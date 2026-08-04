@@ -1,0 +1,5 @@
+@layer pixel_reset, pixel_base, pixel_tokens, pixel_recipes, pixel_utilities;
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
