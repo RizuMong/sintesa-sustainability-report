@@ -19,3 +19,10 @@ export interface MasterKeyIndicatorQuantitative {
   unit: string
   category: string
 }
+
+export interface GriQuantitativeTemplate {
+  id: string
+  templateName: string
+  period: string
+  status: EvaluationStatus
+}

@@ -32,13 +32,13 @@
             </MpTableHead>
             <MpTableBody>
               <MpTableRow v-for="row in items" :key="row.id">
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.indicator }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.period }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   <MpBadge for="tableStatus" :type="statusBadgeType[row.status]">{{ row.status }}</MpBadge>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" :class="css({ textAlign: 'right' })">
@@ -48,7 +48,7 @@
                     </MpPopoverTrigger>
                     <MpPopoverContent>
                       <MpPopoverList>
-                        <MpPopoverListItem @click="goToDetail(row.id)">View detail</MpPopoverListItem>
+                        <MpPopoverListItem @click="goToDetail(row)">View detail</MpPopoverListItem>
                         <MpPopoverListItem :is-disabled="row.status !== 'draft'" @click="submit(row.id)">
                           Submit
                         </MpPopoverListItem>
@@ -170,8 +170,8 @@ const form = reactive({ indicator: '', period: '', value: '' })
 
 onMounted(fetchAll)
 
-function goToDetail(id: string) {
-  router.push(`/evaluate-gri-quantitative/${id}`)
+function goToDetail(row: EvaluationGriQuantitative) {
+  router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
 }
 
 function submit(id: string) {

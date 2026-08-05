@@ -7,7 +7,7 @@
       paddingY="24px"
       backgroundColor="background.surface"
     >
-      <MpText as="h1" size="h1">Master Key Indicator Quantitative</MpText>
+      <MpText as="h1" size="h1">GRI Quantitative</MpText>
     </MpFlex>
 
     <MpFlex direction="column" padding="24px" gap="4">
@@ -20,26 +20,22 @@
           <MpTable>
             <MpTableHead>
               <MpTableRow>
-                <MpTableCell scope="col">Nama indikator</MpTableCell>
-                <MpTableCell scope="col">Kode</MpTableCell>
-                <MpTableCell scope="col">Kategori</MpTableCell>
-                <MpTableCell scope="col">Satuan</MpTableCell>
-                <MpTableCell scope="col" :class="css({ textAlign: 'right' })">Aksi</MpTableCell>
+                <MpTableCell scope="col">Template name</MpTableCell>
+                <MpTableCell scope="col">Period</MpTableCell>
+                <MpTableCell scope="col">Status</MpTableCell>
+                <MpTableCell scope="col" :class="css({ textAlign: 'right' })">Action</MpTableCell>
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
               <MpTableRow v-for="row in items" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.name }}
+                  {{ row.templateName }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.code }}
+                  {{ row.period }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.category }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.unit }}
+                  <MpBadge for="tableStatus" type="information">{{ row.status }}</MpBadge>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" :class="css({ textAlign: 'right' })">
                   <MpPopover :id="`mki-action-${row.id}`" placement="bottom-end" use-portal>
@@ -111,6 +107,7 @@ import {
   MpTableRow,
   MpTableCell,
   MpTableContainer,
+  MpBadge,
   MpPopover,
   MpPopoverTrigger,
   MpPopoverContent,
@@ -126,20 +123,20 @@ import {
   css,
 } from '@mekari/pixel3'
 import { useCrud } from '@/composables/useCrud'
-import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
-import type { MasterKeyIndicatorQuantitative } from '@/types'
+import { griQuantitativeApi } from '@/services/gri-quantitative.api'
+import type { GriQuantitativeTemplate } from '@/types'
 
 const router = useRouter()
-const { items, loading: isLoading, fetchAll, remove } = useCrud<MasterKeyIndicatorQuantitative>(
-  masterKeyIndicatorQuantitativeApi
+const { items, loading: isLoading, fetchAll, remove } = useCrud<GriQuantitativeTemplate>(
+  griQuantitativeApi
 )
 
 const pendingDeleteId = ref<string>()
 
 onMounted(fetchAll)
 
-function goToDetail(row: MasterKeyIndicatorQuantitative) {
-  router.push({ path: '/master-key-indicator-quantitative/detail', state: { record: { ...row } } })
+function goToDetail(row: GriQuantitativeTemplate) {
+  router.push({ path: '/gri-quantitative/detail', state: { record: { ...row } } })
 }
 
 function askDelete(id: string) {

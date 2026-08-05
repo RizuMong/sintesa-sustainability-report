@@ -32,16 +32,16 @@
             </MpTableHead>
             <MpTableBody>
               <MpTableRow v-for="row in pendingItems" :key="row.id">
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.indicator }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.requestor }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.period }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row.id)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   <MpBadge for="tableStatus" type="information">{{ row.status }}</MpBadge>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" :class="css({ textAlign: 'right' })">
@@ -51,7 +51,7 @@
                     </MpPopoverTrigger>
                     <MpPopoverContent>
                       <MpPopoverList>
-                        <MpPopoverListItem @click="goToDetail(row.id)">View detail</MpPopoverListItem>
+                        <MpPopoverListItem @click="goToDetail(row)">View detail</MpPopoverListItem>
                         <MpPopoverListItem @click="decide(row.id, 'approved')">Approve</MpPopoverListItem>
                         <MpPopoverListItem @click="decide(row.id, 'rejected')">Reject</MpPopoverListItem>
                       </MpPopoverList>
@@ -119,8 +119,8 @@ const pendingItems = computed(() => items.value.filter((item) => item.status ===
 
 onMounted(fetchAll)
 
-function goToDetail(id: string) {
-  router.push(`/evaluate-gri-quantitative/${id}`)
+function goToDetail(row: EvaluationGriQuantitative) {
+  router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
 }
 
 function decide(id: string, status: 'approved' | 'rejected') {

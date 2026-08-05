@@ -4,10 +4,13 @@
       <MpFlex direction="row" gap="3">
         <MpButton variant="ghost" left-icon="arrows-left" aria-label="Back" @click="router.back()" />
         <MpFlex direction="column" alignItems="flex-start">
-          <MpButton variant="textLink" as="a" href="#/master-key-indicator-quantitative">
-            Master Key Indicator — Quantitative
-          </MpButton>
-          <MpText as="h1" size="h1">{{ record?.name ?? 'Loading...' }}</MpText>
+          <MpButton variant="textLink" as="a" href="#/gri-quantitative">GRI Quantitative</MpButton>
+          <MpFlex direction="row" alignItems="center" gap="2">
+            <MpText as="h1" size="h1">{{ record?.templateName ?? 'Loading...' }}</MpText>
+            <MpBadge v-if="record" for="tableStatus" :type="statusBadgeType[record.status]">
+              {{ record.status }}
+            </MpBadge>
+          </MpFlex>
         </MpFlex>
       </MpFlex>
       <MpButton v-if="record" variant="ghost" left-icon="delete" @click="isConfirmingDelete = true">
@@ -26,25 +29,14 @@
       padding="24px"
     >
       <MpFlex v-if="record" direction="column" gap="6" maxWidth="640px">
-        <MpFlex gap="6">
-          <MpFormControl id="mki-name" is-required flex="1">
-            <MpFormLabel>Name</MpFormLabel>
-            <MpInput v-model="form.name" />
-          </MpFormControl>
-          <MpFormControl id="mki-code" is-required flex="1">
-            <MpFormLabel>Code</MpFormLabel>
-            <MpInput v-model="form.code" />
-          </MpFormControl>
-        </MpFlex>
-
-        <MpFormControl id="mki-category" is-required>
-          <MpFormLabel>Category</MpFormLabel>
-          <MpInput v-model="form.category" />
+        <MpFormControl id="template-name" is-required>
+          <MpFormLabel>Template name</MpFormLabel>
+          <MpInput v-model="form.templateName" />
         </MpFormControl>
 
-        <MpFormControl id="mki-unit">
-          <MpFormLabel>Unit</MpFormLabel>
-          <MpInput v-model="form.unit" />
+        <MpFormControl id="template-period" is-required>
+          <MpFormLabel>Period</MpFormLabel>
+          <MpInput v-model="form.period" />
         </MpFormControl>
 
         <MpFlex>
@@ -56,11 +48,11 @@
     <MpModal :is-open="isConfirmingDelete" size="md" @close="isConfirmingDelete = false">
       <MpModalContent>
         <MpModalHeader>
-          Delete this indicator?
+          Delete this template?
           <MpModalCloseButton />
         </MpModalHeader>
         <MpModalBody>
-          <MpText size="label">This will permanently remove the indicator. This action cannot be undone.</MpText>
+          <MpText size="label">This will permanently remove the template. This action cannot be undone.</MpText>
         </MpModalBody>
         <MpModalFooter>
           <MpButtonGroup>
@@ -82,6 +74,7 @@ import {
   MpText,
   MpButton,
   MpButtonGroup,
+  MpBadge,
   MpInput,
   MpFormControl,
   MpFormLabel,
@@ -93,37 +86,42 @@ import {
   MpModalOverlay,
   MpModalCloseButton,
 } from '@mekari/pixel3'
-import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
+import { griQuantitativeApi } from '@/services/gri-quantitative.api'
 import { useHistoryRecord } from '@/composables/useHistoryRecord'
-import type { MasterKeyIndicatorQuantitative } from '@/types'
+import type { GriQuantitativeTemplate, EvaluationStatus } from '@/types'
+
+const statusBadgeType: Record<EvaluationStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
+  draft: 'announcement',
+  submitted: 'information',
+  approved: 'completed',
+  rejected: 'critical',
+}
 
 const router = useRouter()
 
-const record = useHistoryRecord<MasterKeyIndicatorQuantitative>('/master-key-indicator-quantitative')
+const record = useHistoryRecord<GriQuantitativeTemplate>('/gri-quantitative')
 const isConfirmingDelete = ref(false)
-const form = reactive({ name: '', code: '', category: '', unit: '' })
+const form = reactive({ templateName: '', period: '' })
 
 watch(
   record,
   (value) => {
     if (!value) return
-    form.name = value.name
-    form.code = value.code
-    form.category = value.category
-    form.unit = value.unit
+    form.templateName = value.templateName
+    form.period = value.period
   },
   { immediate: true }
 )
 
 async function saveEdit() {
   if (!record.value) return
-  record.value = await masterKeyIndicatorQuantitativeApi.update(record.value.id, { ...form })
+  record.value = await griQuantitativeApi.update(record.value.id, { ...form })
 }
 
 async function confirmDelete() {
   if (!record.value) return
-  await masterKeyIndicatorQuantitativeApi.remove(record.value.id)
+  await griQuantitativeApi.remove(record.value.id)
   isConfirmingDelete.value = false
-  router.push('/master-key-indicator-quantitative')
+  router.push('/gri-quantitative')
 }
 </script>

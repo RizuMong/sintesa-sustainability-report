@@ -27,11 +27,7 @@
       roundedTopLeft="md"
       padding="24px"
     >
-      <MpFlex v-if="isLoading" direction="column" gap="3">
-        <MpSkeleton v-for="i in 5" :key="i" height="24px" width="400px" />
-      </MpFlex>
-
-      <MpFlex v-else-if="record" direction="column" gap="6" maxWidth="640px">
+      <MpFlex v-if="record" direction="column" gap="6" maxWidth="640px">
         <MpFlex gap="6">
           <MpFormControl id="eval-indicator" is-disabled flex="1">
             <MpFormLabel>Indikator</MpFormLabel>
@@ -78,10 +74,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { MpFlex, MpText, MpButton, MpBadge, MpInput, MpFormControl, MpFormLabel, MpSkeleton } from '@mekari/pixel3'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { MpFlex, MpText, MpButton, MpBadge, MpInput, MpFormControl, MpFormLabel } from '@mekari/pixel3'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
+import { useHistoryRecord } from '@/composables/useHistoryRecord'
 import type { EvaluationGriQuantitative, EvaluationStatus } from '@/types'
 
 const statusBadgeType: Record<EvaluationStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
@@ -98,11 +95,9 @@ const statusLabel: Record<EvaluationStatus, string> = {
   rejected: 'Rejected',
 }
 
-const route = useRoute()
 const router = useRouter()
 
-const record = ref<EvaluationGriQuantitative>()
-const isLoading = ref(true)
+const record = useHistoryRecord<EvaluationGriQuantitative>('/evaluate-gri-quantitative/requestor')
 
 const formattedTimestamp = computed(() =>
   record.value
@@ -116,21 +111,12 @@ const formattedTimestamp = computed(() =>
     : ''
 )
 
-onMounted(load)
-
-async function load() {
-  isLoading.value = true
-  record.value = await evaluateGriQuantitativeApi.get(route.params.id as string)
-  isLoading.value = false
-}
-
 async function decide(status: 'approved' | 'rejected') {
   if (!record.value) return
-  await evaluateGriQuantitativeApi.update(record.value.id, {
+  record.value = await evaluateGriQuantitativeApi.update(record.value.id, {
     status,
     actor: 'You',
     updatedAt: new Date().toISOString(),
   })
-  await load()
 }
 </script>
