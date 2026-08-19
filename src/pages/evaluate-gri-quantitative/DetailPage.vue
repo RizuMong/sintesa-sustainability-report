@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { MpFlex, MpText, MpButton, MpBadge, MpInput, MpFormControl, MpFormLabel } from '@mekari/pixel3'
+import { MpFlex, MpText, MpButton, MpBadge, MpInput, MpFormControl, MpFormLabel, toast } from '@mekari/pixel3'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
 import { useHistoryRecord } from '@/composables/useHistoryRecord'
 import type { EvaluationGriQuantitative, EvaluationStatus } from '@/types'
@@ -113,10 +113,16 @@ const formattedTimestamp = computed(() =>
 
 async function decide(status: 'approved' | 'rejected') {
   if (!record.value) return
-  record.value = await evaluateGriQuantitativeApi.update(record.value.id, {
+  const id = record.value.id
+  record.value = await evaluateGriQuantitativeApi.update(id, {
     status,
     actor: 'You',
     updatedAt: new Date().toISOString(),
+  })
+  toast.notify({
+    id: `evaluate-detail-decide-${id}`,
+    variant: 'success',
+    title: status === 'approved' ? 'Evaluation approved.' : 'Evaluation rejected.',
   })
 }
 </script>

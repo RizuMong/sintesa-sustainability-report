@@ -105,6 +105,7 @@ import {
   MpPopoverList,
   MpPopoverListItem,
   css,
+  toast,
 } from '@mekari/pixel3'
 import { useCrud } from '@/composables/useCrud'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
@@ -123,7 +124,12 @@ function goToDetail(row: EvaluationGriQuantitative) {
   router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
 }
 
-function decide(id: string, status: 'approved' | 'rejected') {
-  update(id, { status, actor: 'You', updatedAt: new Date().toISOString() })
+async function decide(id: string, status: 'approved' | 'rejected') {
+  await update(id, { status, actor: 'You', updatedAt: new Date().toISOString() })
+  toast.notify({
+    id: `evaluate-decide-${id}`,
+    variant: 'success',
+    title: status === 'approved' ? 'Evaluation approved.' : 'Evaluation rejected.',
+  })
 }
 </script>

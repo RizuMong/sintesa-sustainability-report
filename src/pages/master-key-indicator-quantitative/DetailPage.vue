@@ -297,6 +297,7 @@ import {
   MpModalOverlay,
   MpModalCloseButton,
   css,
+  toast,
   type IconName,
 } from '@mekari/pixel3'
 import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
@@ -432,8 +433,10 @@ async function save() {
 
   if (isEdit.value && id) {
     await masterKeyIndicatorQuantitativeApi.update({ ...payload, id })
+    toast.notify({ id: 'mki-update', variant: 'success', title: 'Indicator updated.' })
   } else {
     await masterKeyIndicatorQuantitativeApi.create(payload)
+    toast.notify({ id: 'mki-create', variant: 'success', title: 'Indicator created.' })
   }
   router.push('/master-key-indicator-quantitative')
 }

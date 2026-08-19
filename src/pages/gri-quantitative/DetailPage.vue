@@ -85,6 +85,7 @@ import {
   MpModalFooter,
   MpModalOverlay,
   MpModalCloseButton,
+  toast,
 } from '@mekari/pixel3'
 import { griQuantitativeApi } from '@/services/gri-quantitative.api'
 import { useHistoryRecord } from '@/composables/useHistoryRecord'
@@ -116,6 +117,7 @@ watch(
 async function saveEdit() {
   if (!record.value) return
   record.value = await griQuantitativeApi.update(record.value.id, { ...form })
+  toast.notify({ id: 'gri-quantitative-update', variant: 'success', title: 'Template updated.' })
 }
 
 async function confirmDelete() {

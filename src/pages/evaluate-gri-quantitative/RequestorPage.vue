@@ -148,6 +148,7 @@ import {
   MpFormLabel,
   MpInput,
   css,
+  toast,
 } from '@mekari/pixel3'
 import { useCrud } from '@/composables/useCrud'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
@@ -174,8 +175,9 @@ function goToDetail(row: EvaluationGriQuantitative) {
   router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
 }
 
-function submit(id: string) {
-  update(id, { status: 'submitted' })
+async function submit(id: string) {
+  await update(id, { status: 'submitted' })
+  toast.notify({ id: `evaluate-submit-${id}`, variant: 'success', title: 'Evaluation submitted.' })
 }
 
 async function createDraft() {
@@ -195,5 +197,6 @@ async function createDraft() {
   form.period = ''
   form.value = ''
   openCreate.value = false
+  toast.notify({ id: 'evaluate-create-draft', variant: 'success', title: 'Draft created.' })
 }
 </script>
