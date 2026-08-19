@@ -1,15 +1,5 @@
 # Lowcode Embed in Officeless Apps
 
-| **Status** | AGREED |
-| --- | --- |
-| **Owner** | Officeless - Value Added Services (VAS) |
-| **Submitted Date** |  |
-| **Contributors** | @Rafif Naufal Rahmadika@Abdullah |
-| **Approver** | * [x] **Solutions Architecture: **@Alexander William * [x] **Officeless Product**:@Restu Setia Lugina * [x] **Product Security**: @Ahmad Syarif |
-| **Related Documents** | - <https://jurnal.atlassian.net/wiki/x/KQButgs>  - <https://jurnal.atlassian.net/wiki/x/BoDXvAs>  - <https://docs.officeless.studio/documentation/Internal-Function/Expression---Function?mod=UUQcHktVR&doc=jBpaHktVR>  - <https://jurnal.atlassian.net/wiki/x/IYiihws> |
-
----
-
 ## 1. Overview
 
 This document establishes the **implementation standards** for **embedding web applications** (low-code) as page components **within the Officeless Gen 2** application, ensuring full compliance with Mekari security guidelines. It serves as the definitive guide for implementing **Workflow API** authentication, utilizing **Workflow Functions** for secure token encryption and provisioning, and managing token retrieval and lifecycle within the **embedded web app**.
