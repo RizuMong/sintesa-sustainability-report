@@ -4,7 +4,8 @@
       justifyContent="space-between"
       alignItems="center"
       paddingX="24px"
-      paddingY="24px"
+      paddingTop="24px"
+      paddingBottom="8px"
       backgroundColor="background.surface"
     >
       <MpFlex direction="column">
@@ -14,7 +15,7 @@
       <MpButton left-icon="add" @click="openCreate = true">New evaluation</MpButton>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="2">
+    <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
       <MpFlex justifyContent="flex-start">
         <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
       </MpFlex>

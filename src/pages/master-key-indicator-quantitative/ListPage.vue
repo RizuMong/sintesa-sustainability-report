@@ -1,12 +1,12 @@
 <template>
   <MpFlex direction="column" backgroundColor="background.stage" minHeight="100vh">
-    <MpFlex direction="column" paddingX="24px" paddingY="24px" backgroundColor="background.surface">
+    <MpFlex direction="column" paddingX="24px" paddingTop="24px" paddingBottom="8px" backgroundColor="background.surface">
       <MpFlex justifyContent="flex-end">
         <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
       </MpFlex>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="2">
+    <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
       <MpFlex justifyContent="flex-start">
         <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
       </MpFlex>
