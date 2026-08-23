@@ -13,12 +13,16 @@
       </MpFlex>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="4">
+    <MpFlex direction="column" padding="24px" gap="2">
+      <MpFlex justifyContent="flex-start">
+        <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
+      </MpFlex>
+
       <MpFlex v-if="isLoading" direction="column" gap="2">
         <MpSkeleton v-for="i in 4" :key="i" height="56px" rounded="md" />
       </MpFlex>
 
-      <template v-else-if="pendingItems.length">
+      <template v-else-if="filteredItems.length">
         <MpTableContainer>
           <MpTable>
             <MpTableHead>
@@ -27,11 +31,10 @@
                 <MpTableCell scope="col">Requestor</MpTableCell>
                 <MpTableCell scope="col">Periode</MpTableCell>
                 <MpTableCell scope="col">Status</MpTableCell>
-                <MpTableCell scope="col" :class="css({ textAlign: 'right' })">Aksi</MpTableCell>
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
-              <MpTableRow v-for="row in pendingItems" :key="row.id">
+              <MpTableRow v-for="row in filteredItems" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.indicator }}
                 </MpTableCell>
@@ -43,20 +46,6 @@
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   <MpBadge for="tableStatus" type="information">{{ row.status }}</MpBadge>
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" :class="css({ textAlign: 'right' })">
-                  <MpPopover :id="`approval-action-${row.id}`" placement="bottom-end" use-portal>
-                    <MpPopoverTrigger>
-                      <MpButton variant="secondary" right-icon="chevrons-down" aria-label="Row actions" />
-                    </MpPopoverTrigger>
-                    <MpPopoverContent>
-                      <MpPopoverList>
-                        <MpPopoverListItem @click="goToDetail(row)">View detail</MpPopoverListItem>
-                        <MpPopoverListItem @click="decide(row.id, 'approved')">Approve</MpPopoverListItem>
-                        <MpPopoverListItem @click="decide(row.id, 'rejected')">Reject</MpPopoverListItem>
-                      </MpPopoverList>
-                    </MpPopoverContent>
-                  </MpPopover>
                 </MpTableCell>
               </MpTableRow>
             </MpTableBody>
@@ -89,7 +78,6 @@ import { useRouter } from 'vue-router'
 import {
   MpFlex,
   MpText,
-  MpButton,
   MpBadge,
   MpImage,
   MpSkeleton,
@@ -99,37 +87,34 @@ import {
   MpTableRow,
   MpTableCell,
   MpTableContainer,
-  MpPopover,
-  MpPopoverTrigger,
-  MpPopoverContent,
-  MpPopoverList,
-  MpPopoverListItem,
   css,
-  toast,
 } from '@mekari/pixel3'
 import { useCrud } from '@/composables/useCrud'
+import { useTableFilter } from '@/composables/useTableFilter'
+import TableFilter from '@/components/TableFilter.vue'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
 import type { EvaluationGriQuantitative } from '@/types'
 
 const router = useRouter()
-const { items, loading: isLoading, fetchAll, update } = useCrud<EvaluationGriQuantitative>(
-  evaluateGriQuantitativeApi
-)
+const { items, loading: isLoading, fetchAll } = useCrud<EvaluationGriQuantitative>(evaluateGriQuantitativeApi)
 
 const pendingItems = computed(() => items.value.filter((item) => item.status === 'submitted'))
+
+const filterColumns = [
+  { value: 'indicator', label: 'Indikator' },
+  { value: 'requestor', label: 'Requestor' },
+  { value: 'period', label: 'Periode' },
+  {
+    value: 'status',
+    label: 'Status',
+    options: [{ value: 'submitted', label: 'submitted' }],
+  },
+]
+const { filteredItems, applyFilter, resetFilter } = useTableFilter(pendingItems)
 
 onMounted(fetchAll)
 
 function goToDetail(row: EvaluationGriQuantitative) {
   router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
-}
-
-async function decide(id: string, status: 'approved' | 'rejected') {
-  await update(id, { status, actor: 'You', updatedAt: new Date().toISOString() })
-  toast.notify({
-    id: `evaluate-decide-${id}`,
-    variant: 'success',
-    title: status === 'approved' ? 'Evaluation approved.' : 'Evaluation rejected.',
-  })
 }
 </script>

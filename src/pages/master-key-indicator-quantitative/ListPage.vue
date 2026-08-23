@@ -1,42 +1,21 @@
 <template>
   <MpFlex direction="column" backgroundColor="background.stage" minHeight="100vh">
-    <MpFlex direction="column" gap="4" paddingX="24px" paddingY="24px" backgroundColor="background.surface">
+    <MpFlex direction="column" paddingX="24px" paddingY="24px" backgroundColor="background.surface">
       <MpFlex justifyContent="flex-end">
         <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
       </MpFlex>
-
-      <MpFlex gap="3" alignItems="center">
-        <MpFlex width="280px">
-          <MpInputGroup>
-            <MpInputLeftAddon>
-              <MpIcon name="search" size="sm" />
-            </MpInputLeftAddon>
-            <MpInput v-model="search" placeholder="Search by name" is-full-width />
-          </MpInputGroup>
-        </MpFlex>
-        <MpFlex width="200px">
-          <MpSelect v-model="categoryId" placeholder="All categories" is-full-width>
-            <option value="">All categories</option>
-            <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </MpSelect>
-        </MpFlex>
-        <MpFlex width="160px">
-          <MpSelect v-model="status" placeholder="All statuses" is-full-width>
-            <option value="">All statuses</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </MpSelect>
-        </MpFlex>
-        <MpButton v-if="hasActiveFilters" variant="ghost" size="sm" @click="clearFilters">Clear filters</MpButton>
-      </MpFlex>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="4">
+    <MpFlex direction="column" padding="24px" gap="2">
+      <MpFlex justifyContent="flex-start">
+        <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
+      </MpFlex>
+
       <MpFlex v-if="isLoading" direction="column" gap="2">
         <MpSkeleton v-for="i in 4" :key="i" height="56px" rounded="md" />
       </MpFlex>
 
-      <template v-else-if="items.length">
+      <template v-else-if="filteredItems.length">
         <MpTableContainer>
           <MpTable>
             <MpTableHead>
@@ -45,12 +24,11 @@
                 <MpTableCell scope="col">Name</MpTableCell>
                 <MpTableCell scope="col">Category</MpTableCell>
                 <MpTableCell scope="col">Status</MpTableCell>
-                <MpTableCell scope="col">Last Updated</MpTableCell>
-                <MpTableCell scope="col" :class="css({ textAlign: 'right' })">Action</MpTableCell>
+                <MpTableCell scope="col">Updated At</MpTableCell>
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
-              <MpTableRow v-for="row in items" :key="row.id">
+              <MpTableRow v-for="row in filteredItems" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.code }}
                 </MpTableCell>
@@ -67,19 +45,6 @@
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ formatDateTime(row.updated_at) }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" :class="css({ textAlign: 'right' })">
-                  <MpPopover :id="`mki-action-${row.id}`" placement="bottom-end" use-portal>
-                    <MpPopoverTrigger>
-                      <MpButton variant="secondary" right-icon="chevrons-down" aria-label="Row actions" />
-                    </MpPopoverTrigger>
-                    <MpPopoverContent>
-                      <MpPopoverList>
-                        <MpPopoverListItem @click="goToDetail(row)">Edit</MpPopoverListItem>
-                        <MpPopoverListItem @click="askDelete(row.id)">Delete</MpPopoverListItem>
-                      </MpPopoverList>
-                    </MpPopoverContent>
-                  </MpPopover>
                 </MpTableCell>
               </MpTableRow>
             </MpTableBody>
@@ -100,41 +65,16 @@
         <MpText size="h3" weight="semiBold">No available yet</MpText>
       </MpFlex>
     </MpFlex>
-
-    <MpModal :is-open="Boolean(pendingDeleteId)" size="md" @close="pendingDeleteId = undefined">
-      <MpModalContent>
-        <MpModalHeader>
-          Delete this?
-          <MpModalCloseButton />
-        </MpModalHeader>
-        <MpModalBody>
-          <MpText size="label">This will set the status to Inactive. It can still be viewed and re-activated.</MpText>
-        </MpModalBody>
-        <MpModalFooter>
-          <MpButtonGroup>
-            <MpButton variant="ghost" @click="pendingDeleteId = undefined">Cancel</MpButton>
-            <MpButton variant="danger" @click="confirmDelete">Delete</MpButton>
-          </MpButtonGroup>
-        </MpModalFooter>
-      </MpModalContent>
-      <MpModalOverlay />
-    </MpModal>
   </MpFlex>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   MpFlex,
   MpText,
   MpButton,
-  MpButtonGroup,
-  MpInput,
-  MpInputGroup,
-  MpInputLeftAddon,
-  MpSelect,
-  MpIcon,
   MpImage,
   MpSkeleton,
   MpTable,
@@ -144,34 +84,38 @@ import {
   MpTableCell,
   MpTableContainer,
   MpBadge,
-  MpPopover,
-  MpPopoverTrigger,
-  MpPopoverContent,
-  MpPopoverList,
-  MpPopoverListItem,
-  MpModal,
-  MpModalContent,
-  MpModalHeader,
-  MpModalBody,
-  MpModalFooter,
-  MpModalOverlay,
-  MpModalCloseButton,
   css,
 } from '@mekari/pixel3'
+import { useTableFilter } from '@/composables/useTableFilter'
+import TableFilter from '@/components/TableFilter.vue'
 import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
 import { masterCategoryApi } from '@/services/master-category.api'
-import type { MasterCategory, MkiGriQuantitativeSummary, MkiStatus } from '@/types'
+import type { MasterCategory, MkiGriQuantitativeSummary } from '@/types'
 
 const router = useRouter()
 
 const items = ref<MkiGriQuantitativeSummary[]>([])
 const categories = ref<MasterCategory[]>([])
 const isLoading = ref(false)
-const search = ref('')
-const categoryId = ref('')
-const status = ref<MkiStatus | ''>('')
 
-const hasActiveFilters = computed(() => Boolean(search.value || categoryId.value || status.value))
+const filterColumns = computed(() => [
+  { value: 'code', label: 'Code' },
+  { value: 'name', label: 'Name' },
+  {
+    value: 'category.name',
+    label: 'Category',
+    options: categories.value.map((c) => ({ value: c.name, label: c.name })),
+  },
+  {
+    value: 'status',
+    label: 'Status',
+    options: [
+      { value: 'Active', label: 'Active' },
+      { value: 'Inactive', label: 'Inactive' },
+    ],
+  },
+])
+const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
 function formatDateTime(value: string) {
   const d = new Date(value)
@@ -179,19 +123,9 @@ function formatDateTime(value: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function clearFilters() {
-  search.value = ''
-  categoryId.value = ''
-  status.value = ''
-}
-
 async function fetchAll() {
   isLoading.value = true
-  const result = await masterKeyIndicatorQuantitativeApi.index({
-    search: search.value || undefined,
-    category_id: categoryId.value || undefined,
-    status: status.value || undefined,
-  })
+  const result = await masterKeyIndicatorQuantitativeApi.index()
   items.value = (result as { data: MkiGriQuantitativeSummary[] }).data
   isLoading.value = false
 }
@@ -201,26 +135,11 @@ onMounted(async () => {
   await fetchAll()
 })
 
-watch([search, categoryId, status], fetchAll)
-
 function goToCreate() {
   router.push('/master-key-indicator-quantitative/detail')
 }
 
 function goToDetail(row: MkiGriQuantitativeSummary) {
   router.push({ path: '/master-key-indicator-quantitative/detail', query: { id: row.id } })
-}
-
-const pendingDeleteId = ref<string>()
-
-function askDelete(id: string) {
-  pendingDeleteId.value = id
-}
-
-async function confirmDelete() {
-  if (!pendingDeleteId.value) return
-  await masterKeyIndicatorQuantitativeApi.remove({ id: pendingDeleteId.value })
-  pendingDeleteId.value = undefined
-  await fetchAll()
 }
 </script>

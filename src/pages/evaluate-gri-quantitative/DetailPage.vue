@@ -15,6 +15,10 @@
           </MpFlex>
         </MpFlex>
       </MpFlex>
+      <MpFlex v-if="record?.status === 'draft'" gap="3">
+        <MpButton variant="ghost" left-icon="delete" @click="isConfirmingDelete = true">Delete</MpButton>
+        <MpButton @click="submitDraft">Submit</MpButton>
+      </MpFlex>
     </MpFlex>
 
     <MpFlex
@@ -70,13 +74,49 @@
         </MpFlex>
       </MpFlex>
     </MpFlex>
+
+    <MpModal :is-open="isConfirmingDelete" size="md" @close="isConfirmingDelete = false">
+      <MpModalContent>
+        <MpModalHeader>
+          Delete this evaluation?
+          <MpModalCloseButton />
+        </MpModalHeader>
+        <MpModalBody>
+          <MpText size="label">This will permanently remove the evaluation. This action cannot be undone.</MpText>
+        </MpModalBody>
+        <MpModalFooter>
+          <MpButtonGroup>
+            <MpButton variant="ghost" @click="isConfirmingDelete = false">Cancel</MpButton>
+            <MpButton variant="danger" @click="confirmDelete">Delete</MpButton>
+          </MpButtonGroup>
+        </MpModalFooter>
+      </MpModalContent>
+      <MpModalOverlay />
+    </MpModal>
   </MpFlex>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { MpFlex, MpText, MpButton, MpBadge, MpInput, MpFormControl, MpFormLabel, toast } from '@mekari/pixel3'
+import {
+  MpFlex,
+  MpText,
+  MpButton,
+  MpButtonGroup,
+  MpBadge,
+  MpInput,
+  MpFormControl,
+  MpFormLabel,
+  MpModal,
+  MpModalContent,
+  MpModalHeader,
+  MpModalBody,
+  MpModalFooter,
+  MpModalOverlay,
+  MpModalCloseButton,
+  toast,
+} from '@mekari/pixel3'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
 import { useHistoryRecord } from '@/composables/useHistoryRecord'
 import type { EvaluationGriQuantitative, EvaluationStatus } from '@/types'
@@ -98,6 +138,7 @@ const statusLabel: Record<EvaluationStatus, string> = {
 const router = useRouter()
 
 const record = useHistoryRecord<EvaluationGriQuantitative>('/evaluate-gri-quantitative/requestor')
+const isConfirmingDelete = ref(false)
 
 const formattedTimestamp = computed(() =>
   record.value
@@ -124,5 +165,19 @@ async function decide(status: 'approved' | 'rejected') {
     variant: 'success',
     title: status === 'approved' ? 'Evaluation approved.' : 'Evaluation rejected.',
   })
+}
+
+async function submitDraft() {
+  if (!record.value) return
+  const id = record.value.id
+  record.value = await evaluateGriQuantitativeApi.update(id, { status: 'submitted' })
+  toast.notify({ id: `evaluate-submit-${id}`, variant: 'success', title: 'Evaluation submitted.' })
+}
+
+async function confirmDelete() {
+  if (!record.value) return
+  await evaluateGriQuantitativeApi.remove(record.value.id)
+  isConfirmingDelete.value = false
+  router.push('/evaluate-gri-quantitative/requestor')
 }
 </script>
