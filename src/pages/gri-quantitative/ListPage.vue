@@ -83,7 +83,7 @@ import { useCrud } from '@/composables/useCrud'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
 import { griQuantitativeApi } from '@/services/gri-quantitative.api'
-import type { GriQuantitativeTemplate } from '@/types'
+import { evaluationStatusOptions, type GriQuantitativeTemplate } from '@/types'
 
 const router = useRouter()
 const { items, loading: isLoading, fetchAll } = useCrud<GriQuantitativeTemplate>(griQuantitativeApi)
@@ -91,16 +91,7 @@ const { items, loading: isLoading, fetchAll } = useCrud<GriQuantitativeTemplate>
 const filterColumns = [
   { value: 'templateName', label: 'Template name' },
   { value: 'period', label: 'Period' },
-  {
-    value: 'status',
-    label: 'Status',
-    options: [
-      { value: 'draft', label: 'draft' },
-      { value: 'submitted', label: 'submitted' },
-      { value: 'approved', label: 'approved' },
-      { value: 'rejected', label: 'rejected' },
-    ],
-  },
+  { value: 'status', label: 'Status', options: evaluationStatusOptions },
 ]
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 

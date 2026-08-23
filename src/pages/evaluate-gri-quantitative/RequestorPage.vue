@@ -137,14 +137,11 @@ import { useCrud } from '@/composables/useCrud'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
 import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
-import type { EvaluationGriQuantitative, EvaluationStatus } from '@/types'
-
-const statusBadgeType: Record<EvaluationStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
-  draft: 'announcement',
-  submitted: 'information',
-  approved: 'completed',
-  rejected: 'critical',
-}
+import {
+  evaluationStatusBadgeType as statusBadgeType,
+  evaluationStatusOptions,
+  type EvaluationGriQuantitative,
+} from '@/types'
 
 const router = useRouter()
 const { items, loading: isLoading, fetchAll, create } = useCrud<EvaluationGriQuantitative>(
@@ -154,16 +151,7 @@ const { items, loading: isLoading, fetchAll, create } = useCrud<EvaluationGriQua
 const filterColumns = [
   { value: 'indicator', label: 'Indikator' },
   { value: 'period', label: 'Periode' },
-  {
-    value: 'status',
-    label: 'Status',
-    options: [
-      { value: 'draft', label: 'draft' },
-      { value: 'submitted', label: 'submitted' },
-      { value: 'approved', label: 'approved' },
-      { value: 'rejected', label: 'rejected' },
-    ],
-  },
+  { value: 'status', label: 'Status', options: evaluationStatusOptions },
 ]
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 

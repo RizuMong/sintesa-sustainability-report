@@ -45,58 +45,24 @@
       </MpFlex>
     </MpFlex>
 
-    <MpModal :is-open="isConfirmingDelete" size="md" @close="isConfirmingDelete = false">
-      <MpModalContent>
-        <MpModalHeader>
-          Delete this template?
-          <MpModalCloseButton />
-        </MpModalHeader>
-        <MpModalBody>
-          <MpText size="label">This will permanently remove the template. This action cannot be undone.</MpText>
-        </MpModalBody>
-        <MpModalFooter>
-          <MpButtonGroup>
-            <MpButton variant="ghost" @click="isConfirmingDelete = false">Cancel</MpButton>
-            <MpButton variant="danger" @click="confirmDelete">Delete</MpButton>
-          </MpButtonGroup>
-        </MpModalFooter>
-      </MpModalContent>
-      <MpModalOverlay />
-    </MpModal>
+    <ConfirmDeleteModal
+      :is-open="isConfirmingDelete"
+      title="Delete this template?"
+      message="This will permanently remove the template. This action cannot be undone."
+      @close="isConfirmingDelete = false"
+      @confirm="confirmDelete"
+    />
   </MpFlex>
 </template>
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  MpFlex,
-  MpText,
-  MpButton,
-  MpButtonGroup,
-  MpBadge,
-  MpInput,
-  MpFormControl,
-  MpFormLabel,
-  MpModal,
-  MpModalContent,
-  MpModalHeader,
-  MpModalBody,
-  MpModalFooter,
-  MpModalOverlay,
-  MpModalCloseButton,
-  toast,
-} from '@mekari/pixel3'
+import { MpFlex, MpText, MpButton, MpBadge, MpInput, MpFormControl, MpFormLabel, toast } from '@mekari/pixel3'
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
 import { griQuantitativeApi } from '@/services/gri-quantitative.api'
 import { useHistoryRecord } from '@/composables/useHistoryRecord'
-import type { GriQuantitativeTemplate, EvaluationStatus } from '@/types'
-
-const statusBadgeType: Record<EvaluationStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
-  draft: 'announcement',
-  submitted: 'information',
-  approved: 'completed',
-  rejected: 'critical',
-}
+import { evaluationStatusBadgeType as statusBadgeType, type GriQuantitativeTemplate } from '@/types'
 
 const router = useRouter()
 

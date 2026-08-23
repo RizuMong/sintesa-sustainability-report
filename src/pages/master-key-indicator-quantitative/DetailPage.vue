@@ -242,24 +242,13 @@
       </template>
     </MpFlex>
 
-    <MpModal :is-open="isConfirmingDelete" size="md" @close="isConfirmingDelete = false">
-      <MpModalContent>
-        <MpModalHeader>
-          Delete this?
-          <MpModalCloseButton />
-        </MpModalHeader>
-        <MpModalBody>
-          <MpText size="label">This will set the status to Inactive. It can still be viewed and re-activated.</MpText>
-        </MpModalBody>
-        <MpModalFooter>
-          <MpButtonGroup>
-            <MpButton variant="ghost" @click="isConfirmingDelete = false">Cancel</MpButton>
-            <MpButton variant="danger" @click="confirmDelete">Delete</MpButton>
-          </MpButtonGroup>
-        </MpModalFooter>
-      </MpModalContent>
-      <MpModalOverlay />
-    </MpModal>
+    <ConfirmDeleteModal
+      :is-open="isConfirmingDelete"
+      title="Delete this?"
+      message="This will set the status to Inactive. It can still be viewed and re-activated."
+      @close="isConfirmingDelete = false"
+      @confirm="confirmDelete"
+    />
   </MpFlex>
 </template>
 
@@ -270,7 +259,6 @@ import {
   MpFlex,
   MpText,
   MpButton,
-  MpButtonGroup,
   MpInput,
   MpSelect,
   MpFormControl,
@@ -289,17 +277,11 @@ import {
   MpTableRow,
   MpTableCell,
   MpTableContainer,
-  MpModal,
-  MpModalContent,
-  MpModalHeader,
-  MpModalBody,
-  MpModalFooter,
-  MpModalOverlay,
-  MpModalCloseButton,
   css,
   toast,
   type IconName,
 } from '@mekari/pixel3'
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
 import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
 import { masterCategoryApi } from '@/services/master-category.api'
 import { masterUnitApi } from '@/services/master-unit.api'
