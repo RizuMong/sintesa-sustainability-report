@@ -16,14 +16,12 @@
           <MpFormControl id="table-filter-column">
             <MpFormLabel>Filter by</MpFormLabel>
             <MpSelect v-model="column" placeholder="Select column" is-full-width>
-              <option value="">Select column</option>
               <option v-for="c in columns" :key="c.value" :value="c.value">{{ c.label }}</option>
             </MpSelect>
           </MpFormControl>
           <MpFormControl id="table-filter-value">
             <MpFormLabel>Filter value</MpFormLabel>
             <MpSelect v-if="valueOptions" v-model="value" placeholder="Select value" is-full-width :is-disabled="!column">
-              <option value="">Select value</option>
               <option v-for="o in valueOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
             </MpSelect>
             <MpInput v-else v-model="value" placeholder="Enter value" is-full-width :is-disabled="!column" />
