@@ -10,13 +10,19 @@ importers:
     dependencies:
       '@mekari/pixel3':
         specifier: ^1.0.14
-        version: 1.0.14(@mekari/pixel3-postcss@1.0.14(typescript@6.0.3))(typescript@6.0.3)(vue@3.5.41(typescript@6.0.3))
+        version: 1.0.14(@mekari/pixel3-postcss@1.0.14(typescript@6.0.3))(axios@1.19.0)(typescript@6.0.3)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-postcss':
         specifier: ^1.0.14
         version: 1.0.14(typescript@6.0.3)
       '@mekari/pixel3-utils':
         specifier: 0.1.0
-        version: 0.1.0(vue@3.5.41(typescript@6.0.3))
+        version: 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@tanstack/vue-query':
+        specifier: ^5.102.0
+        version: 5.102.0(vue@3.5.41(typescript@6.0.3))
+      axios:
+        specifier: ^1.19.0
+        version: 1.19.0
       vue:
         specifier: ^3.5.40
         version: 3.5.41(typescript@6.0.3)
@@ -742,6 +748,22 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
+  '@tanstack/match-sorter-utils@8.19.4':
+    resolution: {integrity: sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg==}
+    engines: {node: '>=12'}
+
+  '@tanstack/query-core@5.102.0':
+    resolution: {integrity: sha512-tvBzr11Q7StuMCEsIJdqX8TAWt6WZIzfw/yrSAjObZDerwTTPeCxeLXN2R8ZSn4ZxFpQV819Xn8QmoO+vtnDvw==}
+
+  '@tanstack/vue-query@5.102.0':
+    resolution: {integrity: sha512-etqK2+b1pvilfdmcKl5Be+A5vHe8OY2dQoBx1VbhGqN8bMZ4g1+prP91cYr92Q+0KGbPf3F7lTeBhhPMZfpXUQ==}
+    peerDependencies:
+      '@vue/composition-api': ^1.1.2
+      vue: ^2.6.0 || ^3.3.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+
   '@tiptap/core@2.7.4':
     resolution: {integrity: sha512-1VTQdNQChgxdVC8+b8QEW6cUxPSD9EDTzg9YRSLWtTtUDQ09sRSVs7eHIn1LcRHVs6PwcAsNgKE4FSjBw0sRlg==}
     peerDependencies:
@@ -1088,6 +1110,10 @@ packages:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
     engines: {node: '>= 0.6'}
 
+  agent-base@6.0.2:
+    resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
+    engines: {node: '>= 6.0.0'}
+
   ajv-formats@3.0.1:
     resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
     peerDependencies:
@@ -1123,6 +1149,12 @@ packages:
   astral-regex@2.0.0:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
+
+  asynckit@0.4.0:
+    resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
+
+  axios@1.19.0:
+    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
 
   balanced-match@4.0.4:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
@@ -1202,6 +1234,10 @@ packages:
     resolution: {integrity: sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==}
     engines: {node: '>=12.5.0'}
 
+  combined-stream@1.0.8:
+    resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
+    engines: {node: '>= 0.8'}
+
   confbox@0.2.4:
     resolution: {integrity: sha512-ysOGlgTFbN2/Y6Cg3Iye8YKulHw+R2fNXHrgSmXISQdMnomY6eNDprVdW9R5xBguEqI954+S6709UyiO7B+6OQ==}
 
@@ -1263,6 +1299,10 @@ packages:
       supports-color:
         optional: true
 
+  delayed-stream@1.0.0:
+    resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
+    engines: {node: '>=0.4.0'}
+
   depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
     engines: {node: '>= 0.8'}
@@ -1306,6 +1346,10 @@ packages:
 
   es-object-atoms@1.1.2:
     resolution: {integrity: sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==}
+    engines: {node: '>= 0.4'}
+
+  es-set-tostringtag@2.1.0:
+    resolution: {integrity: sha512-j6vWzfrGVfyXxge+O0x5sh6cvxAog0a/4Rdd2K36zCMV5eJ+/+tOAngRO8cODMNWbVRdVlmGZQL2YS3yR8bIUA==}
     engines: {node: '>= 0.4'}
 
   esbuild@0.25.12:
@@ -1385,6 +1429,19 @@ packages:
   focus-trap@7.8.0:
     resolution: {integrity: sha512-/yNdlIkpWbM0ptxno3ONTuf+2g318kh2ez3KSeZN5dZ8YC6AAmgeWz+GasYYiBJPFaYcSAPeu4GfhUaChzIJXA==}
 
+  follow-redirects@1.16.0:
+    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+
+  form-data@4.0.6:
+    resolution: {integrity: sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==}
+    engines: {node: '>= 6'}
+
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
@@ -1435,6 +1492,10 @@ packages:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
     engines: {node: '>= 0.4'}
 
+  has-tostringtag@1.0.2:
+    resolution: {integrity: sha512-NqADB8VjPFLM2V0VvHUewwwsw0ZWBaIdgo+ieHtK3hasLz4qeCRjYcqfB6AQrBggRKppKF8L52/VqdVsO47Dlw==}
+    engines: {node: '>= 0.4'}
+
   hasown@2.0.4:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
@@ -1446,6 +1507,10 @@ packages:
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
+
+  https-proxy-agent@5.0.1:
+    resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
+    engines: {node: '>= 6'}
 
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
@@ -1708,8 +1773,16 @@ packages:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
+  mime-db@1.52.0:
+    resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
+    engines: {node: '>= 0.6'}
+
   mime-db@1.54.0:
     resolution: {integrity: sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==}
+    engines: {node: '>= 0.6'}
+
+  mime-types@2.1.35:
+    resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
 
   mime-types@3.0.2:
@@ -1938,6 +2011,10 @@ packages:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
 
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
+
   punycode.js@2.3.1:
     resolution: {integrity: sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==}
     engines: {node: '>=6'}
@@ -1960,6 +2037,9 @@ packages:
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
+
+  remove-accents@0.5.0:
+    resolution: {integrity: sha512-8g3/Otx1eJaVD12e31UbJj1YzdtVvzH85HV7t+9MJYk/u3XmkOUJ5Ys9wQrf9PCPK8+xn4ymzqYCiZl6QWKn+A==}
 
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
@@ -2385,12 +2465,12 @@ snapshots:
 
   '@kurkle/color@0.3.4': {}
 
-  '@mekari/pixel3-accordion@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-accordion@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-collapse': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-collapse': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2406,13 +2486,13 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-airene-button@0.1.12(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-airene-button@0.1.12(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2428,13 +2508,13 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-airene-chat-bubble@0.1.11(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-airene-chat-bubble@0.1.11(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-avatar': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-avatar': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2450,11 +2530,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-airene-chat-input@0.0.12(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-airene-chat-input@0.0.12(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2470,15 +2550,15 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-autocomplete@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-autocomplete@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-popover': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-popover': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2494,11 +2574,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-avatar@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-avatar@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2514,10 +2594,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-badge@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-badge@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2533,11 +2613,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-banner@0.1.4(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-banner@0.1.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2553,13 +2633,13 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-broadcast@0.0.23(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-broadcast@0.0.23(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2575,12 +2655,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-button@0.2.4(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-button@0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2596,11 +2676,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-carousel@0.0.21(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-carousel@0.0.21(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2616,11 +2696,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-chart@0.0.16(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-chart@0.0.16(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       chart.js: 4.5.1
       chartjs-plugin-datalabels: 2.2.0(chart.js@4.5.1)
       color: 4.2.3
@@ -2640,12 +2720,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-checkbox@0.0.25(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-checkbox@0.0.25(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2661,12 +2741,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-collapse@0.0.28(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-collapse@0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-transition': 0.0.28(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-transition': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2682,16 +2762,16 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-color-picker@0.2.3(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-color-picker@0.2.3(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-divider': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-popover': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-divider': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-popover': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       clamp: 1.0.1
       lodash.throttle: 4.1.1
       tinycolor2: 1.6.0
@@ -2710,15 +2790,15 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-date-picker@0.1.20(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-date-picker@0.1.20(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-popover': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-popover': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       date-fns: 3.6.0
       date-format-parse: 0.2.7
       vue: 3.5.41(typescript@6.0.3)
@@ -2736,11 +2816,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-divider@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-divider@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2756,11 +2836,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-drawer@0.0.28(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-drawer@0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-modal': 0.0.28(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-modal': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       animejs: 3.2.2
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
@@ -2777,14 +2857,14 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-dropzone@0.2.1(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-dropzone@0.2.1(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-tooltip': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tooltip': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2800,10 +2880,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-form-control@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-form-control@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2819,10 +2899,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-icon@0.1.5(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-icon@0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2838,11 +2918,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-image@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-image@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2858,17 +2938,17 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-input-tag@0.1.11(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-input-tag@0.1.11(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-popover': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-popover': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-tag': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-tooltip': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tag': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tooltip': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2884,12 +2964,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-input@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-input@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2905,10 +2985,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-loader@0.0.23(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-loader@0.0.23(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2924,10 +3004,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-mask@0.1.6(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-mask@0.1.6(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2943,11 +3023,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-modal@0.0.28(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-modal@0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       animejs: 3.2.2
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
@@ -2964,12 +3044,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-popover@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-popover@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@floating-ui/vue': 1.1.11(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -2997,12 +3077,12 @@ snapshots:
       - supports-color
       - typescript
 
-  '@mekari/pixel3-progress@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-progress@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3018,12 +3098,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-radio@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-radio@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3039,11 +3119,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-rating@0.0.7(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-rating@0.0.7(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3059,20 +3139,20 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-rich-text-editor@0.2.0(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-rich-text-editor@0.2.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-avatar': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-color-picker': 0.2.3(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-divider': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-popover': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-scrollbar': 0.1.8(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-avatar': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-color-picker': 0.2.3(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-divider': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-popover': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-scrollbar': 0.1.8(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@popperjs/core': 2.11.8
       '@tiptap/core': 2.7.4(@tiptap/pm@2.7.4)
       '@tiptap/extension-blockquote': 2.7.4(@tiptap/core@2.7.4(@tiptap/pm@2.7.4))
@@ -3121,10 +3201,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-scrollbar@0.1.8(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-scrollbar@0.1.8(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       lodash-es: 4.18.1
       overlayscrollbars: 2.11.1
       overlayscrollbars-vue: 0.5.9(overlayscrollbars@2.11.1)(vue@3.5.41(typescript@6.0.3))
@@ -3143,11 +3223,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-segmented-control@0.0.25(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-segmented-control@0.0.25(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3163,13 +3243,13 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-select@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-select@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3185,10 +3265,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-skeleton@0.1.7(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-skeleton@0.1.7(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3204,11 +3284,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-slider@0.0.13(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-slider@0.0.13(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3224,11 +3304,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-spinner@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-spinner@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3246,10 +3326,10 @@ snapshots:
 
   '@mekari/pixel3-styled-system@0.3.0': {}
 
-  '@mekari/pixel3-table@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-table@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3265,10 +3345,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-tabs@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-tabs@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3284,11 +3364,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-tag@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-tag@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3304,10 +3384,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-text@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-text@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3323,12 +3403,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-textarea@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-textarea@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3344,12 +3424,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-textlink@0.1.12(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-textlink@0.1.12(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3375,12 +3455,12 @@ snapshots:
       - supports-color
       - typescript
 
-  '@mekari/pixel3-timeline@0.0.28(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-timeline@0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-transition': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-transition': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3396,11 +3476,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-toast@0.0.25(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-toast@0.0.25(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
       vue-sonner: 1.3.2
     transitivePeerDependencies:
@@ -3417,12 +3497,12 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-toggle@0.0.29(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-toggle@0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3438,11 +3518,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-tooltip@0.0.24(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-tooltip@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@floating-ui/vue': 1.1.11(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3458,10 +3538,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-tour@0.0.11(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-tour@0.0.11(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@popperjs/core': 2.11.8
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
@@ -3478,11 +3558,11 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-transition@0.0.28(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-transition@0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       animejs: 3.2.2
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
@@ -3499,14 +3579,14 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-upload@0.0.28(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-upload@0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3522,10 +3602,10 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3-utils@0.1.0(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3-utils@0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 10.6.1(vue@3.5.41(typescript@6.0.3))
-      '@vueuse/integrations': 10.11.1(focus-trap@7.8.0)(vue@3.5.41(typescript@6.0.3))
+      '@vueuse/integrations': 10.11.1(axios@1.19.0)(focus-trap@7.8.0)(vue@3.5.41(typescript@6.0.3))
       focus-trap: 7.8.0
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
@@ -3542,63 +3622,63 @@ snapshots:
       - sortablejs
       - universal-cookie
 
-  '@mekari/pixel3@1.0.14(@mekari/pixel3-postcss@1.0.14(typescript@6.0.3))(typescript@6.0.3)(vue@3.5.41(typescript@6.0.3))':
+  '@mekari/pixel3@1.0.14(@mekari/pixel3-postcss@1.0.14(typescript@6.0.3))(axios@1.19.0)(typescript@6.0.3)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
-      '@mekari/pixel3-accordion': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-airene-button': 0.1.12(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-airene-chat-bubble': 0.1.11(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-airene-chat-input': 0.0.12(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-autocomplete': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-avatar': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-badge': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-banner': 0.1.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-broadcast': 0.0.23(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-button': 0.2.4(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-carousel': 0.0.21(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-chart': 0.0.16(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-checkbox': 0.0.25(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-collapse': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-color-picker': 0.2.3(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-date-picker': 0.1.20(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-divider': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-drawer': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-dropzone': 0.2.1(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-form-control': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-icon': 0.1.5(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-image': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-input-tag': 0.1.11(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-loader': 0.0.23(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-mask': 0.1.6(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-modal': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-popover': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-accordion': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-airene-button': 0.1.12(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-airene-chat-bubble': 0.1.11(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-airene-chat-input': 0.0.12(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-autocomplete': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-avatar': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-badge': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-banner': 0.1.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-broadcast': 0.0.23(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-button': 0.2.4(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-carousel': 0.0.21(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-chart': 0.0.16(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-checkbox': 0.0.25(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-collapse': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-color-picker': 0.2.3(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-date-picker': 0.1.20(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-divider': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-drawer': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-dropzone': 0.2.1(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-form-control': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-icon': 0.1.5(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-image': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-input-tag': 0.1.11(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-loader': 0.0.23(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-mask': 0.1.6(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-modal': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-popover': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-postcss': 1.0.14(typescript@6.0.3)
-      '@mekari/pixel3-progress': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-radio': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-rating': 0.0.7(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-rich-text-editor': 0.2.0(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-scrollbar': 0.1.8(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-segmented-control': 0.0.25(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-select': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-skeleton': 0.1.7(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-slider': 0.0.13(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-spinner': 0.0.29(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-progress': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-radio': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-rating': 0.0.7(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-rich-text-editor': 0.2.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-scrollbar': 0.1.8(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-segmented-control': 0.0.25(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-select': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-skeleton': 0.1.7(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-slider': 0.0.13(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-spinner': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-styled-system': 0.3.0
-      '@mekari/pixel3-table': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-tabs': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-tag': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-text': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-textarea': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-textlink': 0.1.12(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-table': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tabs': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tag': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-text': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-textarea': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-textlink': 0.1.12(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       '@mekari/pixel3-theme': 0.7.0(typescript@6.0.3)(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-timeline': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-toast': 0.0.25(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-toggle': 0.0.29(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-tooltip': 0.0.24(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-tour': 0.0.11(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-transition': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-upload': 0.0.28(vue@3.5.41(typescript@6.0.3))
-      '@mekari/pixel3-utils': 0.1.0(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-timeline': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-toast': 0.0.25(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-toggle': 0.0.29(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tooltip': 0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-tour': 0.0.11(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-transition': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-upload': 0.0.28(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
+      '@mekari/pixel3-utils': 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -3906,6 +3986,20 @@ snapshots:
     optional: true
 
   '@rolldown/pluginutils@1.0.1': {}
+
+  '@tanstack/match-sorter-utils@8.19.4':
+    dependencies:
+      remove-accents: 0.5.0
+
+  '@tanstack/query-core@5.102.0': {}
+
+  '@tanstack/vue-query@5.102.0(vue@3.5.41(typescript@6.0.3))':
+    dependencies:
+      '@tanstack/match-sorter-utils': 8.19.4
+      '@tanstack/query-core': 5.102.0
+      '@vue/devtools-api': 6.6.4
+      vue: 3.5.41(typescript@6.0.3)
+      vue-demi: 0.14.10(vue@3.5.41(typescript@6.0.3))
 
   '@tiptap/core@2.7.4(@tiptap/pm@2.7.4)':
     dependencies:
@@ -4268,12 +4362,13 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/integrations@10.11.1(focus-trap@7.8.0)(vue@3.5.41(typescript@6.0.3))':
+  '@vueuse/integrations@10.11.1(axios@1.19.0)(focus-trap@7.8.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 10.11.1(vue@3.5.41(typescript@6.0.3))
       '@vueuse/shared': 10.11.1(vue@3.5.41(typescript@6.0.3))
       vue-demi: 0.14.10(vue@3.5.41(typescript@6.0.3))
     optionalDependencies:
+      axios: 1.19.0
       focus-trap: 7.8.0
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -4302,6 +4397,12 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
+  agent-base@6.0.2:
+    dependencies:
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
   ajv-formats@3.0.1(ajv@8.20.0):
     optionalDependencies:
       ajv: 8.20.0
@@ -4328,6 +4429,18 @@ snapshots:
   argparse@2.0.1: {}
 
   astral-regex@2.0.0: {}
+
+  asynckit@0.4.0: {}
+
+  axios@1.19.0:
+    dependencies:
+      follow-redirects: 1.16.0
+      form-data: 4.0.6
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
 
   balanced-match@4.0.4: {}
 
@@ -4411,6 +4524,10 @@ snapshots:
       color-convert: 2.0.1
       color-string: 1.9.1
 
+  combined-stream@1.0.8:
+    dependencies:
+      delayed-stream: 1.0.0
+
   confbox@0.2.4: {}
 
   content-disposition@1.1.0: {}
@@ -4452,6 +4569,8 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  delayed-stream@1.0.0: {}
+
   depd@2.0.0: {}
 
   detect-libc@2.1.2: {}
@@ -4481,6 +4600,13 @@ snapshots:
   es-object-atoms@1.1.2:
     dependencies:
       es-errors: 1.3.0
+
+  es-set-tostringtag@2.1.0:
+    dependencies:
+      es-errors: 1.3.0
+      get-intrinsic: 1.3.0
+      has-tostringtag: 1.0.2
+      hasown: 2.0.4
 
   esbuild@0.25.12:
     optionalDependencies:
@@ -4609,6 +4735,16 @@ snapshots:
     dependencies:
       tabbable: 6.5.0
 
+  follow-redirects@1.16.0: {}
+
+  form-data@4.0.6:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      hasown: 2.0.4
+      mime-types: 2.1.35
+
   forwarded@0.2.0: {}
 
   fresh@2.0.0: {}
@@ -4660,6 +4796,10 @@ snapshots:
 
   has-symbols@1.1.0: {}
 
+  has-tostringtag@1.0.2:
+    dependencies:
+      has-symbols: 1.1.0
+
   hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
@@ -4673,6 +4813,13 @@ snapshots:
       setprototypeof: 1.2.0
       statuses: 2.0.2
       toidentifier: 1.0.1
+
+  https-proxy-agent@5.0.1:
+    dependencies:
+      agent-base: 6.0.2
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
 
   iconv-lite@0.7.3:
     dependencies:
@@ -4860,7 +5007,13 @@ snapshots:
       braces: 3.0.3
       picomatch: 2.3.2
 
+  mime-db@1.52.0: {}
+
   mime-db@1.54.0: {}
+
+  mime-types@2.1.35:
+    dependencies:
+      mime-db: 1.52.0
 
   mime-types@3.0.2:
     dependencies:
@@ -5094,6 +5247,8 @@ snapshots:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
 
+  proxy-from-env@2.1.0: {}
+
   punycode.js@2.3.1: {}
 
   qs@6.15.3:
@@ -5113,6 +5268,8 @@ snapshots:
       unpipe: 1.0.0
 
   readdirp@4.1.2: {}
+
+  remove-accents@0.5.0: {}
 
   require-from-string@2.0.2: {}
 

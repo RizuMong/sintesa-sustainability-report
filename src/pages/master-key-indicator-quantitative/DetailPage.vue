@@ -284,8 +284,8 @@ import {
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
 import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
 import { masterCategoryApi } from '@/services/master-category.api'
-import { masterUnitApi } from '@/services/master-unit.api'
-import type { MasterCategory, MasterUnit, MkiGriQuantitativeDetail, MkiInputType } from '@/types'
+import { masterUnitApi } from '@/services/master-unit'
+import type { MasterCategory, MkiGriQuantitativeDetail, MkiInputType } from '@/types'
 
 // pixel3 icon set has no percent glyph — PERCENTAGE renders a "%" label instead of an icon
 const inputTypeOptions: { value: MkiInputType; icon?: IconName; label: string }[] = [
@@ -380,7 +380,7 @@ function populateForm(detail: MkiGriQuantitativeDetail) {
 }
 
 onMounted(async () => {
-  const [{ data: categoryList }, { data: unitList }] = await Promise.all([masterCategoryApi.index(), masterUnitApi.index()])
+  const [{ data: categoryList }, unitList] = await Promise.all([masterCategoryApi.index(), masterUnitApi.getMasterUnit()])
   categories.value = categoryList
   units.value = unitList
 

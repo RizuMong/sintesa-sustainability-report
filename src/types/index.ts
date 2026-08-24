@@ -32,11 +32,6 @@ export interface MasterCategory {
   name: string
 }
 
-export interface MasterUnit {
-  id: string
-  name: string
-}
-
 export interface MkiColumn {
   key: string
   name: string

@@ -1,5 +1,5 @@
 import { masterCategoryApi } from './master-category.api'
-import { masterUnitApi } from './master-unit.api'
+import { masterUnitApi } from './master-unit'
 import type { MkiGriQuantitativeDetail, MkiGriQuantitativeSummary, MkiGriQuantitativePayload, MkiStatus } from '@/types'
 
 let store: MkiGriQuantitativeDetail[] = [
@@ -78,7 +78,7 @@ function toSummary(item: MkiGriQuantitativeDetail): MkiGriQuantitativeSummary {
 }
 
 async function resolvePayload(payload: MkiGriQuantitativePayload) {
-  const [{ data: categories }, { data: units }] = await Promise.all([masterCategoryApi.index(), masterUnitApi.index()])
+  const [{ data: categories }, units] = await Promise.all([masterCategoryApi.index(), masterUnitApi.getMasterUnit()])
   return {
     name: payload.name,
     code: payload.code,

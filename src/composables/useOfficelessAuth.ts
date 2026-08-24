@@ -66,3 +66,8 @@ export async function authFetch(path: string, init: RequestInit = {}) {
 export function useOfficelessAuth() {
   return { config: readonly(config), status: readonly(status), authFetch }
 }
+
+// used by src/lib/http.ts's response interceptor to mirror authFetch's status mapping
+export function markAuthStatus(next: AuthStatus) {
+  status.value = next
+}

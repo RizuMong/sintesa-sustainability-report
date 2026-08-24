@@ -28,15 +28,31 @@ Two token modes coexist. `usePixelTheme().setNextTheme(...)` is toggled per-rout
 
 `src/router/index.ts` — every route points directly at a top-level page component; there is no wrapper layout. This is deliberate so each screen can be deep-linked/embedded independently by the parent Officeless app.
 
-### Feature module shape
+### Services module shape (current convention)
 
-Each feature (`gri-quantitative`, `evaluate-gri-quantitative`, `master-key-indicator-quantitative`, `dashboard/*`) follows the same three-layer split:
+Every feature's data layer lives in its own folder under `src/services/<module>/`:
 
-- `src/types/index.ts` — one shared file for all domain types (list/detail/payload shapes), not split per feature.
-- `src/services/<feature>.api.ts` — the data layer. Some are `createMockApi()` (generic in-memory CRUD keyed by `id`, from `src/services/api.ts`) for simple lists; others (e.g. `master-key-indicator-quantitative.api.ts`) hand-roll a richer mock store with its own `index/create/update/remove` shape that mirrors a real future REST contract (list vs detail response shapes differ, `remove` is a soft-delete that flips status instead of deleting). **All current API modules are mocks** — swapping to real HTTP is meant to be a drop-in replacement of the module internals, keeping the same exported function signatures/JSON shapes. Check the module's own comments before assuming which style it follows.
-- `src/pages/<feature>/ListPage.vue` + `DetailPage.vue` (or `RequestorPage.vue`/`ApprovalPage.vue` for the evaluate flow) — screens, using `useCrud()` (`src/composables/useCrud.ts`) for the generic list/create/update/remove state machine where applicable.
+```
+services/<module>/
+  api.ts          // axios calls through the shared src/lib/http.ts instance, one method per endpoint
+  composables.ts  // that api.ts wrapped in Tanstack Query (useQuery/useMutation)
+  types.d.ts      // ambient global types for the module — `declare global { interface X {...} } / export {}`, no import needed by consumers
+  index.ts        // `export * from './api'` + `export * from './composables'`
+```
 
-Detail pages receive their record via `history.pushState` from the row clicked in the list (`useHistoryRecord()` in `src/composables/useHistoryRecord.ts`) rather than a dedicated fetch-by-id API call — if there's no record in history state, it redirects back to the list's fallback path.
+- `src/lib/http.ts` — the shared axios instance. Request interceptor sets `baseURL`/`Authorization` from `useOfficelessAuth()`'s config (same token/env the embed auth gate captured); response interceptor unwraps nothing itself but maps the `{code, data, error, message}` envelope through `statusFromResponse()` and calls `markAuthStatus()`, mirroring `authFetch`'s behavior so axios and fetch-based calls agree on auth state. Use the exported `unwrap<T>()` helper in `api.ts` methods to pull `.data.data` out of the envelope.
+- `types.d.ts` uses `declare global` (not a named export) — this is deliberate so `MasterUnit` (etc.) is usable in any file with zero import, matching the shape the user specified. Don't add a second same-named type elsewhere (`src/types/index.ts` is being wound down — see below).
+- Real endpoints: check `api/` (see References) for the actual path/payload/response shape before writing `api.ts` — grep the module's folder there first. If no contract exists yet for a given mutation (create/update/delete), follow the sibling `index`/`GET` convention (`{{base_url}}/v1/<module>/<action>`) as a placeholder and flag it, don't invent an unrelated shape.
+- Query keys: `['<moduleName>Api.<methodName>', ...params]` — see `src/services/master-unit/composables.ts` for the reference implementation.
+- **Migration status**: `master-unit` is the reference module on the new shape. `gri-quantitative`, `evaluate-gri-quantitative`, `master-key-indicator-quantitative`, `master-category` are still on the old shape below (flat `src/services/<feature>.api.ts` + in-memory mock + `useCrud()`) — migrate one module at a time, mirroring `master-unit`, rather than mixing old/new inside one module.
+
+### Old shape (pre-migration, still in use by unmigrated modules)
+
+- `src/types/index.ts` — one shared file for all domain types belonging to old-shape modules only. Once a module migrates, its types move to that module's own `types.d.ts` (ambient global) and get deleted here — don't add new types here for new modules.
+- `src/services/<feature>.api.ts` — either `createMockApi()` (`src/services/api.ts`, generic in-memory CRUD keyed by `id`) or a hand-rolled mock store (e.g. `master-key-indicator-quantitative.api.ts`, `index/create/update/remove` with soft-delete). Still in-memory mocks, not axios — do not extend this pattern for new modules, use the services module shape above instead.
+- Pages use `useCrud()` (`src/composables/useCrud.ts`) for the generic list/create/update/remove state machine.
+
+Detail pages in old-shape modules receive their record via `history.pushState` from the row clicked in the list (`useHistoryRecord()` in `src/composables/useHistoryRecord.ts`) rather than a dedicated fetch-by-id API call — if there's no record in history state, it redirects back to the list's fallback path. New-shape modules fetch by id directly through their `composables.ts` (`useQuery` keyed on the route's `id` param) instead.
 
 Design decisions and deviations from an original spec for a given feature are written up in `docs/<feature>.md` as an "As Built" doc (see `docs/mki-quantitative.md`) — check for one before assuming a feature's contract; it documents intentional differences from what may be in git history/PRs.
 
