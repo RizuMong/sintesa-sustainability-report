@@ -31,6 +31,7 @@ Two token modes coexist. `usePixelTheme().setNextTheme(...)` is toggled per-rout
 ### Feature module shape
 
 Each feature (`gri-quantitative`, `evaluate-gri-quantitative`, `master-key-indicator-quantitative`, `dashboard/*`) follows the same three-layer split:
+
 - `src/types/index.ts` — one shared file for all domain types (list/detail/payload shapes), not split per feature.
 - `src/services/<feature>.api.ts` — the data layer. Some are `createMockApi()` (generic in-memory CRUD keyed by `id`, from `src/services/api.ts`) for simple lists; others (e.g. `master-key-indicator-quantitative.api.ts`) hand-roll a richer mock store with its own `index/create/update/remove` shape that mirrors a real future REST contract (list vs detail response shapes differ, `remove` is a soft-delete that flips status instead of deleting). **All current API modules are mocks** — swapping to real HTTP is meant to be a drop-in replacement of the module internals, keeping the same exported function signatures/JSON shapes. Check the module's own comments before assuming which style it follows.
 - `src/pages/<feature>/ListPage.vue` + `DetailPage.vue` (or `RequestorPage.vue`/`ApprovalPage.vue` for the evaluate flow) — screens, using `useCrud()` (`src/composables/useCrud.ts`) for the generic list/create/update/remove state machine where applicable.
@@ -46,3 +47,11 @@ A `pixel` skill (`.agents/skills/pixel/SKILL.md`, symlinked for Claude Code) gov
 ### Comment conventions already in use
 
 Several files use a `// ponytail: ...` comment to flag a deliberate simplification and its upgrade path (e.g. the mock API layer, the no-upfront-verify auth choice). Preserve this pattern when making similar deliberate shortcuts, and check existing `ponytail:` comments before "fixing" something that was cut on purpose.
+
+## References
+
+- FSD: `docs/fsd`
+  - FSD Introduction: `docs/fsd/INTRODUCTION.md`
+  - FSD Platform Administrator: `docs/fsd/platform-administrator.md`
+  - FSD Sustainability Reporting: `docs/fsd/sustainability-reporting.md`
+- API collection: `api/` — symlink to `~/Projects/vas-api-collection/SLM/collections/Sintesa` (separate repo, gitignored here). Bruno/opencollection `.yml` files, one folder per feature, mirroring `src/services/*.api.ts`. Real REST contract — grep it before changing a mock API module's request/response shape.
