@@ -1,35 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { masterUnitApi } from './api'
+import { masterGriApi } from './api'
 
-const listKey = ['masterUnitApi.getMasterUnit']
+const listKey = ['masterGriApi.getMasterGri']
 
-export function useGetMasterUnit() {
+export function useGetMasterGri() {
   return useQuery({
-    queryFn: () => masterUnitApi.getMasterUnit(),
+    queryFn: () => masterGriApi.getMasterGri(),
     queryKey: listKey,
   })
 }
 
-export function useCreateMasterUnit() {
+export function useCreateMasterGri() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.createMasterUnit,
+    mutationFn: masterGriApi.createMasterGri,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
 
-export function useUpdateMasterUnit() {
+export function useUpdateMasterGri() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.updateMasterUnit,
+    mutationFn: masterGriApi.updateMasterGri,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
 
-export function useDeactivateMasterUnit() {
+export function useDeactivateMasterGri() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.deactivateMasterUnit,
+    mutationFn: masterGriApi.deactivateMasterGri,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }

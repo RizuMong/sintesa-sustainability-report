@@ -9,6 +9,30 @@ import MasterKeyIndicatorDetailPage from '@/pages/master-key-indicator-quantitat
 import DashboardGriQuantitativePage from '@/pages/dashboard/GriQuantitativePage.vue'
 import DashboardGriQualitativePage from '@/pages/dashboard/GriQualitativePage.vue'
 import DashboardSdgPage from '@/pages/dashboard/SdgPage.vue'
+import MasterUnitListPage from '@/pages/master-unit/ListPage.vue'
+import MasterUnitDetailPage from '@/pages/master-unit/DetailPage.vue'
+import MasterPillarListPage from '@/pages/master-pillar/ListPage.vue'
+import MasterPillarDetailPage from '@/pages/master-pillar/DetailPage.vue'
+import MasterPeriodListPage from '@/pages/master-period/ListPage.vue'
+import MasterPeriodDetailPage from '@/pages/master-period/DetailPage.vue'
+import MasterGriListPage from '@/pages/master-gri/ListPage.vue'
+import MasterGriDetailPage from '@/pages/master-gri/DetailPage.vue'
+import MasterEntityListPage from '@/pages/master-entity/ListPage.vue'
+import MasterEntityDetailPage from '@/pages/master-entity/DetailPage.vue'
+import MasterPositionListPage from '@/pages/master-position/ListPage.vue'
+import MasterPositionDetailPage from '@/pages/master-position/DetailPage.vue'
+import MasterEmployeeListPage from '@/pages/master-employee/ListPage.vue'
+import MasterEmployeeDetailPage from '@/pages/master-employee/DetailPage.vue'
+import AccessManagementIndexPage from '@/pages/access-management/IndexPage.vue'
+import MkiGriQualitativeListPage from '@/pages/mki-gri-qualitative/ListPage.vue'
+import MkiGriQualitativeDetailPage from '@/pages/mki-gri-qualitative/DetailPage.vue'
+import MkiSdgListPage from '@/pages/mki-sdg/ListPage.vue'
+import MkiSdgDetailPage from '@/pages/mki-sdg/DetailPage.vue'
+import WorkflowConfigurationListPage from '@/pages/workflow-configuration/ListPage.vue'
+import WorkflowConfigurationDetailPage from '@/pages/workflow-configuration/DetailPage.vue'
+import PeriodicNotificationListPage from '@/pages/periodic-notification/ListPage.vue'
+import PeriodicNotificationDetailPage from '@/pages/periodic-notification/DetailPage.vue'
+import GenerateActionPlanLogListPage from '@/pages/generate-action-plan-log/ListPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -40,5 +64,74 @@ export const router = createRouter({
     { path: '/dashboard/gri-quantitative', name: 'dashboard-gri-quantitative', component: DashboardGriQuantitativePage },
     { path: '/dashboard/gri-qualitative', name: 'dashboard-gri-qualitative', component: DashboardGriQualitativePage },
     { path: '/dashboard/sdg', name: 'dashboard-sdg', component: DashboardSdgPage },
+    { path: '/master-unit', name: 'master-unit', component: MasterUnitListPage },
+    { path: '/master-unit/detail', name: 'master-unit-detail', component: MasterUnitDetailPage, meta: { nextTheme: true } },
+    { path: '/master-pillar', name: 'master-pillar', component: MasterPillarListPage },
+    {
+      path: '/master-pillar/detail',
+      name: 'master-pillar-detail',
+      component: MasterPillarDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/master-period', name: 'master-period', component: MasterPeriodListPage },
+    {
+      path: '/master-period/detail',
+      name: 'master-period-detail',
+      component: MasterPeriodDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/master-gri', name: 'master-gri', component: MasterGriListPage },
+    { path: '/master-gri/detail', name: 'master-gri-detail', component: MasterGriDetailPage, meta: { nextTheme: true } },
+    { path: '/master-entity', name: 'master-entity', component: MasterEntityListPage },
+    {
+      path: '/master-entity/detail',
+      name: 'master-entity-detail',
+      component: MasterEntityDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/master-position', name: 'master-position', component: MasterPositionListPage },
+    {
+      path: '/master-position/detail',
+      name: 'master-position-detail',
+      component: MasterPositionDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/master-employee', name: 'master-employee', component: MasterEmployeeListPage },
+    {
+      path: '/master-employee/detail',
+      name: 'master-employee-detail',
+      component: MasterEmployeeDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/access-management', name: 'access-management', component: AccessManagementIndexPage },
+    { path: '/mki-gri-qualitative', name: 'mki-gri-qualitative', component: MkiGriQualitativeListPage },
+    {
+      path: '/mki-gri-qualitative/detail',
+      name: 'mki-gri-qualitative-detail',
+      component: MkiGriQualitativeDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/mki-sdg', name: 'mki-sdg', component: MkiSdgListPage },
+    {
+      path: '/mki-sdg/detail',
+      name: 'mki-sdg-detail',
+      component: MkiSdgDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/workflow-configuration', name: 'workflow-configuration', component: WorkflowConfigurationListPage },
+    {
+      path: '/workflow-configuration/detail',
+      name: 'workflow-configuration-detail',
+      component: WorkflowConfigurationDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/periodic-notification', name: 'periodic-notification', component: PeriodicNotificationListPage },
+    {
+      path: '/periodic-notification/detail',
+      name: 'periodic-notification-detail',
+      component: PeriodicNotificationDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/generate-action-plan-log', name: 'generate-action-plan-log', component: GenerateActionPlanLogListPage },
   ],
 })

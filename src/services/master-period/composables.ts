@@ -1,35 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { masterUnitApi } from './api'
+import { masterPeriodApi } from './api'
 
-const listKey = ['masterUnitApi.getMasterUnit']
+const listKey = ['masterPeriodApi.getMasterPeriod']
 
-export function useGetMasterUnit() {
+export function useGetMasterPeriod() {
   return useQuery({
-    queryFn: () => masterUnitApi.getMasterUnit(),
+    queryFn: () => masterPeriodApi.getMasterPeriod(),
     queryKey: listKey,
   })
 }
 
-export function useCreateMasterUnit() {
+export function useCreateMasterPeriod() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.createMasterUnit,
+    mutationFn: masterPeriodApi.createMasterPeriod,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
 
-export function useUpdateMasterUnit() {
+export function useUpdateMasterPeriod() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.updateMasterUnit,
+    mutationFn: masterPeriodApi.updateMasterPeriod,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
 
-export function useDeactivateMasterUnit() {
+export function useDeactivateMasterPeriod() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.deactivateMasterUnit,
+    mutationFn: masterPeriodApi.deactivateMasterPeriod,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }

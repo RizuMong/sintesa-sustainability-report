@@ -1,35 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { masterUnitApi } from './api'
+import { masterPillarApi } from './api'
 
-const listKey = ['masterUnitApi.getMasterUnit']
+const listKey = ['masterPillarApi.getMasterPillar']
 
-export function useGetMasterUnit() {
+export function useGetMasterPillar() {
   return useQuery({
-    queryFn: () => masterUnitApi.getMasterUnit(),
+    queryFn: () => masterPillarApi.getMasterPillar(),
     queryKey: listKey,
   })
 }
 
-export function useCreateMasterUnit() {
+export function useCreateMasterPillar() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.createMasterUnit,
+    mutationFn: masterPillarApi.createMasterPillar,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
 
-export function useUpdateMasterUnit() {
+export function useUpdateMasterPillar() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.updateMasterUnit,
+    mutationFn: masterPillarApi.updateMasterPillar,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
 
-export function useDeactivateMasterUnit() {
+export function useDeactivateMasterPillar() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: masterUnitApi.deactivateMasterUnit,
+    mutationFn: masterPillarApi.deactivateMasterPillar,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
