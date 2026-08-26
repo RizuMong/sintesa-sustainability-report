@@ -34,3 +34,28 @@ export function useSubmitReportPlanRealization() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listKey }),
   })
 }
+
+const approvalKey = ['reportPlanRealizationApi.getApprovalList']
+
+export function useGetApprovalList() {
+  return useQuery({
+    queryFn: () => reportPlanRealizationApi.getApprovalList(),
+    queryKey: approvalKey,
+  })
+}
+
+export function useApproveReportPlanRealization() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: reportPlanRealizationApi.approveReportPlanRealization,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: approvalKey }),
+  })
+}
+
+export function useRejectReportPlanRealization() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: reportPlanRealizationApi.rejectReportPlanRealization,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: approvalKey }),
+  })
+}
