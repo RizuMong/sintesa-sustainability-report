@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   MpFlex,
@@ -88,26 +88,15 @@ import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
 import { useGetInitiatedPlans } from '@/services/initiate-new-plan'
 import { useGetMasterEntity } from '@/services/master-entity'
-import { http, unwrap } from '@/lib/http'
+import { useGetSdgAdoption } from '@/services/sdg-adoption'
 
 const router = useRouter()
 
 const { data, isLoading: isPlansLoading } = useGetInitiatedPlans()
 const { data: entities, isLoading: isEntitiesLoading } = useGetMasterEntity()
+const { data: sdgGoalsData, isLoading: isSdgLoading } = useGetSdgAdoption()
+const sdgGoals = computed(() => sdgGoalsData.value ?? [])
 const items = computed(() => data.value ?? [])
-
-// ponytail: Stream B's sdg-adoption service module isn't merged yet — fetches the 17-goal
-// endpoint directly here to resolve a display name; swap for `@/services/sdg-adoption`'s
-// composable once it lands (same endpoint per the plan's REST convention).
-const sdgGoals = ref<SdgGoal[]>([])
-const isSdgLoading = ref(true)
-onMounted(async () => {
-  try {
-    sdgGoals.value = await unwrap<SdgGoal[]>(http.get('/v1/sdg-adoption/index'))
-  } finally {
-    isSdgLoading.value = false
-  }
-})
 
 const isLoading = computed(() => isPlansLoading.value || isEntitiesLoading.value || isSdgLoading.value)
 

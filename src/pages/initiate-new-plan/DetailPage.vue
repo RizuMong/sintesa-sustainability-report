@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   MpFlex,
@@ -136,7 +136,7 @@ import { resolveInitiatedPlanGovernance } from '@/services/initiate-new-plan/val
 import { useGetMasterEntity } from '@/services/master-entity'
 import { useGetMasterPillar } from '@/services/master-pillar'
 import { useGetMkiSdgList } from '@/services/mki-sdg'
-import { http, unwrap } from '@/lib/http'
+import { useGetSdgAdoption } from '@/services/sdg-adoption'
 import RowsTable, { type EditableRow } from './RowsTable.vue'
 
 const route = useRoute()
@@ -152,17 +152,8 @@ const { data: indicators, isLoading: isIndicatorsLoading } = useGetMkiSdgList()
 
 const activeEntities = computed(() => (entities.value ?? []).filter((e) => e.status === 'Active'))
 
-// ponytail: Stream B's sdg-adoption service module isn't merged yet — fetches the 17-goal
-// endpoint directly here; swap for `@/services/sdg-adoption`'s composable once it lands.
-const sdgGoals = ref<SdgGoal[]>([])
-const isSdgLoading = ref(true)
-onMounted(async () => {
-  try {
-    sdgGoals.value = await unwrap<SdgGoal[]>(http.get('/v1/sdg-adoption/index'))
-  } finally {
-    isSdgLoading.value = false
-  }
-})
+const { data: sdgGoalsData, isLoading: isSdgLoading } = useGetSdgAdoption()
+const sdgGoals = computed(() => sdgGoalsData.value ?? [])
 
 const isLoading = computed(
   () =>
