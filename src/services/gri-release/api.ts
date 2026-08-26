@@ -25,7 +25,7 @@ const griReleaseApi = {
   async updateGriRelease(payload: GriReleasePayload & { id: string }) {
     return unwrap<GriRelease>(http.post('/v1/master-template-quantitative/update', payload))
   },
-  // AC-38: publish flips status only — auto-distribution/notification assumed backend-side
+  // ponytail: distribution/notification assumed backend-side on publish; UI only shows a success toast
   async publishGriRelease({ id }: { id: string }) {
     return unwrap<GriRelease>(http.post('/v1/master-template-quantitative/publish', { id }))
   },

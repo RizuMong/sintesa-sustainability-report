@@ -84,10 +84,3 @@ export interface MkiGriQuantitativePayload {
   metrics: { key: string; name: string; input_type: MkiInputType; unit: { id: string } | null; sequence: number }[]
   rows: MkiRow[]
 }
-
-export interface GriQuantitativeTemplate {
-  id: string
-  templateName: string
-  period: string
-  status: EvaluationStatus
-}
