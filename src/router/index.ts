@@ -36,6 +36,8 @@ import GenerateActionPlanLogListPage from '@/pages/generate-action-plan-log/List
 import SdgAdoptionListPage from '@/pages/sdg-adoption/ListPage.vue'
 import SdgFrameworkListPage from '@/pages/sdg-framework/ListPage.vue'
 import SdgFrameworkDetailPage from '@/pages/sdg-framework/DetailPage.vue'
+import GriQualitativeListPage from '@/pages/gri-qualitative/ListPage.vue'
+import GriQualitativeDetailPage from '@/pages/gri-qualitative/DetailPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -142,6 +144,13 @@ export const router = createRouter({
       path: '/sdg-framework/detail',
       name: 'sdg-framework-detail',
       component: SdgFrameworkDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/gri-qualitative', name: 'gri-qualitative', component: GriQualitativeListPage },
+    {
+      path: '/gri-qualitative/detail',
+      name: 'gri-qualitative-detail',
+      component: GriQualitativeDetailPage,
       meta: { nextTheme: true },
     },
   ],
