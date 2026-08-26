@@ -18,6 +18,17 @@ const reportPlanRealizationApi = {
   async submitReportPlanRealization(payload: { id: string }) {
     return unwrap<RealizationReport>(http.post('/v1/report-plan-realization/submit', payload))
   },
+  // ponytail: unconfirmed contract — approval trio added for the Review & Approval Tab 3
+  // (Stream E, FSD 2.4). Mirrors evaluate-gri-quantitative's confirmed approval shape.
+  async getApprovalList() {
+    return unwrap<RealizationReport[]>(http.get('/v1/report-plan-realization/approval/index'))
+  },
+  async approveReportPlanRealization(payload: { id: string; notes?: string }) {
+    return unwrap<RealizationReport>(http.post('/v1/report-plan-realization/approve', payload))
+  },
+  async rejectReportPlanRealization(payload: { id: string; notes: string }) {
+    return unwrap<RealizationReport>(http.post('/v1/report-plan-realization/reject', payload))
+  },
 }
 
 export { reportPlanRealizationApi }
