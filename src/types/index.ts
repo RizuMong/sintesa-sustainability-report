@@ -1,29 +1,3 @@
-export type EvaluationStatus = 'draft' | 'submitted' | 'approved' | 'rejected'
-
-export const evaluationStatusBadgeType: Record<EvaluationStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
-  draft: 'announcement',
-  submitted: 'information',
-  approved: 'completed',
-  rejected: 'critical',
-}
-
-export const evaluationStatusOptions = (Object.keys(evaluationStatusBadgeType) as EvaluationStatus[]).map((value) => ({
-  value,
-  label: value,
-}))
-
-export interface EvaluationGriQuantitative {
-  id: string
-  indicator: string
-  period: string
-  value: string
-  requestor: string
-  note: string
-  status: EvaluationStatus
-  actor: string
-  updatedAt: string
-}
-
 export type MkiInputType = 'NUMBER' | 'TEXT' | 'PERCENTAGE' | 'DATE' | 'YES_NO'
 export type MkiStatus = 'Active' | 'Inactive'
 

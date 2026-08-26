@@ -38,6 +38,11 @@ import SdgFrameworkListPage from '@/pages/sdg-framework/ListPage.vue'
 import SdgFrameworkDetailPage from '@/pages/sdg-framework/DetailPage.vue'
 import GriQualitativeListPage from '@/pages/gri-qualitative/ListPage.vue'
 import GriQualitativeDetailPage from '@/pages/gri-qualitative/DetailPage.vue'
+import ActionPlanSubmissionListPage from '@/pages/action-plan-submission/ListPage.vue'
+import ActionPlanSubmissionDetailPage from '@/pages/action-plan-submission/DetailPage.vue'
+import ReportPlanRealizationListPage from '@/pages/report-plan-realization/ListPage.vue'
+import ReportPlanRealizationDetailPage from '@/pages/report-plan-realization/DetailPage.vue'
+import ActionPlanChangeRequestApprovalPage from '@/pages/action-plan-change-request/ApprovalPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -53,6 +58,8 @@ export const router = createRouter({
     },
     { path: '/evaluate-gri-quantitative/requestor', name: 'evaluate-requestor', component: EvaluateRequestorPage },
     { path: '/evaluate-gri-quantitative/approval', name: 'evaluate-approval', component: EvaluateApprovalPage },
+    // alias — same 3-tab Review & Approval shell (FSD 2.4), reachable at its own top-level path too
+    { path: '/review-approval', name: 'review-approval', component: EvaluateApprovalPage },
     {
       path: '/evaluate-gri-quantitative/detail',
       name: 'evaluate-detail',
@@ -152,6 +159,25 @@ export const router = createRouter({
       name: 'gri-qualitative-detail',
       component: GriQualitativeDetailPage,
       meta: { nextTheme: true },
+    },
+    { path: '/action-plan-submission', name: 'action-plan-submission', component: ActionPlanSubmissionListPage },
+    {
+      path: '/action-plan-submission/detail',
+      name: 'action-plan-submission-detail',
+      component: ActionPlanSubmissionDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/report-plan-realization', name: 'report-plan-realization', component: ReportPlanRealizationListPage },
+    {
+      path: '/report-plan-realization/detail',
+      name: 'report-plan-realization-detail',
+      component: ReportPlanRealizationDetailPage,
+      meta: { nextTheme: true },
+    },
+    {
+      path: '/action-plan-change-request/approval',
+      name: 'action-plan-change-request-approval',
+      component: ActionPlanChangeRequestApprovalPage,
     },
   ],
 })
