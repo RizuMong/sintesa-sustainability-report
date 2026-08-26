@@ -32,7 +32,7 @@
         <MpButton
           v-for="tab in tabs"
           :key="tab.key"
-          :variant="activeTab === tab.key ? 'solid' : 'outline'"
+          :variant="activeTab === tab.key ? 'primary' : 'secondary'"
           size="sm"
           @click="activeTab = tab.key"
         >

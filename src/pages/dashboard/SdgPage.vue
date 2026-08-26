@@ -123,11 +123,11 @@
                 <MpTableCell as="td" scope="row">
                   <MpFlex direction="column" gap="1" alignItems="flex-start">
                     <MpText size="label-small">{{ item.created_by_level }}</MpText>
-                    <MpBadge v-if="item.unverified" type="announcement">Unverified / Non-Official SDG</MpBadge>
+                    <MpBadge v-if="item.unverified" for="tableStatus" type="announcement">Unverified / Non-Official SDG</MpBadge>
                   </MpFlex>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row">
-                  <MpBadge :type="decisionBadgeType[item.decision ?? 'none']">{{ item.decision ?? 'Pending' }}</MpBadge>
+                  <MpBadge for="tableStatus" :type="decisionBadgeType[item.decision ?? 'none']">{{ item.decision ?? 'Pending' }}</MpBadge>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row">{{ item.skip_reason ?? '-' }}</MpTableCell>
               </MpTableRow>

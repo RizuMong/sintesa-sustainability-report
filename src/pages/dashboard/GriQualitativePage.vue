@@ -67,7 +67,7 @@
               <MpTableCell as="td" scope="row">{{ item.entity.name }}</MpTableCell>
               <MpTableCell as="td" scope="row">{{ item.period }}</MpTableCell>
               <MpTableCell as="td" scope="row">
-                <MpBadge :type="item.answered ? 'completed' : 'announcement'">{{ item.answered ? 'Answered' : 'Pending' }}</MpBadge>
+                <MpBadge for="tableStatus" :type="item.answered ? 'completed' : 'announcement'">{{ item.answered ? 'Answered' : 'Pending' }}</MpBadge>
               </MpTableCell>
             </MpTableRow>
           </MpTableBody>
