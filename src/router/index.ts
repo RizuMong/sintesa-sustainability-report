@@ -33,6 +33,8 @@ import WorkflowConfigurationDetailPage from '@/pages/workflow-configuration/Deta
 import PeriodicNotificationListPage from '@/pages/periodic-notification/ListPage.vue'
 import PeriodicNotificationDetailPage from '@/pages/periodic-notification/DetailPage.vue'
 import GenerateActionPlanLogListPage from '@/pages/generate-action-plan-log/ListPage.vue'
+import GriQualitativeListPage from '@/pages/gri-qualitative/ListPage.vue'
+import GriQualitativeDetailPage from '@/pages/gri-qualitative/DetailPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -133,5 +135,12 @@ export const router = createRouter({
       meta: { nextTheme: true },
     },
     { path: '/generate-action-plan-log', name: 'generate-action-plan-log', component: GenerateActionPlanLogListPage },
+    { path: '/gri-qualitative', name: 'gri-qualitative', component: GriQualitativeListPage },
+    {
+      path: '/gri-qualitative/detail',
+      name: 'gri-qualitative-detail',
+      component: GriQualitativeDetailPage,
+      meta: { nextTheme: true },
+    },
   ],
 })
