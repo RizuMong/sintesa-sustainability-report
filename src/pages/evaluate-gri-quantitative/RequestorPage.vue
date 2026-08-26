@@ -12,7 +12,7 @@
         <MpText size="label-small" color="text.secondary">Evaluate GRI Quantitative</MpText>
         <MpText as="h1" size="h1">Requestor</MpText>
       </MpFlex>
-      <MpButton left-icon="add" @click="openCreate = true">New evaluation</MpButton>
+      <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
     </MpFlex>
 
     <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
@@ -29,21 +29,27 @@
           <MpTable>
             <MpTableHead>
               <MpTableRow>
-                <MpTableCell scope="col">Indikator</MpTableCell>
-                <MpTableCell scope="col">Periode</MpTableCell>
+                <MpTableCell scope="col">Entity</MpTableCell>
+                <MpTableCell scope="col">Period</MpTableCell>
+                <MpTableCell scope="col">Template</MpTableCell>
                 <MpTableCell scope="col">Status</MpTableCell>
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
               <MpTableRow v-for="row in filteredItems" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.indicator }}
+                  {{ row.entity_id.name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.period }}
+                  {{ row.period_id.name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  <MpBadge for="tableStatus" :type="statusBadgeType[row.status]">{{ row.status }}</MpBadge>
+                  {{ row.template_id.name }}
+                </MpTableCell>
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                  <MpBadge for="tableStatus" :type="statusBadgeType[row.flow_status] ?? 'information'">
+                    {{ row.flow_status }}
+                  </MpBadge>
                 </MpTableCell>
               </MpTableRow>
             </MpTableBody>
@@ -62,39 +68,51 @@
           :is-show-loading="false"
         />
         <MpFlex direction="column" alignItems="center" gap="1">
-          <MpText size="h3" weight="semiBold">No evaluation yet</MpText>
-          <MpText size="label" color="text.secondary">Create your first GRI quantitative evaluation.</MpText>
+          <MpText size="h3" weight="semiBold">No submission yet</MpText>
+          <MpText size="label" color="text.secondary">Create your first GRI quantitative submission.</MpText>
         </MpFlex>
-        <MpButton left-icon="add" @click="openCreate = true">New evaluation</MpButton>
+        <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
       </MpFlex>
     </MpFlex>
 
     <MpModal :is-open="openCreate" size="md" @close="openCreate = false">
       <MpModalContent>
         <MpModalHeader>
-          New evaluation
+          New submission
           <MpModalCloseButton />
         </MpModalHeader>
         <MpModalBody>
           <MpFlex direction="column" gap="4">
-            <MpFormControl id="indicator" is-required>
-              <MpFormLabel>Indikator</MpFormLabel>
-              <MpInput v-model="form.indicator" placeholder="GHG Emission Scope 1" />
+            <MpFormControl id="new-entity" is-required>
+              <MpFormLabel>Entity</MpFormLabel>
+              <MpSelect v-model="form.entityId" placeholder="Select entity" is-full-width>
+                <option value="" disabled>Select entity</option>
+                <option v-for="e in entities" :key="e.id" :value="e.id">{{ e.name }}</option>
+              </MpSelect>
             </MpFormControl>
-            <MpFormControl id="period" is-required>
-              <MpFormLabel>Periode</MpFormLabel>
-              <MpInput v-model="form.period" placeholder="FY2026 Q1" />
+            <MpFormControl id="new-period" is-required>
+              <MpFormLabel>Period</MpFormLabel>
+              <MpSelect v-model="form.periodId" placeholder="Select period" is-full-width>
+                <option value="" disabled>Select period</option>
+                <option v-for="p in periods" :key="p.id" :value="p.id">{{ p.year }}</option>
+              </MpSelect>
             </MpFormControl>
-            <MpFormControl id="value" is-required>
-              <MpFormLabel>Nilai</MpFormLabel>
-              <MpInput v-model="form.value" placeholder="1.250 tCO2e" />
+            <MpFormControl id="new-template" is-required>
+              <MpFormLabel>Template</MpFormLabel>
+              <MpSelect v-model="form.templateId" placeholder="Select template" is-full-width>
+                <option value="" disabled>Select template</option>
+                <option v-for="t in publishedTemplates" :key="t.id" :value="t.id">{{ t.template_name }}</option>
+              </MpSelect>
             </MpFormControl>
+            <MpFormErrorMessage v-if="isDuplicate">
+              A submission for this entity, period and template already exists.
+            </MpFormErrorMessage>
           </MpFlex>
         </MpModalBody>
         <MpModalFooter>
           <MpButtonGroup>
             <MpButton variant="ghost" @click="openCreate = false">Cancel</MpButton>
-            <MpButton @click="createDraft">Save as draft</MpButton>
+            <MpButton :is-disabled="!canCreate || isCreating" @click="createSubmission">Create</MpButton>
           </MpButtonGroup>
         </MpModalFooter>
       </MpModalContent>
@@ -104,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   MpFlex,
@@ -129,58 +147,92 @@ import {
   MpModalCloseButton,
   MpFormControl,
   MpFormLabel,
-  MpInput,
+  MpFormErrorMessage,
+  MpSelect,
   css,
   toast,
 } from '@mekari/pixel3'
-import { useCrud } from '@/composables/useCrud'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
-import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
+import { useGetMasterEntity } from '@/services/master-entity'
+import { useGetMasterPeriod } from '@/services/master-period'
 import {
-  evaluationStatusBadgeType as statusBadgeType,
-  evaluationStatusOptions,
-  type EvaluationGriQuantitative,
-} from '@/types'
+  useGetRequestorList,
+  useCreateEvaluateGriQuantitative,
+  useGetMasterTemplateQuantitativeOptions,
+  hasDuplicateSubmission,
+} from '@/services/evaluate-gri-quantitative'
+
+const statusBadgeType: Record<SubmissionFlowStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
+  draft: 'announcement',
+  submitted: 'information',
+  approved: 'completed',
+  rejected: 'critical',
+  cancelled: 'announcement',
+}
 
 const router = useRouter()
-const { items, loading: isLoading, fetchAll, create } = useCrud<EvaluationGriQuantitative>(
-  evaluateGriQuantitativeApi
-)
 
-const filterColumns = [
-  { value: 'indicator', label: 'Indikator' },
-  { value: 'period', label: 'Periode' },
-  { value: 'status', label: 'Status', options: evaluationStatusOptions },
-]
+const { data, isLoading } = useGetRequestorList()
+const items = computed(() => data.value ?? [])
+
+const { data: entityData } = useGetMasterEntity()
+const entities = computed(() => (entityData.value ?? []).filter((e) => e.status === 'Active'))
+
+const { data: periodData } = useGetMasterPeriod()
+const periods = computed(() => (periodData.value ?? []).filter((p) => p.status === 'Active'))
+
+const { data: templateData } = useGetMasterTemplateQuantitativeOptions()
+const publishedTemplates = computed(() => (templateData.value ?? []).filter((t) => t.status === 'Published'))
+
+const filterColumns = computed(() => [
+  { value: 'entity_id.name', label: 'Entity' },
+  { value: 'period_id.name', label: 'Period' },
+  { value: 'template_id.name', label: 'Template' },
+  {
+    value: 'flow_status',
+    label: 'Status',
+    options: (Object.keys(statusBadgeType) as SubmissionFlowStatus[]).map((value) => ({ value, label: value })),
+  },
+])
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
 const openCreate = ref(false)
-const form = reactive({ indicator: '', period: '', value: '' })
+const form = reactive({ entityId: '', periodId: '', templateId: '' })
 
-onMounted(fetchAll)
+// AC-86 — block a duplicate submission for the same entity+period+template while one is in flight
+const isDuplicate = computed(() => {
+  if (!form.entityId || !form.periodId || !form.templateId) return false
+  return hasDuplicateSubmission(items.value, form.entityId, form.periodId, form.templateId)
+})
+const canCreate = computed(
+  () => Boolean(form.entityId && form.periodId && form.templateId) && !isDuplicate.value,
+)
 
-function goToDetail(row: EvaluationGriQuantitative) {
-  router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
+const createMutation = useCreateEvaluateGriQuantitative()
+const isCreating = computed(() => createMutation.isPending.value)
+
+function goToDetail(row: EvaluateGriQuantitativeSummary) {
+  router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: row.id } })
 }
 
-async function createDraft() {
-  if (!form.indicator || !form.period || !form.value) return
-  await create({
-    id: crypto.randomUUID(),
-    indicator: form.indicator,
-    period: form.period,
-    value: form.value,
-    requestor: 'You',
-    note: '',
-    status: 'draft',
-    actor: 'You',
-    updatedAt: new Date().toISOString(),
+async function createSubmission() {
+  if (!canCreate.value) return
+  const entity = entities.value.find((e) => e.id === form.entityId)
+  const period = periods.value.find((p) => p.id === form.periodId)
+  const template = publishedTemplates.value.find((t) => t.id === form.templateId)
+  if (!entity || !period || !template) return
+
+  const created = await createMutation.mutateAsync({
+    entity_id: { id: entity.id, name: entity.name },
+    period_id: { id: period.id, name: String(period.year) },
+    template_id: { id: template.id, name: template.template_name },
   })
-  form.indicator = ''
-  form.period = ''
-  form.value = ''
+  form.entityId = ''
+  form.periodId = ''
+  form.templateId = ''
   openCreate.value = false
-  toast.notify({ id: 'evaluate-create-draft', variant: 'success', title: 'Draft created.' })
+  toast.notify({ id: 'evaluate-create', variant: 'success', title: 'Submission created.' })
+  router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: created.id } })
 }
 </script>
