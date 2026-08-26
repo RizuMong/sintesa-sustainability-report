@@ -43,6 +43,8 @@ import ActionPlanSubmissionDetailPage from '@/pages/action-plan-submission/Detai
 import ReportPlanRealizationListPage from '@/pages/report-plan-realization/ListPage.vue'
 import ReportPlanRealizationDetailPage from '@/pages/report-plan-realization/DetailPage.vue'
 import ActionPlanChangeRequestApprovalPage from '@/pages/action-plan-change-request/ApprovalPage.vue'
+import PerformanceTrackingListPage from '@/pages/performance-tracking/ListPage.vue'
+import DataExportListPage from '@/pages/data-export/ListPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -179,5 +181,7 @@ export const router = createRouter({
       name: 'action-plan-change-request-approval',
       component: ActionPlanChangeRequestApprovalPage,
     },
+    { path: '/performance-tracking', name: 'performance-tracking', component: PerformanceTrackingListPage },
+    { path: '/data-export', name: 'data-export', component: DataExportListPage },
   ],
 })
