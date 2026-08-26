@@ -33,6 +33,9 @@ import WorkflowConfigurationDetailPage from '@/pages/workflow-configuration/Deta
 import PeriodicNotificationListPage from '@/pages/periodic-notification/ListPage.vue'
 import PeriodicNotificationDetailPage from '@/pages/periodic-notification/DetailPage.vue'
 import GenerateActionPlanLogListPage from '@/pages/generate-action-plan-log/ListPage.vue'
+import SdgAdoptionListPage from '@/pages/sdg-adoption/ListPage.vue'
+import SdgFrameworkListPage from '@/pages/sdg-framework/ListPage.vue'
+import SdgFrameworkDetailPage from '@/pages/sdg-framework/DetailPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -133,5 +136,13 @@ export const router = createRouter({
       meta: { nextTheme: true },
     },
     { path: '/generate-action-plan-log', name: 'generate-action-plan-log', component: GenerateActionPlanLogListPage },
+    { path: '/sdg-adoption', name: 'sdg-adoption', component: SdgAdoptionListPage },
+    { path: '/sdg-framework', name: 'sdg-framework', component: SdgFrameworkListPage },
+    {
+      path: '/sdg-framework/detail',
+      name: 'sdg-framework-detail',
+      component: SdgFrameworkDetailPage,
+      meta: { nextTheme: true },
+    },
   ],
 })
