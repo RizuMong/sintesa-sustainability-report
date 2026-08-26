@@ -32,11 +32,11 @@ const evaluateGriQualitativeApi = {
     return unwrap<GriQualSubmission>(http.post('/v1/evaluate-gri-qualitative/submit', { id }))
   },
   // ponytail: unconfirmed contract, mirrors evaluate-gri-quantitative — consumed by Stream E's approval tab
-  async approve(id: string) {
-    return unwrap<GriQualSubmission>(http.post('/v1/evaluate-gri-qualitative/approve', { id }))
+  async approve(payload: { id: string; remarks?: string }) {
+    return unwrap<GriQualSubmission>(http.post('/v1/evaluate-gri-qualitative/approve', payload))
   },
   // ponytail: unconfirmed contract, mirrors evaluate-gri-quantitative — consumed by Stream E's approval tab
-  async reject(payload: { id: string; notes: string }) {
+  async reject(payload: { id: string; remarks: string }) {
     return unwrap<GriQualSubmission>(http.post('/v1/evaluate-gri-qualitative/reject', payload))
   },
   // ponytail: unconfirmed contract, mirrors evaluate-gri-quantitative
