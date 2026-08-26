@@ -83,11 +83,11 @@ import {
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
-import { useGetChangeRequests } from '@/services/action-plan-change-request'
+import { useGetActionPlanChangeRequests } from '@/services/action-plan-change-request'
 
 const router = useRouter()
 
-const { data, isLoading } = useGetChangeRequests()
+const { data, isLoading } = useGetActionPlanChangeRequests()
 const items = computed(() => data.value ?? [])
 
 const statusBadgeType: Record<ActionPlanChangeRequest['status'], 'announcement' | 'information' | 'completed' | 'critical'> = {

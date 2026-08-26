@@ -153,7 +153,7 @@ import {
   MpTableContainer,
   toast,
 } from '@mekari/pixel3'
-import { useCreateChangeRequest, useGetChangeRequestHistory } from '@/services/action-plan-change-request'
+import { useCreateActionPlanChangeRequest, useGetActionPlanChangeRequestHistory } from '@/services/action-plan-change-request'
 import { hasProposedChanges, isChangeRequestNotesValid } from '@/services/action-plan-change-request/validation'
 import { useGetInitiatedPlans } from '@/services/initiate-new-plan'
 
@@ -212,7 +212,7 @@ const canSubmit = computed(
   () => Boolean(selectedRow.value) && isNotesValid.value && hasProposedChanges(existingPartial.value, proposedPartial.value),
 )
 
-const { data: history } = useGetChangeRequestHistory(() =>
+const { data: history } = useGetActionPlanChangeRequestHistory(() =>
   eligibleRows.value.find((opt) => opt.row.id === selectedRowId.value) ? selectedRowId.value : undefined,
 )
 
@@ -222,7 +222,7 @@ const statusBadgeType: Record<ActionPlanChangeRequest['status'], 'announcement' 
   Rejected: 'critical',
 }
 
-const createMutation = useCreateChangeRequest()
+const createMutation = useCreateActionPlanChangeRequest()
 const isSaving = computed(() => createMutation.isPending.value)
 
 async function submit() {
