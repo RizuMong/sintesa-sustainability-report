@@ -1,17 +1,19 @@
-// ponytail: temporary stub of Stream I's module — reconcile with Stream I at merge (delete this
-// file once the real one lands). Built only far enough for the Holding approval page (FSD 2.5).
 declare global {
+  // FSD 2.13, AC-105…108 — Subsidiary-submitted request to change fields on an already
+  // Active/Taken Action Plan Matrix row. Field names are exact per plan §5-I — Stream E's
+  // Holding approval page (`/action-plan-change-request/approval`) consumes this type verbatim.
+  // `ActionPlanMatrixRow` is Stream B's global (src/services/sdg-framework/types.d.ts).
   interface ActionPlanChangeRequest {
     id: string
     action_plan_id: string
-    // ponytail: typed as Record<string, unknown> until Stream B's ActionPlanMatrixRow global lands
-    // (B owns that type — not redeclared here); swap to Partial<ActionPlanMatrixRow> at merge.
-    existing: Record<string, unknown>
-    proposed: Record<string, unknown>
+    existing: Partial<ActionPlanMatrixRow>
+    proposed: Partial<ActionPlanMatrixRow>
     notes: string
     status: 'Pending Review' | 'Approved' | 'Rejected'
     request_date: string
     request_by: string
+    // unset until a Holding reviewer decides (AC-64…66) — kept nullable rather than empty-string
+    // sentinels so consumers can tell "not yet reviewed" from "reviewed with no notes".
     approved_date: string | null
     approved_by: string | null
     reviewer_notes: string | null
