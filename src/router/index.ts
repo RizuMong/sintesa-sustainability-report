@@ -38,6 +38,10 @@ import SdgFrameworkListPage from '@/pages/sdg-framework/ListPage.vue'
 import SdgFrameworkDetailPage from '@/pages/sdg-framework/DetailPage.vue'
 import GriQualitativeListPage from '@/pages/gri-qualitative/ListPage.vue'
 import GriQualitativeDetailPage from '@/pages/gri-qualitative/DetailPage.vue'
+import InitiateNewPlanListPage from '@/pages/initiate-new-plan/ListPage.vue'
+import InitiateNewPlanDetailPage from '@/pages/initiate-new-plan/DetailPage.vue'
+import ActionPlanChangeRequestListPage from '@/pages/action-plan-change-request/ListPage.vue'
+import ActionPlanChangeRequestDetailPage from '@/pages/action-plan-change-request/DetailPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -151,6 +155,24 @@ export const router = createRouter({
       path: '/gri-qualitative/detail',
       name: 'gri-qualitative-detail',
       component: GriQualitativeDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/initiate-new-plan', name: 'initiate-new-plan', component: InitiateNewPlanListPage },
+    {
+      path: '/initiate-new-plan/detail',
+      name: 'initiate-new-plan-detail',
+      component: InitiateNewPlanDetailPage,
+      meta: { nextTheme: true },
+    },
+    {
+      path: '/action-plan-change-request',
+      name: 'action-plan-change-request',
+      component: ActionPlanChangeRequestListPage,
+    },
+    {
+      path: '/action-plan-change-request/detail',
+      name: 'action-plan-change-request-detail',
+      component: ActionPlanChangeRequestDetailPage,
       meta: { nextTheme: true },
     },
   ],
