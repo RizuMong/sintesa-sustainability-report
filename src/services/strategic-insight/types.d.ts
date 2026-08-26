@@ -32,7 +32,7 @@ declare global {
     action_indicator: Ref2 | null
     created_by_level: MkiCreatedByLevel // reuse mki-sdg's global ('Holding' | 'Subsidiary')
     unverified: boolean // §4 Unverified flag — true only when created_by_level = 'Subsidiary'
-    decision: 'Take' | 'Skip' | null
+    decision: TakeSkipDecision // reuse action-plan-submission's global ('Take' | 'Skip' | null)
     skip_reason: string | null
   }
 
