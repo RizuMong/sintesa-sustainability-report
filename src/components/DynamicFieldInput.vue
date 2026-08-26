@@ -1,7 +1,7 @@
 <template>
   <MpFlex v-if="input_type === 'Number'" alignItems="center" gap="2">
     <MpInput
-      :model-value="modelValue as string | number | null"
+      :model-value="(modelValue ?? undefined) as string | number | undefined"
       type="number"
       :is-disabled="disabled"
       :placeholder="unit ? `e.g. 100 ${unit}` : 'e.g. 100'"
@@ -12,7 +12,7 @@
 
   <MpFlex v-else-if="input_type === 'Percentage'" alignItems="center" gap="2">
     <MpInput
-      :model-value="modelValue as string | number | null"
+      :model-value="(modelValue ?? undefined) as string | number | undefined"
       type="number"
       :is-disabled="disabled"
       placeholder="0-100"
@@ -32,7 +32,7 @@
 
   <MpTextarea
     v-else
-    :model-value="modelValue as string | null"
+    :model-value="(modelValue ?? undefined) as string | undefined"
     :is-disabled="disabled"
     @update:model-value="$emit('update:modelValue', $event)"
   />
@@ -46,7 +46,7 @@ import { MpFlex, MpInput, MpText, MpToggle, MpTextarea } from '@mekari/pixel3'
 defineProps<{
   input_type: MkiInputType
   unit?: string | null
-  modelValue: string | number | boolean | null
+  modelValue: string | number | boolean | null | undefined
   disabled?: boolean
 }>()
 

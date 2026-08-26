@@ -35,7 +35,7 @@
       </MpFlex>
 
       <MpFlex v-else-if="submission" direction="column" gap="6" maxWidth="720px">
-        <MpBanner v-if="isLocked" variant="information">
+        <MpBanner v-if="isLocked" variant="info">
           <MpBannerDescription>This submission has been submitted and is read-only.</MpBannerDescription>
         </MpBanner>
 

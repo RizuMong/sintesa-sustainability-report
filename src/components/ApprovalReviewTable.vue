@@ -148,7 +148,7 @@
   </MpFlex>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="TRow extends { id: string; flow_status: string; current_stage_order?: number; approval_logs?: ApprovalLog[] }">
 import { computed, ref } from 'vue'
 import {
   MpFlex,
@@ -189,9 +189,9 @@ interface ApprovableRow {
 }
 
 const props = defineProps<{
-  items: ApprovableRow[]
+  items: TRow[]
   isLoading: boolean
-  columns: { key: string; label: string; value: (row: ApprovableRow) => string | number }[]
+  columns: { key: string; label: string; value: (row: TRow) => string | number }[]
   approveMutation: { mutateAsync: (payload: { id: string; remarks?: string }) => Promise<unknown>; isPending: { value: boolean } }
   rejectMutation: { mutateAsync: (payload: { id: string; remarks: string }) => Promise<unknown>; isPending: { value: boolean } }
   emptyTitle?: string

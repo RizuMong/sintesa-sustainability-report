@@ -23,10 +23,10 @@ const reportPlanRealizationApi = {
   async getApprovalList() {
     return unwrap<RealizationReport[]>(http.get('/v1/report-plan-realization/approval/index'))
   },
-  async approveReportPlanRealization(payload: { id: string; notes?: string }) {
+  async approveReportPlanRealization(payload: { id: string; remarks?: string }) {
     return unwrap<RealizationReport>(http.post('/v1/report-plan-realization/approve', payload))
   },
-  async rejectReportPlanRealization(payload: { id: string; notes: string }) {
+  async rejectReportPlanRealization(payload: { id: string; remarks: string }) {
     return unwrap<RealizationReport>(http.post('/v1/report-plan-realization/reject', payload))
   },
 }
