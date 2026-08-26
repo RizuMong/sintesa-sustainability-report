@@ -2,9 +2,8 @@ declare global {
   type TrackingStatus = 'Draft' | 'Submitted' | 'Approved' | 'Rejected'
 
   interface TrackingRow {
-    // ponytail: swap to Ref2 once Stream C lands
-    entity: { id: string; name: string }
-    period: { id: string; name: string }
+    entity: Ref2
+    period: Ref2
     submission_type: string
     completion_percent: number
     status: TrackingStatus
