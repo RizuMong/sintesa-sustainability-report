@@ -1,8 +1,7 @@
 declare global {
-  // AC-90/91: None mode has no answer_mode value of its own in the already-shipped
-  // MkiGriQualAnswerMode ('Single' | 'Conditional') — extend locally rather than redeclare
-  // the global (mki-gri-qualitative owns that type).
-  type GriQualAnswerMode = MkiGriQualAnswerMode | 'None'
+  // GriQualAnswerMode ('Single' | 'Conditional' | 'None', AC-41/AC-90) is declared once by
+  // src/services/gri-release/types.d.ts, which owns the template half of this contract.
+  // Do not redeclare it here — it is already global.
 
   interface GriQualSubmissionQuestion {
     id: string
