@@ -36,6 +36,7 @@ import GenerateActionPlanLogListPage from '@/pages/generate-action-plan-log/List
 import SdgAdoptionListPage from '@/pages/sdg-adoption/ListPage.vue'
 import SdgFrameworkListPage from '@/pages/sdg-framework/ListPage.vue'
 import SdgFrameworkDetailPage from '@/pages/sdg-framework/DetailPage.vue'
+import ActionPlanChangeRequestApprovalPage from '@/pages/action-plan-change-request/ApprovalPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -51,6 +52,8 @@ export const router = createRouter({
     },
     { path: '/evaluate-gri-quantitative/requestor', name: 'evaluate-requestor', component: EvaluateRequestorPage },
     { path: '/evaluate-gri-quantitative/approval', name: 'evaluate-approval', component: EvaluateApprovalPage },
+    // alias — same 3-tab Review & Approval shell (FSD 2.4), reachable at its own top-level path too
+    { path: '/review-approval', name: 'review-approval', component: EvaluateApprovalPage },
     {
       path: '/evaluate-gri-quantitative/detail',
       name: 'evaluate-detail',
@@ -143,6 +146,11 @@ export const router = createRouter({
       name: 'sdg-framework-detail',
       component: SdgFrameworkDetailPage,
       meta: { nextTheme: true },
+    },
+    {
+      path: '/action-plan-change-request/approval',
+      name: 'action-plan-change-request-approval',
+      component: ActionPlanChangeRequestApprovalPage,
     },
   ],
 })

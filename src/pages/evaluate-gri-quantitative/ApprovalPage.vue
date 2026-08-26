@@ -8,113 +8,110 @@
       backgroundColor="background.surface"
     >
       <MpFlex direction="column">
-        <MpText size="label-small" color="text.secondary">Evaluate GRI Quantitative</MpText>
-        <MpText as="h1" size="h1">Approval</MpText>
+        <MpText size="label-small" color="text.secondary">Sustainability Reporting</MpText>
+        <MpText as="h1" size="h1">Review &amp; Approval</MpText>
       </MpFlex>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="2">
-      <MpFlex justifyContent="flex-start">
-        <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
-      </MpFlex>
-
-      <MpFlex v-if="isLoading" direction="column" gap="2">
-        <MpSkeleton v-for="i in 4" :key="i" height="56px" rounded="md" />
-      </MpFlex>
-
-      <template v-else-if="filteredItems.length">
-        <MpTableContainer>
-          <MpTable>
-            <MpTableHead>
-              <MpTableRow>
-                <MpTableCell scope="col">Indikator</MpTableCell>
-                <MpTableCell scope="col">Requestor</MpTableCell>
-                <MpTableCell scope="col">Periode</MpTableCell>
-                <MpTableCell scope="col">Status</MpTableCell>
-              </MpTableRow>
-            </MpTableHead>
-            <MpTableBody>
-              <MpTableRow v-for="row in filteredItems" :key="row.id">
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.indicator }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.requestor }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.period }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  <MpBadge for="tableStatus" type="information">{{ row.status }}</MpBadge>
-                </MpTableCell>
-              </MpTableRow>
-            </MpTableBody>
-          </MpTable>
-        </MpTableContainer>
-      </template>
-
-      <MpFlex v-else direction="column" alignItems="center" gap="4" paddingY="20">
-        <MpImage
-          src="https://cdn.mekari.design/illustration/blank-slate/NoData_PB_L_01.png"
-          alt="empty state illustration"
-          layout="fixed"
-          :width="200"
-          :height="160"
-          object-fit="contain"
-          :is-show-loading="false"
-        />
-        <MpFlex direction="column" alignItems="center" gap="1">
-          <MpText size="h3" weight="semiBold">No evaluation waiting for approval</MpText>
-          <MpText size="label" color="text.secondary">Submitted evaluations will show up here.</MpText>
-        </MpFlex>
-      </MpFlex>
+    <MpFlex direction="column" padding="24px" gap="4">
+      <!--
+        ponytail: entity scoping + stage gating enforced server-side (AC-59); the UI only reflects
+        approval_logs / current_stage_order returned by each list endpoint, it never filters rows
+        client-side as a security control.
+      -->
+      <MpTabs>
+        <MpTabList>
+          <MpTab>GRI Quantitative</MpTab>
+          <MpTab>GRI Qualitative</MpTab>
+          <MpTab>Action Plan Realization</MpTab>
+        </MpTabList>
+        <MpTabPanels>
+          <MpTabPanel>
+            <ApprovalReviewTable
+              :items="quantItems"
+              :is-loading="quantLoading"
+              :columns="quantColumns"
+              :approve-mutation="approveQuant"
+              :reject-mutation="rejectQuant"
+              empty-title="No GRI Quantitative submissions waiting for approval"
+            />
+          </MpTabPanel>
+          <MpTabPanel>
+            <ApprovalReviewTable
+              :items="qualItems"
+              :is-loading="qualLoading"
+              :columns="qualColumns"
+              :approve-mutation="approveQual"
+              :reject-mutation="rejectQual"
+              empty-title="No GRI Qualitative submissions waiting for approval"
+            />
+          </MpTabPanel>
+          <MpTabPanel>
+            <ApprovalReviewTable
+              :items="realizationItems"
+              :is-loading="realizationLoading"
+              :columns="realizationColumns"
+              :approve-mutation="approveRealization"
+              :reject-mutation="rejectRealization"
+              empty-title="No Action Plan Realization reports waiting for approval"
+            />
+          </MpTabPanel>
+        </MpTabPanels>
+      </MpTabs>
     </MpFlex>
   </MpFlex>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { MpFlex, MpText, MpTabs, MpTabList, MpTab, MpTabPanels, MpTabPanel } from '@mekari/pixel3'
+import ApprovalReviewTable from '@/components/ApprovalReviewTable.vue'
 import {
-  MpFlex,
-  MpText,
-  MpBadge,
-  MpImage,
-  MpSkeleton,
-  MpTable,
-  MpTableHead,
-  MpTableBody,
-  MpTableRow,
-  MpTableCell,
-  MpTableContainer,
-  css,
-} from '@mekari/pixel3'
-import { useCrud } from '@/composables/useCrud'
-import { useTableFilter } from '@/composables/useTableFilter'
-import TableFilter from '@/components/TableFilter.vue'
-import { evaluateGriQuantitativeApi } from '@/services/evaluate-gri-quantitative.api'
-import type { EvaluationGriQuantitative } from '@/types'
+  useGetApprovalList as useGetQuantApprovalList,
+  useApproveEvaluateGriQuantitative,
+  useRejectEvaluateGriQuantitative,
+} from '@/services/evaluate-gri-quantitative'
+import {
+  useGetApprovalList as useGetQualApprovalList,
+  useApproveEvaluateGriQualitative,
+  useRejectEvaluateGriQualitative,
+} from '@/services/evaluate-gri-qualitative'
+import {
+  useGetApprovalList as useGetRealizationApprovalList,
+  useApproveReportPlanRealization,
+  useRejectReportPlanRealization,
+} from '@/services/report-plan-realization'
 
-const router = useRouter()
-const { items, loading: isLoading, fetchAll } = useCrud<EvaluationGriQuantitative>(evaluateGriQuantitativeApi)
-
-const pendingItems = computed(() => items.value.filter((item) => item.status === 'submitted'))
-
-const filterColumns = [
-  { value: 'indicator', label: 'Indikator' },
-  { value: 'requestor', label: 'Requestor' },
-  { value: 'period', label: 'Periode' },
-  {
-    value: 'status',
-    label: 'Status',
-    options: [{ value: 'submitted', label: 'submitted' }],
-  },
+// Tab 1 — GRI Quantitative (Stream C)
+const { data: quantData, isLoading: quantLoading } = useGetQuantApprovalList()
+const quantItems = computed(() => quantData.value ?? [])
+const approveQuant = useApproveEvaluateGriQuantitative()
+const rejectQuant = useRejectEvaluateGriQuantitative()
+const quantColumns = [
+  { key: 'entity', label: 'Entity', value: (row: EvaluateGriQuantitativeSummary) => row.entity_id.name },
+  { key: 'period', label: 'Period', value: (row: EvaluateGriQuantitativeSummary) => row.period_id.name },
+  { key: 'template', label: 'Template', value: (row: EvaluateGriQuantitativeSummary) => row.template_id.name },
 ]
-const { filteredItems, applyFilter, resetFilter } = useTableFilter(pendingItems)
 
-onMounted(fetchAll)
+// Tab 2 — GRI Qualitative (Stream D)
+const { data: qualData, isLoading: qualLoading } = useGetQualApprovalList()
+const qualItems = computed(() => qualData.value ?? [])
+const approveQual = useApproveEvaluateGriQualitative()
+const rejectQual = useRejectEvaluateGriQualitative()
+const qualColumns = [
+  { key: 'entity', label: 'Entity', value: (row: GriQualSubmission) => row.entity_id.name },
+  { key: 'period', label: 'Period', value: (row: GriQualSubmission) => row.period_id.name },
+  { key: 'template', label: 'Template', value: (row: GriQualSubmission) => row.template_id.name },
+]
 
-function goToDetail(row: EvaluationGriQuantitative) {
-  router.push({ path: '/evaluate-gri-quantitative/detail', state: { record: { ...row } } })
-}
+// Tab 3 — Action Plan Realization (Stream F)
+const { data: realizationData, isLoading: realizationLoading } = useGetRealizationApprovalList()
+const realizationItems = computed(() => realizationData.value ?? [])
+const approveRealization = useApproveReportPlanRealization()
+const rejectRealization = useRejectReportPlanRealization()
+const realizationColumns = [
+  { key: 'period', label: 'Period', value: (row: RealizationReport) => row.period_id.name },
+  { key: 'indicator', label: 'Action Indicator', value: (row: RealizationReport) => row.action_indicator.name },
+  { key: 'value', label: 'Value', value: (row: RealizationReport) => String(row.value ?? '—') },
+]
 </script>
