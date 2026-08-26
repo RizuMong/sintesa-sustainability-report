@@ -2,6 +2,7 @@ declare global {
   // FSD 2.13, AC-105…108 — Subsidiary-submitted request to change fields on an already
   // Active/Taken Action Plan Matrix row. Field names are exact per plan §5-I — Stream E's
   // Holding approval page (`/action-plan-change-request/approval`) consumes this type verbatim.
+  // `ActionPlanMatrixRow` is Stream B's global (src/services/sdg-framework/types.d.ts).
   interface ActionPlanChangeRequest {
     id: string
     action_plan_id: string
