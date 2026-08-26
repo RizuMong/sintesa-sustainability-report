@@ -7,7 +7,8 @@
       paddingY="24px"
       backgroundColor="background.surface"
     >
-      <MpText as="h1" size="h1">GRI Quantitative</MpText>
+      <MpText as="h1" size="h1">GRI Management</MpText>
+      <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
     </MpFlex>
 
     <MpFlex direction="column" padding="24px" gap="2">
@@ -32,13 +33,15 @@
             <MpTableBody>
               <MpTableRow v-for="row in filteredItems" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.templateName }}
+                  {{ row.template_name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.period }}
+                  {{ row.period_id.name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  <MpBadge for="tableStatus" type="information">{{ row.status }}</MpBadge>
+                  <MpBadge for="tableStatus" :type="row.status === 'Published' ? 'completed' : 'announcement'">
+                    {{ row.status }}
+                  </MpBadge>
                 </MpTableCell>
               </MpTableRow>
             </MpTableBody>
@@ -56,18 +59,19 @@
           object-fit="contain"
           :is-show-loading="false"
         />
-        <MpText size="h3" weight="semiBold">No indicator available yet</MpText>
+        <MpText size="h3" weight="semiBold">No template released yet</MpText>
       </MpFlex>
     </MpFlex>
   </MpFlex>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   MpFlex,
   MpText,
+  MpButton,
   MpImage,
   MpSkeleton,
   MpTable,
@@ -79,25 +83,34 @@ import {
   MpBadge,
   css,
 } from '@mekari/pixel3'
-import { useCrud } from '@/composables/useCrud'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
-import { griQuantitativeApi } from '@/services/gri-quantitative.api'
-import { evaluationStatusOptions, type GriQuantitativeTemplate } from '@/types'
+import { useGetGriReleases } from '@/services/gri-release'
 
 const router = useRouter()
-const { items, loading: isLoading, fetchAll } = useCrud<GriQuantitativeTemplate>(griQuantitativeApi)
+
+const { data, isLoading } = useGetGriReleases()
+const items = computed(() => data.value ?? [])
 
 const filterColumns = [
-  { value: 'templateName', label: 'Template name' },
-  { value: 'period', label: 'Period' },
-  { value: 'status', label: 'Status', options: evaluationStatusOptions },
+  { value: 'template_name', label: 'Template name' },
+  { value: 'period_id.name', label: 'Period' },
+  {
+    value: 'status',
+    label: 'Status',
+    options: [
+      { value: 'Draft', label: 'Draft' },
+      { value: 'Published', label: 'Published' },
+    ],
+  },
 ]
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
-onMounted(fetchAll)
+function goToCreate() {
+  router.push('/gri-quantitative/detail')
+}
 
-function goToDetail(row: GriQuantitativeTemplate) {
-  router.push({ path: '/gri-quantitative/detail', state: { record: { ...row } } })
+function goToDetail(row: GriReleaseSummary) {
+  router.push({ path: '/gri-quantitative/detail', query: { id: row.id } })
 }
 </script>
