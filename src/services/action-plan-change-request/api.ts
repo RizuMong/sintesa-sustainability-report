@@ -1,5 +1,5 @@
 import { http, unwrap } from '@/lib/http'
-import { canSubmitChangeRequest, hasProposedChanges, isChangeRequestNotesValid } from './validation'
+import { canSubmitChangeRequest } from './validation'
 
 export { canSubmitChangeRequest, hasProposedChanges, isChangeRequestNotesValid } from './validation'
 
