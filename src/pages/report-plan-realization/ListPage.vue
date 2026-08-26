@@ -1,17 +1,12 @@
 <template>
   <MpFlex direction="column" backgroundColor="background.stage" minHeight="100vh">
-    <MpFlex
-      justifyContent="space-between"
-      alignItems="center"
-      paddingX="24px"
-      paddingY="24px"
-      backgroundColor="background.surface"
-    >
-      <MpText as="h1" size="h1">GRI Management</MpText>
-      <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
+    <MpFlex direction="column" paddingX="24px" paddingTop="24px" paddingBottom="8px" backgroundColor="background.surface">
+      <MpFlex justifyContent="space-between" alignItems="center">
+        <MpText as="h1" size="h1">Report Plan Realization</MpText>
+      </MpFlex>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="2">
+    <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
       <MpFlex justifyContent="flex-start">
         <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
       </MpFlex>
@@ -25,23 +20,25 @@
           <MpTable>
             <MpTableHead>
               <MpTableRow>
-                <MpTableCell scope="col">Template name</MpTableCell>
                 <MpTableCell scope="col">Period</MpTableCell>
+                <MpTableCell scope="col">Action Indicator</MpTableCell>
+                <MpTableCell scope="col">Value</MpTableCell>
                 <MpTableCell scope="col">Status</MpTableCell>
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
               <MpTableRow v-for="row in filteredItems" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.template_name }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   {{ row.period_id.name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  <MpBadge for="tableStatus" :type="row.status === 'Published' ? 'completed' : 'announcement'">
-                    {{ row.status }}
-                  </MpBadge>
+                  {{ row.action_indicator.name }}
+                </MpTableCell>
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                  {{ row.value || '—' }}
+                </MpTableCell>
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                  <MpBadge for="tableStatus" :type="statusBadgeType(row.flow_status)">{{ row.flow_status }}</MpBadge>
                 </MpTableCell>
               </MpTableRow>
             </MpTableBody>
@@ -59,7 +56,7 @@
           object-fit="contain"
           :is-show-loading="false"
         />
-        <MpText size="h3" weight="semiBold">No template released yet</MpText>
+        <MpText size="h3" weight="semiBold">No available yet</MpText>
       </MpFlex>
     </MpFlex>
   </MpFlex>
@@ -71,7 +68,6 @@ import { useRouter } from 'vue-router'
 import {
   MpFlex,
   MpText,
-  MpButton,
   MpImage,
   MpSkeleton,
   MpTable,
@@ -85,32 +81,34 @@ import {
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
-import { useGetGriReleases } from '@/services/gri-release'
+import { useGetReportPlanRealization } from '@/services/report-plan-realization'
 
 const router = useRouter()
 
-const { data, isLoading } = useGetGriReleases()
+const { data, isLoading } = useGetReportPlanRealization()
 const items = computed(() => data.value ?? [])
 
-const filterColumns = [
-  { value: 'template_name', label: 'Template name' },
+const filterColumns = computed(() => [
   { value: 'period_id.name', label: 'Period' },
+  { value: 'action_indicator.name', label: 'Action Indicator' },
   {
-    value: 'status',
+    value: 'flow_status',
     label: 'Status',
-    options: [
-      { value: 'Draft', label: 'Draft' },
-      { value: 'Published', label: 'Published' },
-    ],
+    options: (['draft', 'submitted', 'approved', 'rejected', 'cancelled'] satisfies RealizationFlowStatus[]).map(
+      (s) => ({ value: s, label: s }),
+    ),
   },
-]
+])
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
-function goToCreate() {
-  router.push('/gri-quantitative/detail')
+function statusBadgeType(status: RealizationFlowStatus) {
+  if (status === 'approved') return 'completed'
+  if (status === 'rejected' || status === 'cancelled') return 'critical'
+  if (status === 'submitted') return 'information'
+  return 'announcement'
 }
 
-function goToDetail(row: GriReleaseSummary) {
-  router.push({ path: '/gri-quantitative/detail', query: { id: row.id } })
+function goToDetail(row: RealizationReport) {
+  router.push({ path: '/report-plan-realization/detail', query: { id: row.id } })
 }
 </script>

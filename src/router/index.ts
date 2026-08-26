@@ -33,6 +33,15 @@ import WorkflowConfigurationDetailPage from '@/pages/workflow-configuration/Deta
 import PeriodicNotificationListPage from '@/pages/periodic-notification/ListPage.vue'
 import PeriodicNotificationDetailPage from '@/pages/periodic-notification/DetailPage.vue'
 import GenerateActionPlanLogListPage from '@/pages/generate-action-plan-log/ListPage.vue'
+import SdgAdoptionListPage from '@/pages/sdg-adoption/ListPage.vue'
+import SdgFrameworkListPage from '@/pages/sdg-framework/ListPage.vue'
+import SdgFrameworkDetailPage from '@/pages/sdg-framework/DetailPage.vue'
+import GriQualitativeListPage from '@/pages/gri-qualitative/ListPage.vue'
+import GriQualitativeDetailPage from '@/pages/gri-qualitative/DetailPage.vue'
+import ActionPlanSubmissionListPage from '@/pages/action-plan-submission/ListPage.vue'
+import ActionPlanSubmissionDetailPage from '@/pages/action-plan-submission/DetailPage.vue'
+import ReportPlanRealizationListPage from '@/pages/report-plan-realization/ListPage.vue'
+import ReportPlanRealizationDetailPage from '@/pages/report-plan-realization/DetailPage.vue'
 
 // flat routes, no shared layout wrapper — each page standalone so it can be embedded in another app by route alone
 export const router = createRouter({
@@ -133,5 +142,34 @@ export const router = createRouter({
       meta: { nextTheme: true },
     },
     { path: '/generate-action-plan-log', name: 'generate-action-plan-log', component: GenerateActionPlanLogListPage },
+    { path: '/sdg-adoption', name: 'sdg-adoption', component: SdgAdoptionListPage },
+    { path: '/sdg-framework', name: 'sdg-framework', component: SdgFrameworkListPage },
+    {
+      path: '/sdg-framework/detail',
+      name: 'sdg-framework-detail',
+      component: SdgFrameworkDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/gri-qualitative', name: 'gri-qualitative', component: GriQualitativeListPage },
+    {
+      path: '/gri-qualitative/detail',
+      name: 'gri-qualitative-detail',
+      component: GriQualitativeDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/action-plan-submission', name: 'action-plan-submission', component: ActionPlanSubmissionListPage },
+    {
+      path: '/action-plan-submission/detail',
+      name: 'action-plan-submission-detail',
+      component: ActionPlanSubmissionDetailPage,
+      meta: { nextTheme: true },
+    },
+    { path: '/report-plan-realization', name: 'report-plan-realization', component: ReportPlanRealizationListPage },
+    {
+      path: '/report-plan-realization/detail',
+      name: 'report-plan-realization-detail',
+      component: ReportPlanRealizationDetailPage,
+      meta: { nextTheme: true },
+    },
   ],
 })

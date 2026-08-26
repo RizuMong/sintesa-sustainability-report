@@ -9,8 +9,8 @@
       backgroundColor="background.surface"
     >
       <MpFlex direction="column">
-        <MpText size="label-small" color="text.secondary">Evaluate GRI Quantitative</MpText>
-        <MpText as="h1" size="h1">Requestor</MpText>
+        <MpText size="label-small" color="text.secondary">GRI Submission</MpText>
+        <MpText as="h1" size="h1">Qualitative</MpText>
       </MpFlex>
       <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
     </MpFlex>
@@ -47,9 +47,7 @@
                   {{ row.template_id.name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  <MpBadge for="tableStatus" :type="statusBadgeType[row.flow_status] ?? 'information'">
-                    {{ row.flow_status }}
-                  </MpBadge>
+                  <MpBadge for="tableStatus" :type="statusBadgeType[row.flow_status]">{{ row.flow_status }}</MpBadge>
                 </MpTableCell>
               </MpTableRow>
             </MpTableBody>
@@ -69,7 +67,7 @@
         />
         <MpFlex direction="column" alignItems="center" gap="1">
           <MpText size="h3" weight="semiBold">No submission yet</MpText>
-          <MpText size="label" color="text.secondary">Create your first GRI quantitative submission.</MpText>
+          <MpText size="label" color="text.secondary">Create your first GRI qualitative submission.</MpText>
         </MpFlex>
         <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
       </MpFlex>
@@ -83,36 +81,35 @@
         </MpModalHeader>
         <MpModalBody>
           <MpFlex direction="column" gap="4">
-            <MpFormControl id="new-entity" is-required>
+            <MpFormControl id="create-entity" is-required>
               <MpFormLabel>Entity</MpFormLabel>
-              <MpSelect v-model="form.entityId" placeholder="Select entity" is-full-width>
+              <MpSelect v-model="form.entity_id" is-full-width>
                 <option value="" disabled>Select entity</option>
-                <option v-for="e in entities" :key="e.id" :value="e.id">{{ e.name }}</option>
+                <option v-for="entity in entities" :key="entity.id" :value="entity.id">{{ entity.name }}</option>
               </MpSelect>
             </MpFormControl>
-            <MpFormControl id="new-period" is-required>
+            <MpFormControl id="create-period" is-required>
               <MpFormLabel>Period</MpFormLabel>
-              <MpSelect v-model="form.periodId" placeholder="Select period" is-full-width>
+              <MpSelect v-model="form.period_id" is-full-width>
                 <option value="" disabled>Select period</option>
-                <option v-for="p in periods" :key="p.id" :value="p.id">{{ p.year }}</option>
+                <option v-for="period in periods" :key="period.id" :value="period.id">{{ period.year }}</option>
               </MpSelect>
             </MpFormControl>
-            <MpFormControl id="new-template" is-required>
-              <MpFormLabel>Template</MpFormLabel>
-              <MpSelect v-model="form.templateId" placeholder="Select template" is-full-width>
-                <option value="" disabled>Select template</option>
-                <option v-for="t in publishedTemplates" :key="t.id" :value="t.id">{{ t.template_name }}</option>
-              </MpSelect>
+            <!-- ponytail: no GRI_QUAL template lookup module exists yet (owned by Stream A's
+                 gri-release module, category GRI_QUAL, status Published) — raw id input as a
+                 stand-in until it lands, swap to a MpSelect at merge. -->
+            <MpFormControl id="create-template" is-required>
+              <MpFormLabel>Template ID</MpFormLabel>
+              <MpInput v-model="form.template_id" placeholder="Published GRI_QUAL template id" />
             </MpFormControl>
-            <MpFormErrorMessage v-if="isDuplicate">
-              A submission for this entity, period and template already exists.
-            </MpFormErrorMessage>
           </MpFlex>
         </MpModalBody>
         <MpModalFooter>
           <MpButtonGroup>
             <MpButton variant="ghost" @click="openCreate = false">Cancel</MpButton>
-            <MpButton :is-disabled="!canCreate || isCreating" @click="createSubmission">Create</MpButton>
+            <MpButton :is-disabled="!canCreate || createMutation.isPending.value" @click="createDraft">
+              Save as draft
+            </MpButton>
           </MpButtonGroup>
         </MpModalFooter>
       </MpModalContent>
@@ -147,43 +144,35 @@ import {
   MpModalCloseButton,
   MpFormControl,
   MpFormLabel,
-  MpFormErrorMessage,
+  MpInput,
   MpSelect,
   css,
   toast,
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
+import { useGetGriQualSubmissions, useCreateGriQualSubmission } from '@/services/evaluate-gri-qualitative'
 import { useGetMasterEntity } from '@/services/master-entity'
 import { useGetMasterPeriod } from '@/services/master-period'
-import {
-  useGetRequestorList,
-  useCreateEvaluateGriQuantitative,
-  useGetMasterTemplateQuantitativeOptions,
-  hasDuplicateSubmission,
-} from '@/services/evaluate-gri-quantitative'
 
+// inline status->badge map, per sibling list pages (CLAUDE.md: no shared badge util)
 const statusBadgeType: Record<SubmissionFlowStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
   draft: 'announcement',
   submitted: 'information',
   approved: 'completed',
   rejected: 'critical',
-  cancelled: 'announcement',
+  cancelled: 'critical',
 }
 
 const router = useRouter()
 
-const { data, isLoading } = useGetRequestorList()
+const { data, isLoading } = useGetGriQualSubmissions()
 const items = computed(() => data.value ?? [])
 
 const { data: entityData } = useGetMasterEntity()
 const entities = computed(() => (entityData.value ?? []).filter((e) => e.status === 'Active'))
-
 const { data: periodData } = useGetMasterPeriod()
 const periods = computed(() => (periodData.value ?? []).filter((p) => p.status === 'Active'))
-
-const { data: templateData } = useGetMasterTemplateQuantitativeOptions()
-const publishedTemplates = computed(() => (templateData.value ?? []).filter((t) => t.status === 'Published'))
 
 const filterColumns = computed(() => [
   { value: 'entity_id.name', label: 'Entity' },
@@ -198,41 +187,27 @@ const filterColumns = computed(() => [
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
 const openCreate = ref(false)
-const form = reactive({ entityId: '', periodId: '', templateId: '' })
+const form = reactive({ entity_id: '', period_id: '', template_id: '' })
+const canCreate = computed(() => Boolean(form.entity_id && form.period_id && form.template_id))
 
-// AC-86 — block a duplicate submission for the same entity+period+template while one is in flight
-const isDuplicate = computed(() => {
-  if (!form.entityId || !form.periodId || !form.templateId) return false
-  return hasDuplicateSubmission(items.value, form.entityId, form.periodId, form.templateId)
-})
-const canCreate = computed(
-  () => Boolean(form.entityId && form.periodId && form.templateId) && !isDuplicate.value,
-)
+const createMutation = useCreateGriQualSubmission()
 
-const createMutation = useCreateEvaluateGriQuantitative()
-const isCreating = computed(() => createMutation.isPending.value)
-
-function goToDetail(row: EvaluateGriQuantitativeSummary) {
-  router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: row.id } })
+async function createDraft() {
+  if (!canCreate.value) return
+  const created = await createMutation.mutateAsync({
+    entity_id: form.entity_id,
+    period_id: form.period_id,
+    template_id: form.template_id,
+  })
+  form.entity_id = ''
+  form.period_id = ''
+  form.template_id = ''
+  openCreate.value = false
+  toast.notify({ id: 'gri-qualitative-create-draft', variant: 'success', title: 'Draft created.' })
+  router.push({ path: '/gri-qualitative/detail', query: { id: created.id } })
 }
 
-async function createSubmission() {
-  if (!canCreate.value) return
-  const entity = entities.value.find((e) => e.id === form.entityId)
-  const period = periods.value.find((p) => p.id === form.periodId)
-  const template = publishedTemplates.value.find((t) => t.id === form.templateId)
-  if (!entity || !period || !template) return
-
-  const created = await createMutation.mutateAsync({
-    entity_id: { id: entity.id, name: entity.name },
-    period_id: { id: period.id, name: String(period.year) },
-    template_id: { id: template.id, name: template.template_name },
-  })
-  form.entityId = ''
-  form.periodId = ''
-  form.templateId = ''
-  openCreate.value = false
-  toast.notify({ id: 'evaluate-create', variant: 'success', title: 'Submission created.' })
-  router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: created.id } })
+function goToDetail(row: GriQualSubmission) {
+  router.push({ path: '/gri-qualitative/detail', query: { id: row.id } })
 }
 </script>

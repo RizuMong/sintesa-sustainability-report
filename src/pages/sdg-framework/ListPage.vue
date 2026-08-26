@@ -1,17 +1,13 @@
 <template>
   <MpFlex direction="column" backgroundColor="background.stage" minHeight="100vh">
-    <MpFlex
-      justifyContent="space-between"
-      alignItems="center"
-      paddingX="24px"
-      paddingY="24px"
-      backgroundColor="background.surface"
-    >
-      <MpText as="h1" size="h1">GRI Management</MpText>
-      <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
+    <MpFlex direction="column" paddingX="24px" paddingTop="24px" paddingBottom="8px" backgroundColor="background.surface">
+      <MpFlex justifyContent="space-between" alignItems="center">
+        <MpText as="h1" size="h1">SDG Framework</MpText>
+        <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
+      </MpFlex>
     </MpFlex>
 
-    <MpFlex direction="column" padding="24px" gap="2">
+    <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
       <MpFlex justifyContent="flex-start">
         <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
       </MpFlex>
@@ -25,18 +21,26 @@
           <MpTable>
             <MpTableHead>
               <MpTableRow>
-                <MpTableCell scope="col">Template name</MpTableCell>
-                <MpTableCell scope="col">Period</MpTableCell>
+                <MpTableCell scope="col">SDG</MpTableCell>
+                <MpTableCell scope="col">Impact Type</MpTableCell>
+                <MpTableCell scope="col">Entity Scope</MpTableCell>
+                <MpTableCell scope="col">Rows</MpTableCell>
                 <MpTableCell scope="col">Status</MpTableCell>
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
               <MpTableRow v-for="row in filteredItems" :key="row.id">
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.template_name }}
+                  {{ sdgName(row.sdg_id) }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.period_id.name }}
+                  {{ row.impact_type }}
+                </MpTableCell>
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                  {{ row.is_applied_to_all_entity ? 'All Entities' : `${row.applicable_entity_ids.length} entities` }}
+                </MpTableCell>
+                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                  {{ row.rows.length }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
                   <MpBadge for="tableStatus" :type="row.status === 'Published' ? 'completed' : 'announcement'">
@@ -59,7 +63,7 @@
           object-fit="contain"
           :is-show-loading="false"
         />
-        <MpText size="h3" weight="semiBold">No template released yet</MpText>
+        <MpText size="h3" weight="semiBold">No available yet</MpText>
       </MpFlex>
     </MpFlex>
   </MpFlex>
@@ -85,16 +89,21 @@ import {
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
-import { useGetGriReleases } from '@/services/gri-release'
+import { useGetSdgFrameworks } from '@/services/sdg-framework'
+import { useGetSdgAdoption } from '@/services/sdg-adoption'
 
 const router = useRouter()
 
-const { data, isLoading } = useGetGriReleases()
+const { data, isLoading } = useGetSdgFrameworks()
 const items = computed(() => data.value ?? [])
 
-const filterColumns = [
-  { value: 'template_name', label: 'Template name' },
-  { value: 'period_id.name', label: 'Period' },
+const { data: goals } = useGetSdgAdoption()
+function sdgName(sdgId: string) {
+  return goals.value?.find((g) => g.id === sdgId)?.name ?? sdgId
+}
+
+const filterColumns = computed(() => [
+  { value: 'impact_type', label: 'Impact Type', options: ['Operation Impact', 'Investment Impact'].map((v) => ({ value: v, label: v })) },
   {
     value: 'status',
     label: 'Status',
@@ -103,14 +112,14 @@ const filterColumns = [
       { value: 'Published', label: 'Published' },
     ],
   },
-]
+])
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
 function goToCreate() {
-  router.push('/gri-quantitative/detail')
+  router.push('/sdg-framework/detail')
 }
 
-function goToDetail(row: GriReleaseSummary) {
-  router.push({ path: '/gri-quantitative/detail', query: { id: row.id } })
+function goToDetail(row: SdgFramework) {
+  router.push({ path: '/sdg-framework/detail', query: { id: row.id } })
 }
 </script>
