@@ -15,7 +15,14 @@
       <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
     </MpFlex>
 
-    <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
+    <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="4">
+      <MpFlex gap="4">
+        <SummaryBox label="Draft" :amount="summary.draft" />
+        <SummaryBox label="Awaiting Approval" :amount="summary.awaitingApproval" />
+        <SummaryBox label="Approved" :amount="summary.approved" />
+        <SummaryBox label="Rejected" :amount="summary.rejected" />
+      </MpFlex>
+
       <MpFlex justifyContent="flex-start">
         <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
       </MpFlex>
@@ -154,6 +161,7 @@ import {
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
+import SummaryBox from '@/components/SummaryBox.vue'
 import { useGetMasterEntity } from '@/services/master-entity'
 import { useGetMasterPeriod } from '@/services/master-period'
 import {
@@ -161,6 +169,7 @@ import {
   useCreateEvaluateGriQuantitative,
   useGetMasterTemplateQuantitativeOptions,
   hasDuplicateSubmission,
+  requestorSummary,
 } from '@/services/evaluate-gri-quantitative'
 
 const statusBadgeType: Record<SubmissionFlowStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
@@ -175,6 +184,8 @@ const router = useRouter()
 
 const { data, isLoading } = useGetRequestorList()
 const items = computed(() => data.value ?? [])
+
+const summary = computed(() => requestorSummary(items.value))
 
 const { data: entityData } = useGetMasterEntity()
 const entities = computed(() => (entityData.value ?? []).filter((e) => e.status === 'Active'))

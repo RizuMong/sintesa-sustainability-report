@@ -7,7 +7,12 @@
           <MpButton variant="textLink" as="a" href="#/master-key-indicator-quantitative">
             Master Key Indicator — Quantitative
           </MpButton>
-          <MpText as="h1" size="h1">{{ isEdit ? form.name || 'Edit' : 'Create' }}</MpText>
+          <MpFlex alignItems="center" gap="3">
+            <MpText as="h1" size="h1">{{ isEdit ? form.description || 'Edit' : 'Create' }}</MpText>
+            <MpBadge v-if="isEdit" for="tableStatus" :type="status === 'Active' ? 'completed' : 'announcement'">
+              {{ status }}
+            </MpBadge>
+          </MpFlex>
         </MpFlex>
       </MpFlex>
       <MpButton v-if="isEdit" variant="ghost" left-icon="delete" @click="isConfirmingDelete = true">Delete</MpButton>
@@ -40,13 +45,18 @@
             </MpFormControl>
             <MpFormControl id="mki-code" is-required flex="1">
               <MpFormLabel>Code</MpFormLabel>
-              <MpInput v-model="form.code" placeholder="e.g. 403-9" />
+              <MpSelect v-model="form.code" placeholder="Select code" is-full-width>
+                <option value="" disabled>Select code</option>
+                <option v-for="g in griCodes" :key="g.id" :value="g.gri_code">
+                  {{ g.gri_code }} — {{ g.disclosure_title }}
+                </option>
+              </MpSelect>
             </MpFormControl>
           </MpFlex>
 
-          <MpFormControl id="mki-name" is-required>
-            <MpFormLabel>Name</MpFormLabel>
-            <MpInput v-model="form.name" placeholder="e.g. Work-related Injuries (403-9)" />
+          <MpFormControl id="mki-description" is-required>
+            <MpFormLabel>Description</MpFormLabel>
+            <MpInput v-model="form.description" placeholder="e.g. Work-related Injuries (403-9)" />
           </MpFormControl>
 
           <MpDivider />
@@ -244,8 +254,8 @@
 
     <ConfirmDeleteModal
       :is-open="isConfirmingDelete"
-      title="Delete this?"
-      message="This will set the status to Inactive. It can still be viewed and re-activated."
+      title="Delete this indicator?"
+      message="This permanently removes the indicator schema. This action cannot be undone."
       @close="isConfirmingDelete = false"
       @confirm="confirmDelete"
     />
@@ -253,12 +263,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   MpFlex,
   MpText,
   MpButton,
+  MpBadge,
   MpInput,
   MpSelect,
   MpFormControl,
@@ -282,13 +293,18 @@ import {
   type IconName,
 } from '@mekari/pixel3'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
-import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
-import { masterCategoryApi } from '@/services/master-category.api'
-import { masterUnitApi } from '@/services/master-unit'
-import type { MasterCategory, MkiGriQuantitativeDetail, MkiInputType } from '@/types'
+import {
+  useMkiGriQuantitativeDetail,
+  useCreateMkiGriQuantitative,
+  useUpdateMkiGriQuantitative,
+  useDeleteMkiGriQuantitative,
+} from '@/services/master-key-indicator-quantitative'
+import { useGetMasterCategory } from '@/services/master-category'
+import { useGetMasterGri } from '@/services/master-gri'
+import { useGetMasterUnit } from '@/services/master-unit'
 
 // pixel3 icon set has no percent glyph — PERCENTAGE renders a "%" label instead of an icon
-const inputTypeOptions: { value: MkiInputType; icon?: IconName; label: string }[] = [
+const inputTypeOptions: { value: MkiQuantInputType; icon?: IconName; label: string }[] = [
   { value: 'NUMBER', icon: 'number', label: 'Number' },
   { value: 'TEXT', icon: 'textarea', label: 'Text' },
   { value: 'PERCENTAGE', label: 'Percentage' },
@@ -296,11 +312,11 @@ const inputTypeOptions: { value: MkiInputType; icon?: IconName; label: string }[
   { value: 'YES_NO', icon: 'check', label: 'Yes / No' },
 ]
 
-function inputTypeIcon(type: MkiInputType) {
+function inputTypeIcon(type: MkiQuantInputType) {
   return inputTypeOptions.find((opt) => opt.value === type)?.icon
 }
 
-function inputTypeLabel(type: MkiInputType) {
+function inputTypeLabel(type: MkiQuantInputType) {
   return inputTypeOptions.find((opt) => opt.value === type)?.label ?? type
 }
 
@@ -309,24 +325,36 @@ const router = useRouter()
 
 const id = route.query.id as string | undefined
 const isEdit = computed(() => Boolean(id))
-const isLoading = ref(true)
 const isConfirmingDelete = ref(false)
 
-const categories = ref<MasterCategory[]>([])
-const units = ref<MasterUnit[]>([])
+const { data: categoryData } = useGetMasterCategory()
+const categories = computed(() => categoryData.value ?? [])
+
+const { data: griData } = useGetMasterGri()
+const griCodes = computed(() => (griData.value ?? []).filter((g) => g.status === 'Active'))
+
+const { data: unitData } = useGetMasterUnit()
+const units = computed(() => unitData.value ?? [])
+
+const { data: detail, isLoading: isFetching } = useMkiGriQuantitativeDetail(id)
+const isLoading = computed(() => isEdit.value && isFetching.value)
+// no status field on the endpoint yet — see the ponytail note on MkiGriQuantitative.status
+const status = computed(() => detail.value?.status ?? 'Active')
 
 const form = reactive({
   categoryId: '',
   code: '',
-  name: '',
+  description: '',
   columns: [] as { key: string; name: string }[],
-  metrics: [] as { key: string; name: string; input_type: MkiInputType; unitId: string }[],
+  metrics: [] as { key: string; name: string; input_type: MkiQuantInputType; unitId: string }[],
   rows: [] as { labels: Record<string, string> }[],
 })
 
-const canSave = computed(() => Boolean(form.categoryId && form.code && form.name && form.columns.length))
+const canSave = computed(() =>
+  Boolean(form.categoryId && form.code && form.description && form.columns.length),
+)
 
-// ponytail: naive slugify, no collision handling — fine for a mockup builder
+// ponytail: naive slugify, no collision handling — fine for a schema builder
 function slugify(text: string) {
   return text
     .trim()
@@ -370,54 +398,57 @@ function removeRow(i: number) {
   form.rows.splice(i, 1)
 }
 
-function populateForm(detail: MkiGriQuantitativeDetail) {
-  form.categoryId = detail.category.id
-  form.code = detail.code
-  form.name = detail.name
-  form.columns = detail.columns.map((c) => ({ key: c.key, name: c.name }))
-  form.metrics = detail.metrics.map((m) => ({ key: m.key, name: m.name, input_type: m.input_type, unitId: m.unit?.id ?? '' }))
-  form.rows = detail.rows.map((r) => ({ labels: { ...r.labels } }))
-}
-
-onMounted(async () => {
-  const [{ data: categoryList }, unitList] = await Promise.all([masterCategoryApi.index(), masterUnitApi.getMasterUnit()])
-  categories.value = categoryList
-  units.value = unitList
-
-  if (id) {
-    const detail = (await masterKeyIndicatorQuantitativeApi.index({ id })) as MkiGriQuantitativeDetail | undefined
-    if (!detail) {
-      router.replace('/master-key-indicator-quantitative')
-      return
-    }
-    populateForm(detail)
-  }
-  isLoading.value = false
-})
-
-async function save() {
-  if (!canSave.value) return
-  const payload = {
-    id,
-    category: { id: form.categoryId },
-    code: form.code,
-    name: form.name,
-    columns: form.columns.map((c, i) => ({ key: c.key, name: c.name, sequence: i + 1 })),
-    metrics: form.metrics.map((m, i) => ({
+watch(
+  detail,
+  (next) => {
+    if (!next) return
+    form.categoryId = next.category_id?.id ?? ''
+    form.code = next.code
+    form.description = next.description
+    form.columns = next.columns.map((c) => ({ key: c.key, name: c.name }))
+    form.metrics = next.metrics.map((m) => ({
       key: m.key,
       name: m.name,
       input_type: m.input_type,
-      unit: m.unitId ? { id: m.unitId } : null,
-      sequence: i + 1,
-    })),
+      unitId: m.unit?.id ?? '',
+    }))
+    form.rows = next.rows.map((r) => ({ labels: { ...r.labels } }))
+  },
+  { immediate: true },
+)
+
+const createMutation = useCreateMkiGriQuantitative()
+const updateMutation = useUpdateMkiGriQuantitative()
+const deleteMutation = useDeleteMkiGriQuantitative()
+
+function buildPayload(): MkiGriQuantitativePayload {
+  const category = categories.value.find((c) => c.id === form.categoryId)
+  return {
+    category_id: { id: form.categoryId, name: category?.name ?? '' },
+    code: form.code,
+    description: form.description,
+    columns: form.columns.map((c, i) => ({ key: c.key, name: c.name, sequence: i + 1 })),
+    metrics: form.metrics.map((m, i) => {
+      const unit = units.value.find((u) => u.id === m.unitId)
+      return {
+        key: m.key,
+        name: m.name,
+        input_type: m.input_type,
+        unit: unit ? { id: unit.id, name: unit.name } : null,
+        sequence: i + 1,
+      }
+    }),
     rows: form.rows.map((r, i) => ({ sequence: i + 1, labels: { ...r.labels } })),
   }
+}
 
+async function save() {
+  if (!canSave.value) return
   if (isEdit.value && id) {
-    await masterKeyIndicatorQuantitativeApi.update({ ...payload, id })
+    await updateMutation.mutateAsync({ ...buildPayload(), id })
     toast.notify({ id: 'mki-update', variant: 'success', title: 'Indicator updated.' })
   } else {
-    await masterKeyIndicatorQuantitativeApi.create(payload)
+    await createMutation.mutateAsync(buildPayload())
     toast.notify({ id: 'mki-create', variant: 'success', title: 'Indicator created.' })
   }
   router.push('/master-key-indicator-quantitative')
@@ -425,7 +456,7 @@ async function save() {
 
 async function confirmDelete() {
   if (!id) return
-  await masterKeyIndicatorQuantitativeApi.remove({ id })
+  await deleteMutation.mutateAsync(id)
   isConfirmingDelete.value = false
   router.push('/master-key-indicator-quantitative')
 }

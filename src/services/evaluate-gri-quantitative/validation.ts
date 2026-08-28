@@ -41,3 +41,95 @@ export function latestRejectionNote(approvalLogs: ApprovalLog[]): string | null 
     .sort((a, b) => b.acted_at - a.acted_at)
   return notes[0]?.notes ?? null
 }
+
+// "In flight" is anything that is not one of the four terminal-ish statuses, rather than an exact
+// match on 'submitted' — the live API has been observed to answer 'sent' for the same state (see
+// G1 in docs/sustainability-reporting-portal-open-gaps.md), and isReadOnly() already hedges the
+// same way.
+function isAwaitingApproval(item: EvaluateGriQuantitativeSummary): boolean {
+  return !['draft', 'approved', 'rejected', 'cancelled'].includes(item.flow_status)
+}
+
+// Requestor summary blocks — Draft / Awaiting Approval / Approved / Rejected.
+export function requestorSummary(items: EvaluateGriQuantitativeSummary[]) {
+  const count = (status: SubmissionFlowStatus) => items.filter((i) => i.flow_status === status).length
+  return {
+    draft: count('draft'),
+    awaitingApproval: items.filter(isAwaitingApproval).length,
+    approved: count('approved'),
+    rejected: count('rejected'),
+  }
+}
+
+// Approval summary blocks — Awaiting Approval / Approved by Me / Approved / Rejected.
+// "by me" is matched on the approver's email because that is the only identity the embed token
+// yields (POST /v1/tools/auth, method: decrypt). Rows with no email match simply don't count.
+export function approvalSummary(items: EvaluateGriQuantitativeSummary[], myEmail?: string | null) {
+  const actedByMe = (item: EvaluateGriQuantitativeSummary, action: ApprovalAction) =>
+    Boolean(myEmail) &&
+    item.approval_logs.some((log) =>
+      log.approvers.some((a) => a.action === action && a.user.email.toLowerCase() === myEmail!.toLowerCase()),
+    )
+  return {
+    awaitingApproval: items.filter(isAwaitingApproval).length,
+    approvedByMe: items.filter((i) => actedByMe(i, 'APPROVED')).length,
+    approved: items.filter((i) => i.flow_status === 'approved').length,
+    rejected: items.filter((i) => i.flow_status === 'rejected').length,
+  }
+}
+
+// --- submission matrix cell values -------------------------------------------------------------
+// The Update contract wants one flat `values` entry per (row, metric) cell with the value split
+// across value_number/value_text/value_date by the metric's input_type; the UI holds one plain
+// value per cell instead. These two map between the shapes.
+
+export function rowKey(sequence: number): string {
+  return `row_${sequence}`
+}
+
+export function cellKey(rowSequence: number, metricKey: string): string {
+  return `${rowKey(rowSequence)}:${metricKey}`
+}
+
+export function toSubmissionValue(
+  metric: { key: string; input_type: MkiQuantInputType; unit: { name: string } | null },
+  rowSequence: number,
+  raw: string | number | boolean | null | undefined,
+): EvaluateGriQuantitativeValue {
+  const empty = raw === '' || raw === null || raw === undefined
+  const isNumeric = metric.input_type === 'NUMBER' || metric.input_type === 'PERCENTAGE'
+  const isDate = metric.input_type === 'DATE'
+  return {
+    row_key: rowKey(rowSequence),
+    metric_key: metric.key,
+    value_number: !empty && isNumeric ? Number(raw) : null,
+    value_date: !empty && isDate ? new Date(raw as string | number).getTime() : null,
+    value_text: !empty && !isNumeric && !isDate ? String(raw) : null,
+    unit: metric.unit?.name ?? null,
+  }
+}
+
+// inverse, for seeding the form from whatever the detail endpoint echoes back
+export function fromSubmissionValues(
+  values: EvaluateGriQuantitativeValue[] = [],
+): Record<string, string | number | boolean | null> {
+  const cells: Record<string, string | number | boolean | null> = {}
+  for (const v of values) {
+    cells[`${v.row_key}:${v.metric_key}`] =
+      v.value_number ?? (v.value_date ? new Date(v.value_date).toISOString().slice(0, 10) : null) ?? v.value_text
+  }
+  return cells
+}
+
+// Detail view groups the disclosure items under their category heading, in the order the categories
+// first appear in the response.
+export function groupItemsByCategory(items: EvaluateGriQuantitativeItem[]) {
+  const groups: { id: string; name: string; items: EvaluateGriQuantitativeItem[] }[] = []
+  for (const item of items) {
+    const category = item.category_id ?? { id: 'uncategorized', name: 'Uncategorized' }
+    const group = groups.find((g) => g.id === category.id)
+    if (group) group.items.push(item)
+    else groups.push({ id: category.id, name: category.name, items: [item] })
+  }
+  return groups
+}

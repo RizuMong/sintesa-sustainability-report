@@ -1,7 +1,18 @@
 import { http, unwrap } from '@/lib/http'
 
 // All endpoints confirmed in api/Evaluate GRI - Quantitative/*.yml.
-export { hasDuplicateSubmission, isReadOnly, latestRejectionNote } from './validation'
+export {
+  approvalSummary,
+  cellKey,
+  fromSubmissionValues,
+  groupItemsByCategory,
+  hasDuplicateSubmission,
+  isReadOnly,
+  latestRejectionNote,
+  requestorSummary,
+  rowKey,
+  toSubmissionValue,
+} from './validation'
 
 const evaluateGriQuantitativeApi = {
   async getRequestorList(params: { entity_id?: string; period?: string; template_id?: string } = {}) {

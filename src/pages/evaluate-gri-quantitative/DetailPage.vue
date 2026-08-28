@@ -15,13 +15,14 @@
           </MpFlex>
         </MpFlex>
       </MpFlex>
-      <MpFlex v-if="detail && !readOnly" gap="3">
-        <MpButton v-if="detail.flow_status === 'draft'" variant="ghost" left-icon="delete" @click="isConfirmingDelete = true">
-          Delete
-        </MpButton>
-        <MpButton variant="ghost" :is-disabled="isSaving" @click="save">Save draft</MpButton>
-        <MpButton :is-disabled="!canSubmitForm || isSaving || isSubmitting" @click="submit">Submit</MpButton>
-      </MpFlex>
+      <MpButton
+        v-if="detail && !readOnly && detail.flow_status === 'draft'"
+        variant="ghost"
+        left-icon="delete"
+        @click="isConfirmingDelete = true"
+      >
+        Delete
+      </MpButton>
     </MpFlex>
 
     <MpFlex
@@ -68,48 +69,62 @@
           </MpFormControl>
         </MpFlex>
 
-        <MpFlex v-for="item in matrix" :key="item.id" direction="column" gap="3">
-          <MpText size="h3" weight="semiBold">{{ item.name }}</MpText>
+        <!-- items grouped under their category heading -->
+        <MpFlex v-for="group in groups" :key="group.id" direction="column" gap="4">
+          <MpText size="h2" weight="semiBold">{{ group.name }}</MpText>
 
-          <MpTableContainer>
-            <MpTable>
-              <MpTableHead>
-                <MpTableRow>
-                  <MpTableCell v-for="col in item.columns" :key="col.key" scope="col">{{ col.name }}</MpTableCell>
-                  <MpTableCell scope="col">Value</MpTableCell>
-                </MpTableRow>
-              </MpTableHead>
-              <MpTableBody>
-                <MpTableRow v-for="row in item.rows" :key="row.sequence">
-                  <MpTableCell v-for="col in item.columns" :key="col.key" as="td" scope="row">
-                    {{ row.labels[col.key] }}
-                  </MpTableCell>
-                  <MpTableCell as="td" scope="row">
-                    <DynamicFieldInput
-                      :input_type="item.input_type ?? 'Number'"
-                      :unit="item.unit"
-                      v-model="row.value"
-                      :disabled="readOnly"
-                    />
-                  </MpTableCell>
-                </MpTableRow>
-              </MpTableBody>
-            </MpTable>
-          </MpTableContainer>
+          <MpFlex v-for="item in group.items" :key="item.id" direction="column" gap="3">
+            <MpText size="h3" weight="semiBold">{{ itemTitle(item) }}</MpText>
 
-          <MpFormControl v-if="item.evidence_attachment === 'Required'" :id="`evidence-${item.id}`" is-required>
-            <MpFormLabel>Evidence (pdf, jpg, png, docx, csv — max 4MB)</MpFormLabel>
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png,.docx,.csv"
-              :disabled="readOnly"
-              @change="(e) => onEvidenceChange(item.id, e)"
-            />
-            <MpFormErrorMessage v-if="evidenceErrors[item.id]">{{ evidenceErrors[item.id] }}</MpFormErrorMessage>
-            <MpText v-else-if="evidenceFiles[item.id]" size="label-small" color="text.secondary">
-              {{ evidenceFiles[item.id]?.name }}
-            </MpText>
-          </MpFormControl>
+            <MpTableContainer>
+              <MpTable>
+                <MpTableHead>
+                  <MpTableRow>
+                    <MpTableCell v-for="col in item.columns" :key="col.key" scope="col">{{ col.name }}</MpTableCell>
+                    <MpTableCell v-for="metric in item.metrics" :key="metric.key" scope="col">
+                      {{ metric.name }}
+                    </MpTableCell>
+                  </MpTableRow>
+                </MpTableHead>
+                <MpTableBody>
+                  <MpTableRow v-for="row in item.rows" :key="row.sequence">
+                    <MpTableCell v-for="col in item.columns" :key="col.key" as="td" scope="row">
+                      {{ row.labels[col.key] }}
+                    </MpTableCell>
+                    <MpTableCell v-for="metric in item.metrics" :key="metric.key" as="td" scope="row">
+                      <DynamicFieldInput
+                        :input_type="metric.input_type"
+                        :unit="metric.unit?.name"
+                        :model-value="cells[cellId(item.id, row.sequence, metric.key)]"
+                        :disabled="readOnly"
+                        @update:model-value="(v: string | number | boolean | null) => (cells[cellId(item.id, row.sequence, metric.key)] = v)"
+                      />
+                    </MpTableCell>
+                  </MpTableRow>
+                </MpTableBody>
+              </MpTable>
+            </MpTableContainer>
+
+            <MpFormControl v-if="item.evidence_attachment === 'Required'" :id="`evidence-${item.id}`" is-required>
+              <MpFormLabel>Evidence (pdf, jpg, png, docx, csv — max 4MB)</MpFormLabel>
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.docx,.csv"
+                :disabled="readOnly"
+                @change="(e) => onEvidenceChange(item.id, e)"
+              />
+              <MpFormErrorMessage v-if="evidenceErrors[item.id]">{{ evidenceErrors[item.id] }}</MpFormErrorMessage>
+              <MpText v-else-if="evidenceFiles[item.id]" size="label-small" color="text.secondary">
+                {{ evidenceFiles[item.id]?.name }}
+              </MpText>
+            </MpFormControl>
+          </MpFlex>
+        </MpFlex>
+
+        <!-- actions sit below the form, matching the Officeless submission screen -->
+        <MpFlex v-if="!readOnly" gap="3" paddingTop="2">
+          <MpButton :is-disabled="!canSubmitForm || isSaving || isSubmitting" @click="submit">Submit</MpButton>
+          <MpButton variant="secondary" :is-disabled="isSaving" @click="save">Update</MpButton>
         </MpFlex>
       </MpFlex>
     </MpFlex>
@@ -155,6 +170,10 @@ import {
   useDeleteEvaluateGriQuantitative,
   isReadOnly,
   latestRejectionNote,
+  groupItemsByCategory,
+  fromSubmissionValues,
+  toSubmissionValue,
+  cellKey,
 } from '@/services/evaluate-gri-quantitative'
 
 const statusBadgeType: Record<SubmissionFlowStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
@@ -174,16 +193,30 @@ const { data: detail, isLoading } = useGetEvaluateGriQuantitativeDetail(id)
 const readOnly = computed(() => !detail.value || isReadOnly(detail.value.flow_status))
 const rejectionNote = computed(() => (detail.value ? latestRejectionNote(detail.value.approval_logs) : null))
 
-// local editable copy of the matrix — cloned from the fetched detail so the form doesn't mutate query cache directly
-const matrix = reactive<EvaluateGriQuantitativeItem[]>([])
+const items = computed(() => detail.value?.items ?? [])
+const groups = computed(() => groupItemsByCategory(items.value))
+
+// the API answers no title of its own on an item — see the ponytail note on EvaluateGriQuantitativeItem
+function itemTitle(item: EvaluateGriQuantitativeItem) {
+  return item.description ?? item.name ?? item.code ?? item.parent_id?.name ?? '—'
+}
+
+// one editable cell per (item, row, metric); kept flat and outside the query cache so the form
+// never mutates fetched data in place
+const cells = reactive<Record<string, string | number | boolean | null>>({})
+
+function cellId(itemId: string, rowSequence: number, metricKey: string) {
+  return `${itemId}:${cellKey(rowSequence, metricKey)}`
+}
+
 watch(
-  detail,
+  items,
   (next) => {
-    const cloned = next ? structuredClone(next.items) : []
-    for (const item of cloned) {
-      for (const row of item.rows) row.value ??= null
+    for (const key of Object.keys(cells)) delete cells[key]
+    for (const item of next) {
+      const saved = fromSubmissionValues(item.values)
+      for (const [key, value] of Object.entries(saved)) cells[`${item.id}:${key}`] = value
     }
-    matrix.splice(0, matrix.length, ...cloned)
   },
   { immediate: true },
 )
@@ -208,7 +241,7 @@ function onEvidenceChange(itemId: string, event: Event) {
 }
 
 const canSubmitForm = computed(() =>
-  matrix.every((item) => canSubmitEvidence(item.evidence_attachment ?? 'Optional', Boolean(evidenceFiles[item.id]))),
+  items.value.every((item) => canSubmitEvidence(item.evidence_attachment ?? 'Optional', Boolean(evidenceFiles[item.id]))),
 )
 
 const updateMutation = useUpdateEvaluateGriQuantitative()
@@ -225,7 +258,14 @@ async function save() {
     template_id: detail.value.template_id,
     period_id: detail.value.period_id,
     entity_id: detail.value.entity_id,
-    items: matrix,
+    items: items.value.map((item) => ({
+      item_id: item.id,
+      values: item.rows.flatMap((row) =>
+        item.metrics.map((metric) =>
+          toSubmissionValue(metric, row.sequence, cells[cellId(item.id, row.sequence, metric.key)]),
+        ),
+      ),
+    })),
   })
   toast.notify({ id: 'evaluate-save', variant: 'success', title: 'Draft saved.' })
 }

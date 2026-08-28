@@ -35,11 +35,16 @@ declare global {
   interface EvaluateGriQuantitativeRow {
     labels: Record<string, string>
     sequence: number
-    // ponytail: unconfirmed — the seeded Detail.yml example is an unfilled draft, so no per-row
-    // value field appears in the contract yet. Assumed the backend accepts/echoes it back under
-    // `value` once the requestor fills the matrix in; reconcile the key name if a filled example
-    // surfaces a different one.
-    value?: string | number | boolean | null
+  }
+
+  // one filled cell of the matrix — Update.yml's items[].values[] shape
+  interface EvaluateGriQuantitativeValue {
+    row_key: string
+    metric_key: string
+    value_number: number | null
+    value_text: string | null
+    value_date: number | null
+    unit: string | null
   }
 
   // one disclosure line of the submission matrix (Stream A's GriDisclosure, evaluated for one entity/period)
@@ -50,18 +55,24 @@ declare global {
     created_at: number
     created_by: number
     category_id: Ref2
-    name: string
     parent_id: Ref2
     columns: EvaluateGriQuantitativeColumn[]
+    metrics: MkiQuantMetric[]
     rows: EvaluateGriQuantitativeRow[]
     updated_at: number
     updated_by: number
-    // ponytail: unconfirmed — Detail.yml's item objects carry only name/columns/rows, no
-    // input_type/unit/evidence_attachment. Assumed denormalized onto the item (from the MKI behind
-    // the disclosure) until the backend confirms the join; reconcile at merge if it instead needs a
-    // separate lookup against Stream A's GriDisclosure/MKI record.
-    input_type?: MkiInputType
-    unit?: string | null
+    // ponytail: Detail.yml's item objects carry no title of their own (only category_id/parent_id),
+    // so the heading falls back through description -> name -> code. Drop the fallbacks once the
+    // backend confirms which one it sends.
+    description?: string
+    name?: string
+    code?: string
+    // ponytail: unconfirmed — Detail.yml's seeded example is an unfilled draft, so no saved values
+    // come back on it. Assumed the backend echoes them under the same items[].values[] shape Update
+    // sends; reconcile if a filled example surfaces a different one.
+    values?: EvaluateGriQuantitativeValue[]
+    // ponytail: unconfirmed — no evidence_attachment on the item in the contract. Assumed
+    // denormalized from the MKI behind the disclosure.
     evidence_attachment?: MkiEvidenceAttachment
   }
 
@@ -103,7 +114,7 @@ declare global {
     template_id: Ref2
     period_id: Ref2
     entity_id: Ref2
-    items: EvaluateGriQuantitativeItem[]
+    items: { item_id: string; values: EvaluateGriQuantitativeValue[] }[]
   }
 }
 

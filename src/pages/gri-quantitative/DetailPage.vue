@@ -242,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   MpFlex,
@@ -273,8 +273,7 @@ import {
 import { useGetMasterPeriod } from '@/services/master-period'
 import { useGetMasterGri } from '@/services/master-gri'
 import { useGetMkiGriQualitativeList } from '@/services/mki-gri-qualitative'
-import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
-import type { MkiGriQuantitativeDetail, MkiGriQuantitativeSummary } from '@/types'
+import { useGetMkiGriQuantitativeList } from '@/services/master-key-indicator-quantitative'
 
 const route = useRoute()
 const router = useRouter()
@@ -291,15 +290,15 @@ const griCodes = computed(() => griCodesData.value ?? [])
 // GRI_QUAL indicators — new-shape module, fetched via composable
 const { data: mkiQualData } = useGetMkiGriQualitativeList()
 
-// GRI_QUANT indicators — old shape, still fine to read from per §5 Stream A. No composable exists
-// for it yet, so fetch once like src/pages/master-key-indicator-quantitative/ListPage.vue does.
-const mkiQuantList = ref<MkiGriQuantitativeSummary[]>([])
-masterKeyIndicatorQuantitativeApi.index().then((result) => {
-  mkiQuantList.value = (result as { data: MkiGriQuantitativeSummary[] }).data
-})
+// GRI_QUANT indicators — the index endpoint answers the full record per row, so no second
+// fetch-by-id is needed when one is picked.
+const { data: mkiQuantData } = useGetMkiGriQuantitativeList()
+const mkiQuantList = computed(() => mkiQuantData.value ?? [])
 
 const mkiOptions = computed(() =>
-  form.category === 'GRI_QUAL' ? (mkiQualData.value ?? []) : mkiQuantList.value,
+  form.category === 'GRI_QUAL'
+    ? (mkiQualData.value ?? []).map((m) => ({ id: m.id, name: m.name }))
+    : mkiQuantList.value.map((m) => ({ id: m.id, name: m.description })),
 )
 
 const form = reactive<{
@@ -376,11 +375,8 @@ async function onPickMki(disclosure: GriDisclosure, mkiId: string) {
     return
   }
 
-  const summary = mkiQuantList.value.find((m) => m.id === mkiId)
-  disclosure.mki_name = summary?.name ?? ''
-  const detailRecord = (await masterKeyIndicatorQuantitativeApi.index({ id: mkiId })) as
-    | MkiGriQuantitativeDetail
-    | undefined
+  const detailRecord = mkiQuantList.value.find((m) => m.id === mkiId)
+  disclosure.mki_name = detailRecord?.description ?? ''
   const metric = detailRecord?.metrics[0]
   disclosure.input_type = metric?.input_type ?? ''
   disclosure.unit = metric?.unit?.name ?? ''

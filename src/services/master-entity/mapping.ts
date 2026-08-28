@@ -2,12 +2,14 @@
 // imports — lets master-entity.check.ts exercise it directly under plain `node`, no network/mocking needed.
 
 // ponytail: the real GET /v1/master-entity/index response (api/Master Entity/Index.yml) doesn't match the
-// plan §3 MasterEntity contract 1:1 yet — it has no `name`/`address` fields, uses `code` + uppercase
-// `entity_type` (HOLDING/SUBSIDIARY/BRANCH/BUSINESS_UNIT), and nests parent_entity_id as {id, name}.
-// Mapped onto MasterEntity below: `code` stands in for `name`, `address` has no backend source so
-// defaults to '' — flag both for backend follow-up once real name/address fields exist.
+// plan §3 MasterEntity contract 1:1 yet — it uses uppercase `entity_type`
+// (HOLDING/SUBSIDIARY/BRANCH/BUSINESS_UNIT) and nests parent_entity_id as {id, name}, and `address`
+// has no backend source so it defaults to '' — flag that one for backend follow-up.
+// `name` is the display field everywhere (it is what parent_entity_id/entity_id nest as); `code` is
+// only the fallback for the seeded Index.yml example, which predates the `name` field.
 export interface RawMasterEntity {
   id: string
+  name?: string
   code: string
   entity_type: string
   parent_entity_id?: { id: string; name: string } | string | null
@@ -41,7 +43,7 @@ export function toRow(raw: RawMasterEntity): MasterEntityRow {
     id: raw.id,
     parent_entity_id: parentIdOf(raw),
     parent_entity_name: parentNameOf(raw),
-    name: raw.code,
+    name: raw.name ?? raw.code,
     type: ENTITY_TYPE_MAP[raw.entity_type] ?? (raw.entity_type as EntityType),
     address: '',
     status: raw.status,

@@ -21,7 +21,7 @@
             <MpTableHead>
               <MpTableRow>
                 <MpTableCell scope="col">Code</MpTableCell>
-                <MpTableCell scope="col">Name</MpTableCell>
+                <MpTableCell scope="col">Description</MpTableCell>
                 <MpTableCell scope="col">Category</MpTableCell>
                 <MpTableCell scope="col">Status</MpTableCell>
                 <MpTableCell scope="col">Updated At</MpTableCell>
@@ -33,14 +33,14 @@
                   {{ row.code }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.name }}
+                  {{ row.description }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  {{ row.category.name }}
+                  {{ row.category_id?.name }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
-                  <MpBadge for="tableStatus" :type="row.status === 'Active' ? 'completed' : 'announcement'">
-                    {{ row.status }}
+                  <MpBadge for="tableStatus" :type="(row.status ?? 'Active') === 'Active' ? 'completed' : 'announcement'">
+                    {{ row.status ?? 'Active' }}
                   </MpBadge>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   MpFlex,
@@ -88,23 +88,23 @@ import {
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
-import { masterKeyIndicatorQuantitativeApi } from '@/services/master-key-indicator-quantitative.api'
-import { masterCategoryApi } from '@/services/master-category.api'
-import type { MasterCategory, MkiGriQuantitativeSummary } from '@/types'
+import { useGetMkiGriQuantitativeList } from '@/services/master-key-indicator-quantitative'
+import { useGetMasterCategory } from '@/services/master-category'
 
 const router = useRouter()
 
-const items = ref<MkiGriQuantitativeSummary[]>([])
-const categories = ref<MasterCategory[]>([])
-const isLoading = ref(false)
+const { data, isLoading } = useGetMkiGriQuantitativeList()
+const items = computed(() => data.value ?? [])
+
+const { data: categoryData } = useGetMasterCategory()
 
 const filterColumns = computed(() => [
   { value: 'code', label: 'Code' },
-  { value: 'name', label: 'Name' },
+  { value: 'description', label: 'Description' },
   {
-    value: 'category.name',
+    value: 'category_id.name',
     label: 'Category',
-    options: categories.value.map((c) => ({ value: c.name, label: c.name })),
+    options: (categoryData.value ?? []).map((c) => ({ value: c.name, label: c.name })),
   },
   {
     value: 'status',
@@ -117,27 +117,16 @@ const filterColumns = computed(() => [
 ])
 const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
 
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString('sv-SE')
+// the API answers epoch milliseconds, not an ISO string
+function formatDateTime(value: number) {
+  return value ? new Date(value).toLocaleString('sv-SE') : '—'
 }
-
-async function fetchAll() {
-  isLoading.value = true
-  const result = await masterKeyIndicatorQuantitativeApi.index()
-  items.value = (result as { data: MkiGriQuantitativeSummary[] }).data
-  isLoading.value = false
-}
-
-onMounted(async () => {
-  categories.value = (await masterCategoryApi.index()).data
-  await fetchAll()
-})
 
 function goToCreate() {
   router.push('/master-key-indicator-quantitative/detail')
 }
 
-function goToDetail(row: MkiGriQuantitativeSummary) {
+function goToDetail(row: MkiGriQuantitative) {
   router.push({ path: '/master-key-indicator-quantitative/detail', query: { id: row.id } })
 }
 </script>

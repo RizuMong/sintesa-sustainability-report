@@ -10,11 +10,12 @@ const branch: RawMasterEntity = {
   parent_entity_id: { id: 'e-1', name: 'PT Sintesa Argo' },
   status: 'Active',
 }
-const branchRow = toRow(branch)
+const branchRow = toRow({ ...branch, name: 'PT Sintesa Jakarta' })
 assert.equal(branchRow.parent_entity_id, 'e-1')
 assert.equal(branchRow.parent_entity_name, 'PT Sintesa Argo')
 assert.equal(branchRow.type, 'Branch')
-assert.equal(branchRow.name, 'JKT')
+assert.equal(branchRow.name, 'PT Sintesa Jakarta', 'name is the display field, not code')
+assert.equal(toRow(branch).name, 'JKT', 'falls back to code when the response has no name')
 assert.equal(branchRow.address, '')
 
 // Subsidiary with no parent (AC-06)
