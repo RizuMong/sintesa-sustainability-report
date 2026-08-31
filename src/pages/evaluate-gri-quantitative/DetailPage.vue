@@ -40,91 +40,112 @@
         <MpSkeleton v-for="i in 3" :key="i" height="56px" rounded="md" />
       </MpFlex>
 
-      <MpFlex v-else-if="detail" direction="column" gap="6">
-        <MpFlex
-          v-if="detail.flow_status === 'rejected' && rejectionNote"
-          direction="column"
-          gap="1"
-          padding="16px"
-          backgroundColor="background.surface"
-          borderWidth="1px"
-          borderColor="border.default"
-          rounded="md"
-        >
-          <MpFlex alignItems="center" gap="2">
-            <MpBadge for="tableStatus" type="critical">rejected</MpBadge>
-            <MpText size="label" weight="semiBold">Reviewer note</MpText>
+      <MpFlex v-else-if="detail" gap="6" alignItems="flex-start">
+        <MpFlex direction="column" gap="6" flex="2" minWidth="0">
+          <MpFlex
+            v-if="detail.flow_status === 'rejected' && rejectionNote"
+            direction="column"
+            gap="1"
+            padding="16px"
+            backgroundColor="background.surface"
+            borderWidth="1px"
+            borderColor="border.default"
+            rounded="md"
+          >
+            <MpFlex alignItems="center" gap="2">
+              <MpBadge for="tableStatus" type="critical">rejected</MpBadge>
+              <MpText size="label" weight="semiBold">Reviewer note</MpText>
+            </MpFlex>
+            <MpText size="label">{{ rejectionNote }}</MpText>
           </MpFlex>
-          <MpText size="label">{{ rejectionNote }}</MpText>
-        </MpFlex>
 
-        <MpFlex gap="6">
-          <MpFormControl id="detail-entity" is-disabled flex="1">
-            <MpFormLabel>Entity</MpFormLabel>
-            <MpInput :model-value="detail.entity_id.name" is-disabled />
-          </MpFormControl>
-          <MpFormControl id="detail-period" is-disabled flex="1">
-            <MpFormLabel>Period</MpFormLabel>
-            <MpInput :model-value="String(detail.period_id.name)" is-disabled />
-          </MpFormControl>
-        </MpFlex>
-
-        <!-- items grouped under their category heading -->
-        <MpFlex v-for="group in groups" :key="group.id" direction="column" gap="4">
-          <MpText size="h2" weight="semiBold">{{ group.name }}</MpText>
-
-          <MpFlex v-for="item in group.items" :key="item.id" direction="column" gap="3">
-            <MpText size="h3" weight="semiBold">{{ itemTitle(item) }}</MpText>
-
-            <MpTableContainer>
-              <MpTable>
-                <MpTableHead>
-                  <MpTableRow>
-                    <MpTableCell v-for="col in item.columns" :key="col.key" scope="col">{{ col.name }}</MpTableCell>
-                    <MpTableCell v-for="metric in item.metrics" :key="metric.key" scope="col">
-                      {{ metric.name }}
-                    </MpTableCell>
-                  </MpTableRow>
-                </MpTableHead>
-                <MpTableBody>
-                  <MpTableRow v-for="row in item.rows" :key="row.sequence">
-                    <MpTableCell v-for="col in item.columns" :key="col.key" as="td" scope="row">
-                      {{ row.labels[col.key] }}
-                    </MpTableCell>
-                    <MpTableCell v-for="metric in item.metrics" :key="metric.key" as="td" scope="row">
-                      <DynamicFieldInput
-                        :input_type="metric.input_type"
-                        :unit="metric.unit?.name"
-                        :model-value="cells[cellId(item.id, row.sequence, metric.key)]"
-                        :disabled="readOnly"
-                        @update:model-value="(v: string | number | boolean | null) => (cells[cellId(item.id, row.sequence, metric.key)] = v)"
-                      />
-                    </MpTableCell>
-                  </MpTableRow>
-                </MpTableBody>
-              </MpTable>
-            </MpTableContainer>
-
-            <MpFormControl v-if="item.evidence_attachment === 'Required'" :id="`evidence-${item.id}`" is-required>
-              <MpFormLabel>Evidence (pdf, jpg, png, docx, csv — max 4MB)</MpFormLabel>
-              <input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.docx,.csv"
-                :disabled="readOnly"
-                @change="(e) => onEvidenceChange(item.id, e)"
-              />
-              <MpFormErrorMessage v-if="evidenceErrors[item.id]">{{ evidenceErrors[item.id] }}</MpFormErrorMessage>
-              <MpText v-else-if="evidenceFiles[item.id]" size="label-small" color="text.secondary">
-                {{ evidenceFiles[item.id]?.name }}
-              </MpText>
+          <MpFlex gap="6">
+            <MpFormControl id="detail-entity" is-disabled flex="1">
+              <MpFormLabel>Entity</MpFormLabel>
+              <MpInput :model-value="detail.entity_id.name" is-disabled />
+            </MpFormControl>
+            <MpFormControl id="detail-period" is-disabled flex="1">
+              <MpFormLabel>Period</MpFormLabel>
+              <MpInput :model-value="String(detail.period_id.name)" is-disabled />
             </MpFormControl>
           </MpFlex>
+
+          <!-- items grouped under their category heading -->
+          <MpFlex v-for="group in groups" :key="group.id" direction="column" gap="4">
+            <MpText size="h2" weight="semiBold">{{ group.name }}</MpText>
+
+            <MpFlex v-for="item in group.items" :key="item.id" direction="column" gap="3">
+              <MpText size="h3" weight="semiBold">{{ itemTitle(item) }}</MpText>
+
+              <MpTableContainer>
+                <MpTable>
+                  <MpTableHead>
+                    <MpTableRow>
+                      <MpTableCell v-for="col in item.columns" :key="col.key" scope="col">{{ col.name }}</MpTableCell>
+                      <MpTableCell v-for="metric in item.metrics" :key="metric.key" scope="col">
+                        {{ metric.name }}
+                      </MpTableCell>
+                    </MpTableRow>
+                  </MpTableHead>
+                  <MpTableBody>
+                    <MpTableRow v-for="row in item.rows" :key="row.sequence">
+                      <MpTableCell v-for="col in item.columns" :key="col.key" as="td" scope="row">
+                        {{ row.labels[col.key] }}
+                      </MpTableCell>
+                      <MpTableCell v-for="metric in item.metrics" :key="metric.key" as="td" scope="row">
+                        <DynamicFieldInput
+                          :input_type="metric.input_type"
+                          :unit="metric.unit?.name"
+                          :model-value="cells[cellId(item.id, row.sequence, metric.key)]"
+                          :disabled="readOnly"
+                          @update:model-value="(v: string | number | boolean | null) => (cells[cellId(item.id, row.sequence, metric.key)] = v)"
+                        />
+                      </MpTableCell>
+                    </MpTableRow>
+                  </MpTableBody>
+                </MpTable>
+              </MpTableContainer>
+
+              <MpFormControl v-if="item.evidence_attachment === 'Required'" :id="`evidence-${item.id}`" is-required>
+                <MpFormLabel>Evidence (pdf, jpg, png, docx, csv — max 4MB)</MpFormLabel>
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.docx,.csv"
+                  :disabled="readOnly"
+                  @change="(e) => onEvidenceChange(item.id, e)"
+                />
+                <MpFormErrorMessage v-if="evidenceErrors[item.id]">{{ evidenceErrors[item.id] }}</MpFormErrorMessage>
+                <MpText v-else-if="evidenceFiles[item.id]" size="label-small" color="text.secondary">
+                  {{ evidenceFiles[item.id]?.name }}
+                </MpText>
+              </MpFormControl>
+            </MpFlex>
+          </MpFlex>
+
+          <!-- actions sit below the form, matching the Officeless submission screen -->
+          <MpFlex v-if="!readOnly" gap="3" paddingTop="2">
+            <MpButton :is-disabled="!canSubmitForm || isSaving || isSubmitting" @click="submit">Submit</MpButton>
+            <MpButton variant="secondary" :is-disabled="isSaving" @click="save">Update</MpButton>
+          </MpFlex>
         </MpFlex>
 
-        <!-- actions sit below the form, matching the Officeless submission screen -->
-        <MpFlex v-if="!readOnly" gap="3" paddingTop="2">
-          <MpButton :is-disabled="!canSubmitForm || isSaving || isSubmitting" @click="submit">Submit</MpButton>
-          <MpButton variant="secondary" :is-disabled="isSaving" @click="save">Update</MpButton>
+        <!-- approval line — moved here from the Review & Approval table's inline expand row;
+             read-only fields follow report-plan-realization/DetailPage.vue (MpFormControl + MpText) -->
+        <MpFlex direction="column" gap="6" flex="1" minWidth="0">
+          <MpText as="h2" size="h2" weight="semiBold">Approval line</MpText>
+
+          <MpText v-if="!approvalLogs.length" size="label" color="text.secondary">No approval stages yet.</MpText>
+
+          <MpFormControl v-for="log in approvalLogs" :key="log.stage_order" :id="`approval-stage-${log.stage_order}`">
+            <MpFormLabel>Stage {{ log.stage_order }} · {{ log.approval_type }}</MpFormLabel>
+            <MpFlex direction="column" alignItems="flex-start" gap="1">
+              <MpBadge for="tableStatus" :type="statusBadgeType[log.status] ?? 'information'">{{ log.status }}</MpBadge>
+              <MpText v-for="a in log.approvers" :key="a.user.id" size="label" color="text.secondary">
+                {{ a.user.name }} ({{ a.position.name }}): {{ a.action }}
+                <template v-if="a.notes"> — "{{ a.notes }}"</template>
+              </MpText>
+            </MpFlex>
+          </MpFormControl>
         </MpFlex>
       </MpFlex>
     </MpFlex>
@@ -176,12 +197,17 @@ import {
   cellKey,
 } from '@/services/evaluate-gri-quantitative'
 
-const statusBadgeType: Record<SubmissionFlowStatus, 'announcement' | 'information' | 'completed' | 'critical'> = {
+const statusBadgeType: Partial<
+  Record<SubmissionFlowStatus | ApprovalStageStatus, 'announcement' | 'information' | 'completed' | 'critical'>
+> = {
   draft: 'announcement',
   submitted: 'information',
   approved: 'completed',
   rejected: 'critical',
   cancelled: 'announcement',
+  WAITING_APPROVAL: 'information',
+  APPROVED: 'completed',
+  REJECTED: 'critical',
 }
 
 const route = useRoute()
@@ -191,6 +217,9 @@ const id = computed(() => route.query.id as string | undefined)
 const { data: detail, isLoading } = useGetEvaluateGriQuantitativeDetail(id)
 
 const readOnly = computed(() => !detail.value || isReadOnly(detail.value.flow_status))
+const approvalLogs = computed(() =>
+  [...(detail.value?.approval_logs ?? [])].sort((a, b) => a.stage_order - b.stage_order),
+)
 const rejectionNote = computed(() => (detail.value ? latestRejectionNote(detail.value.approval_logs) : null))
 
 const items = computed(() => detail.value?.items ?? [])
@@ -281,6 +310,6 @@ async function confirmDelete() {
   if (!detail.value) return
   await deleteMutation.mutateAsync(detail.value.id)
   isConfirmingDelete.value = false
-  router.push('/evaluate-gri-quantitative/requestor')
+  router.push(route.query.from === 'approval' ? '/evaluate-gri-quantitative/approval' : '/evaluate-gri-quantitative/requestor')
 }
 </script>

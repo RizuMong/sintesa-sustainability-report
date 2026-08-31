@@ -43,13 +43,14 @@
                     @update:is-checked="(checked: boolean) => toggleRow(row.id, checked)"
                   />
                 </MpTableCell>
-                <MpTableCell v-for="col in columns" :key="col.key" as="td" scope="row">
-                  {{ col.value(row) }}
+                <MpTableCell v-for="(col, i) in columns" :key="col.key" as="td" scope="row">
+                  <MpButton v-if="i === 0" variant="textLink" size="sm" @click="emit('rowClick', row)">
+                    {{ col.value(row) }}
+                  </MpButton>
+                  <template v-else>{{ col.value(row) }}</template>
                 </MpTableCell>
                 <MpTableCell as="td" scope="row">
-                  <MpButton variant="textLink" size="sm" @click="toggleExpand(row.id)">
-                    Stage {{ row.current_stage_order }} — {{ currentStage(row)?.approval_type ?? '—' }}
-                  </MpButton>
+                  Stage {{ row.current_stage_order }} — {{ currentStage(row)?.approval_type ?? '—' }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row">
                   <MpBadge for="tableStatus" :type="statusBadgeType(row.flow_status)">{{ row.flow_status }}</MpBadge>
@@ -76,28 +77,6 @@
                 </MpTableCell>
               </MpTableRow>
 
-              <MpTableRow v-if="expandedId === row.id">
-                <MpTableCell as="td" :col-span="columns.length + 4">
-                  <MpFlex direction="column" gap="2" padding="12px">
-                    <MpText size="label" weight="semiBold">Approval line</MpText>
-                    <MpFlex
-                      v-for="log in [...(row.approval_logs ?? [])].sort((a, b) => a.stage_order - b.stage_order)"
-                      :key="log.stage_order"
-                      direction="column"
-                      gap="1"
-                    >
-                      <MpText size="label">
-                        Stage {{ log.stage_order }} · {{ log.approval_type }} —
-                        <MpBadge for="tableStatus" :type="statusBadgeType(log.status)">{{ log.status }}</MpBadge>
-                      </MpText>
-                      <MpText v-for="a in log.approvers" :key="a.user.id" size="label-small" color="text.secondary">
-                        {{ a.user.name }} ({{ a.position.name }}): {{ a.action }}
-                        <template v-if="a.notes"> — "{{ a.notes }}"</template>
-                      </MpText>
-                    </MpFlex>
-                  </MpFlex>
-                </MpTableCell>
-              </MpTableRow>
             </template>
           </MpTableBody>
         </MpTable>
@@ -197,10 +176,11 @@ const props = defineProps<{
   emptyTitle?: string
 }>()
 
+const emit = defineEmits<{ rowClick: [row: TRow] }>()
+
 const emptyTitle = props.emptyTitle ?? 'No submissions waiting for approval'
 
 const selected = ref<Set<string>>(new Set())
-const expandedId = ref<string | null>(null)
 const rejectTargetId = ref<string | null>(null)
 const rejectNotes = ref('')
 const actingOnId = ref<string | null>(null)
@@ -231,9 +211,6 @@ function statusBadgeType(status: string) {
   return 'information'
 }
 
-function toggleExpand(id: string) {
-  expandedId.value = expandedId.value === id ? null : id
-}
 
 function toggleRow(id: string, checked: boolean) {
   const next = new Set(selected.value)

@@ -33,6 +33,7 @@
         :approve-mutation="approveMutation"
         :reject-mutation="rejectMutation"
         empty-title="No GRI Quantitative submissions waiting for approval"
+        @row-click="onRowClick"
       />
     </MpFlex>
   </MpFlex>
@@ -40,6 +41,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { MpFlex, MpText } from '@mekari/pixel3'
 import ApprovalReviewTable from '@/components/ApprovalReviewTable.vue'
 import SummaryBox from '@/components/SummaryBox.vue'
@@ -53,8 +55,14 @@ import {
 
 // Scoped to GRI Quantitative only — the Qualitative and Action Plan Realization queues have their
 // own portals; this one mirrors the Officeless GRI Quantitative approval screen.
+const router = useRouter()
+
 const { data, isLoading } = useGetApprovalList()
 const items = computed(() => data.value ?? [])
+
+function onRowClick(row: EvaluateGriQuantitativeSummary) {
+  router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: row.id, from: 'approval' } })
+}
 
 const { data: myEmail } = useCurrentUserEmail()
 const summary = computed(() => approvalSummary(items.value, myEmail.value))
