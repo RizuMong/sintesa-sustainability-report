@@ -13,8 +13,6 @@
       </MpBanner>
 
       <MpFlex v-else direction="column" gap="6" width="100%">
-        <MpAvatar id="profile-avatar" :name="profile?.name" size="xl" variant-color="sky" />
-
         <MpFlex direction="column" gap="4">
           <MpFormControl id="profile-name">
             <MpFormLabel>Name</MpFormLabel>
@@ -42,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { MpFlex, MpSkeleton, MpBanner, MpBannerDescription, MpAvatar, MpFormControl, MpFormLabel, MpInput } from '@mekari/pixel3'
+import { MpFlex, MpSkeleton, MpBanner, MpBannerDescription, MpFormControl, MpFormLabel, MpInput } from '@mekari/pixel3'
 import { useGetUserProfile } from '@/services/user-profile'
 
 const { data: profile, isLoading, isError } = useGetUserProfile()
