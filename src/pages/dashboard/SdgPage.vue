@@ -29,12 +29,12 @@
     </MpFlex>
 
     <MpFlex v-else direction="column" padding="24px" gap="6" class="sdg-print-area">
-      <MpFlex gap="4" wrap="wrap">
-        <SummaryBox label="Holding SDG Roadmap" :amount="kpi.holding_sdg_roadmap" />
-        <SummaryBox label="Strategic Alignment %" :amount="`${kpi.strategic_alignment_rate}%`" />
-        <SummaryBox label="Execution Rate (Take)" :amount="`${kpi.execution_rate_take}%`" />
-        <SummaryBox label="Bottom-Up Initiatives" :amount="kpi.bottom_up_initiatives" />
-      </MpFlex>
+      <div :class="css({ display: 'grid', gridTemplateColumns: '4', gap: '4' })">
+        <SummaryBox variant="blue" label="Holding SDG Roadmap" :amount="kpi.holding_sdg_roadmap" />
+        <SummaryBox variant="green" label="Strategic Alignment %" :amount="`${kpi.strategic_alignment_rate}%`" />
+        <SummaryBox variant="orange" label="Execution Rate (Take)" :amount="`${kpi.execution_rate_take}%`" />
+        <SummaryBox variant="gray" label="Bottom-Up Initiatives" :amount="kpi.bottom_up_initiatives" />
+      </div>
 
       <MpFlex direction="column" gap="3">
         <MpText as="h2" size="h3" weight="semiBold">Strategic Action Matrix — Take Rate per SDG</MpText>

@@ -7,7 +7,7 @@ const props = defineProps({
     as: { type: String, default: "div" },
     id: [String, Number],
     isLoading: Boolean,
-    variant: [String, Number],
+    variant: { type: [String, Number], default: "gray" },
     label: { type: [String], default: "Label" },
     labelSrc: String,
     badge: [String, Number],
@@ -38,6 +38,8 @@ const summaryBoxStyle = sva({
         root: {
             display: "flex",
             flexDirection: "column",
+            width: "full",
+            minWidth: "0",
             borderWidth: "1px",
             transition: "all 0.1s ease, box-shadow 0.5s ease",
             rounded: "md",
@@ -58,7 +60,7 @@ const summaryBoxStyle = sva({
             px: "1.5",
             py: "0.5",
             rounded: "16",
-            color: "text.inverse.static",
+            color: "white",
             fontFamily: "body",
             fontWeight: "regular",
             letterSpacing: "normal",
@@ -66,7 +68,7 @@ const summaryBoxStyle = sva({
         },
         bottomContent: {
             position: "relative",
-            bg: "background.neutral",
+            bg: "white",
             roundedBottom: "md",
             width: "full",
         },
@@ -107,29 +109,31 @@ const summaryBoxStyle = sva({
         color: {
             orange: {
                 root: {
-                    "&[data-hoverabale=true]": {
+                    borderColor: "orange.400",
+                    "&[data-hoverable=true]": {
                         _hover: {
-                            borderColor: "border.warning",
+                            borderColor: "orange.700",
                             boxShadow: "lg",
                         },
                     },
                     "&[data-active=true]": {
-                        borderColor: "border.warning",
-                    },
-                    "&[data-active=false]": {
-                        borderColor: "border.warning",
+                        borderColor: "orange.700",
                     },
                 },
                 topContent: {
-                    bg: "background.warning",
+                    bg: "orange.50",
+                    color: "orange.700",
+                    // borderBottomWidth: "1px",
+                    borderBottomColor: "orange.400",
                 },
                 badge: {
-                    bg: "background.warning.bold",
+                    bg: "orange.500",
                 },
             },
             green: {
                 root: {
-                    "&[data-hoverabale=true]": {
+                    borderColor: "green.400",
+                    "&[data-hoverable=true]": {
                         _hover: {
                             borderColor: "green.700",
                             boxShadow: "lg",
@@ -138,20 +142,21 @@ const summaryBoxStyle = sva({
                     "&[data-active=true]": {
                         borderColor: "green.700",
                     },
-                    "&[data-active=false]": {
-                        borderColor: "orange.400",
-                    },
                 },
                 topContent: {
-                    bg: "background.success",
+                    bg: "green.50",
+                    color: "green.700",
+                    // borderBottomWidth: "1px",
+                    borderBottomColor: "green.400",
                 },
                 badge: {
-                    bg: "background.success.bold",
+                    bg: "green.500",
                 },
             },
             red: {
                 root: {
-                    "&[data-hoverabale=true]": {
+                    borderColor: "red.400",
+                    "&[data-hoverable=true]": {
                         _hover: {
                             borderColor: "red.700",
                             boxShadow: "lg",
@@ -160,20 +165,21 @@ const summaryBoxStyle = sva({
                     "&[data-active=true]": {
                         borderColor: "red.700",
                     },
-                    "&[data-active=false]": {
-                        borderColor: "red.400",
-                    },
                 },
                 topContent: {
-                    bg: "background.danger",
+                    bg: "red.50",
+                    color: "red.700",
+                    // borderBottomWidth: "1px",
+                    borderBottomColor: "red.400",
                 },
                 badge: {
-                    bg: "background.danger.bold",
+                    bg: "red.500",
                 },
             },
             blue: {
                 root: {
-                    "&[data-hoverabale=true]": {
+                    borderColor: "blue.400",
+                    "&[data-hoverable=true]": {
                         _hover: {
                             borderColor: "blue.700",
                             boxShadow: "lg",
@@ -182,20 +188,21 @@ const summaryBoxStyle = sva({
                     "&[data-active=true]": {
                         borderColor: "blue.700",
                     },
-                    "&[data-active=false]": {
-                        borderColor: "blue.400",
-                    },
                 },
                 topContent: {
-                    bg: "background.brand",
+                    bg: "blue.50",
+                    color: "blue.700",
+                    // borderBottomWidth: "1px",
+                    borderBottomColor: "blue.400",
                 },
                 badge: {
-                    bg: "background.brand.bold",
+                    bg: "blue.500",
                 },
             },
             gray: {
                 root: {
-                    "&[data-hoverabale=true]": {
+                    borderColor: "gray.100",
+                    "&[data-hoverable=true]": {
                         _hover: {
                             borderColor: "gray.400",
                             boxShadow: "lg",
@@ -204,15 +211,15 @@ const summaryBoxStyle = sva({
                     "&[data-active=true]": {
                         borderColor: "gray.400",
                     },
-                    "&[data-active=false]": {
-                        borderColor: "gray.100",
-                    },
                 },
                 topContent: {
-                    bg: "background.neutral.subtle",
+                    bg: "gray.50",
+                    color: "gray.600",
+                    // borderBottomWidth: "1px",
+                    borderBottomColor: "gray.100",
                 },
                 badge: {
-                    bg: "background.neutral.bold",
+                    bg: "gray.600",
                 },
             },
         },
@@ -232,13 +239,25 @@ const {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     color: props.variant as any,
 });
+
+// MpText sets its own color class, so the label can't inherit the tinted
+// header's color — hand it the matching token explicitly.
+const labelColor =
+    {
+        orange: "orange.700",
+        green: "green.700",
+        red: "red.700",
+        blue: "blue.700",
+        gray: "gray.600",
+    }[String(props.variant)] ?? "gray.600";
 </script>
 
 <template>
     <component
         :is="props.as"
         data-slot="root"
-        data-active="true"
+        :data-active="props.isActive"
+        :data-hoverable="props.isHoverable || undefined"
         :class="['group', root]"
         :style="{
             cursor: props.isHoverable || props.isFilter ? 'pointer' : '',
@@ -257,7 +276,11 @@ const {
 
                 <div v-else>
                     <MpTooltip :label="label">
-                        <MpText weight="semiBold" isTruncated>
+                        <MpText
+                            weight="semiBold"
+                            :color="labelColor"
+                            isTruncated
+                        >
                             {{ label }}
                         </MpText>
                     </MpTooltip>

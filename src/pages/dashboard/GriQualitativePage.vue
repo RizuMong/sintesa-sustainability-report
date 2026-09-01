@@ -31,11 +31,11 @@
     <MpFlex v-else direction="column" padding="24px" gap="6">
       <MpText size="label" color="text.secondary">Menampilkan: {{ filterState.activeFilterLabel.value }}</MpText>
 
-      <MpFlex gap="4">
-        <SummaryBox label="Total narasi" :amount="narratives.length" />
-        <SummaryBox label="Sudah diisi" :amount="answeredCount" />
-        <SummaryBox label="Belum diisi" :amount="narratives.length - answeredCount" />
-      </MpFlex>
+      <div :class="css({ display: 'grid', gridTemplateColumns: '3', gap: '4' })">
+        <SummaryBox variant="blue" label="Total narasi" :amount="narratives.length" :badge="narratives.length" />
+        <SummaryBox variant="green" label="Sudah diisi" :amount="answeredCount" :badge="answeredCount" />
+        <SummaryBox variant="orange" label="Belum diisi" :amount="narratives.length - answeredCount" :badge="narratives.length - answeredCount" />
+      </div>
 
       <MpFlex gap="4" wrap="wrap">
         <MpChart
@@ -107,6 +107,7 @@ import {
   MpTableCell,
   MpTableContainer,
   MpBadge,
+  css,
 } from '@mekari/pixel3'
 import SummaryBox from '@/components/SummaryBox.vue'
 import { useGriQualitativeInsight, useStrategicInsightFilterState } from '@/services/strategic-insight'

@@ -49,9 +49,16 @@
       <MpText size="label" color="text.secondary">Menampilkan: {{ filterState.activeFilterLabel.value }}</MpText>
 
       <template v-if="activeTabMetrics.length">
-        <MpFlex gap="4" wrap="wrap">
-          <SummaryBox v-for="metric in activeTabMetrics" :key="metric.gri_code" :label="`${metric.title} (${metric.gri_code})`" :amount="formatMetricValue(metric)" />
-        </MpFlex>
+        <div :class="css({ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '4' })">
+          <SummaryBox
+            v-for="(metric, i) in activeTabMetrics"
+            :key="metric.gri_code"
+            :variant="metricVariants[i % metricVariants.length]"
+            :label="`${metric.title} (${metric.gri_code})`"
+            :caption="metric.gri_code"
+            :amount="formatMetricValue(metric)"
+          />
+        </div>
 
         <MpFlex v-if="activeTab === 'general' && generalComparisonMetric" direction="column" gap="3">
           <MpText as="h2" size="h3" weight="semiBold">Perbandingan antar PT — {{ generalComparisonMetric.title }}</MpText>
@@ -95,8 +102,11 @@ import {
   MpImage,
   MpButton,
   MpButtonGroup,
+  css,
 } from '@mekari/pixel3'
 import SummaryBox from '@/components/SummaryBox.vue'
+
+const metricVariants = ['blue', 'green', 'orange', 'gray'] as const
 import { aggregateMetricRows, useGriQuantitativeInsight, useStrategicInsightFilterState } from '@/services/strategic-insight'
 
 type TabKey = 'general' | 'energy' | 'waste' | 'water' | 'diversity' | 'employment' | 'ohs' | 'training'

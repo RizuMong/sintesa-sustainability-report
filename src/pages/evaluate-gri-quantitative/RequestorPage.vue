@@ -16,7 +16,7 @@
     </MpFlex>
 
     <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="4">
-      <MpFlex gap="4">
+      <div :class="css({ display: 'grid', gridTemplateColumns: '4', gap: '4' })">
         <SummaryBox
           variant="gray"
           label="Draft"
@@ -45,7 +45,7 @@
           :badge="summary.rejected"
           :is-loading="isLoading"
         />
-      </MpFlex>
+      </div>
 
       <MpFlex justifyContent="flex-start">
         <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />

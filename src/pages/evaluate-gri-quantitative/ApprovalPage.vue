@@ -14,7 +14,7 @@
     </MpFlex>
 
     <MpFlex direction="column" padding="24px" gap="4">
-      <MpFlex gap="4">
+      <div :class="css({ display: 'grid', gridTemplateColumns: '4', gap: '4' })">
         <SummaryBox
           variant="orange"
           label="Awaiting Approval"
@@ -43,7 +43,7 @@
           :badge="summary.rejected"
           :is-loading="isLoading"
         />
-      </MpFlex>
+      </div>
 
       <!-- ponytail: isFilter/isActive card-as-filter affordance from the SummaryBox port isn't wired
            here — filtering lives in TableFilter below instead. -->
@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { MpFlex, MpText } from '@mekari/pixel3'
+import { MpFlex, MpText, css } from '@mekari/pixel3'
 import ApprovalReviewTable from '@/components/ApprovalReviewTable.vue'
 import SummaryBox from '@/components/SummaryBox.vue'
 import TableFilter from '@/components/TableFilter.vue'
