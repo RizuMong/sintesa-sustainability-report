@@ -38,11 +38,15 @@ const evaluateGriQuantitativeApi = {
   async cancel(id: string) {
     return unwrap<Partial<EvaluateGriQuantitative>>(http.post('/v1/evaluate-gri-quantitative/cancel', { id }))
   },
-  async approve(id: string, remarks?: string) {
-    return unwrap<Record<string, never>>(http.post('/v1/evaluate-gri-quantitative/approve', { id, remarks }))
+  async approve(id: string, remarks?: string, silentToast = false) {
+    return unwrap<Record<string, never>>(
+      http.post('/v1/evaluate-gri-quantitative/approve', { id, remarks }, { meta: { silentToast } }),
+    )
   },
-  async reject(id: string, remarks: string) {
-    return unwrap<Record<string, never>>(http.post('/v1/evaluate-gri-quantitative/reject', { id, remarks }))
+  async reject(id: string, remarks: string, silentToast = false) {
+    return unwrap<Record<string, never>>(
+      http.post('/v1/evaluate-gri-quantitative/reject', { id, remarks }, { meta: { silentToast } }),
+    )
   },
   async remove(id: string) {
     return unwrap<Record<string, never>>(http.delete('/v1/evaluate-gri-quantitative/delete', { params: { id } }))

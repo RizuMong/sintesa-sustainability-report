@@ -14,6 +14,9 @@ importers:
       '@mekari/pixel3-postcss':
         specifier: ^1.0.14
         version: 1.0.14(typescript@6.0.3)
+      '@mekari/pixel3-styled-system':
+        specifier: ^0.3.1
+        version: 0.3.1
       '@mekari/pixel3-utils':
         specifier: 0.1.0
         version: 0.1.0(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))
@@ -461,6 +464,9 @@ packages:
 
   '@mekari/pixel3-styled-system@0.3.0':
     resolution: {integrity: sha512-DDm/VSHJR/PDMhd/zRenv7626CwlUbankIVUu3JhH55e7cdT8AYB841Ie5XBSbOID8ZkEPYLp8M6Sk9zrpH61g==}
+
+  '@mekari/pixel3-styled-system@0.3.1':
+    resolution: {integrity: sha512-OgPazbQUaSp+gsnUiI0mpEPWCSOF3Y5zoLuTFOfC+vSSLF+SAylckXd96pTbj5m0DRXdZMFjPWuiNogyoEId9Q==}
 
   '@mekari/pixel3-table@0.0.24':
     resolution: {integrity: sha512-RbhNYzecnootTL0vNpnrkZhXDb7BwMV5BNuUREb4utq5PMwrA1MznxxpM3B/rbxx9EqozSj7VXcO49JWQo7gTQ==}
@@ -3325,6 +3331,8 @@ snapshots:
       - universal-cookie
 
   '@mekari/pixel3-styled-system@0.3.0': {}
+
+  '@mekari/pixel3-styled-system@0.3.1': {}
 
   '@mekari/pixel3-table@0.0.24(axios@1.19.0)(vue@3.5.41(typescript@6.0.3))':
     dependencies:

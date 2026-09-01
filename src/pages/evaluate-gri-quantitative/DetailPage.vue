@@ -68,6 +68,10 @@
               <MpFormLabel>Period</MpFormLabel>
               <MpInput :model-value="String(detail.period_id.name)" is-disabled />
             </MpFormControl>
+            <MpFormControl id="detail-template" is-disabled flex="1">
+              <MpFormLabel>Template</MpFormLabel>
+              <MpInput :model-value="detail.template_id.name" is-disabled />
+            </MpFormControl>
           </MpFlex>
 
           <!-- items grouped under their category heading -->
@@ -136,16 +140,26 @@
 
           <MpText v-if="!approvalLogs.length" size="label" color="text.secondary">No approval stages yet.</MpText>
 
-          <MpFormControl v-for="log in approvalLogs" :key="log.stage_order" :id="`approval-stage-${log.stage_order}`">
-            <MpFormLabel>Stage {{ log.stage_order }} · {{ log.approval_type }}</MpFormLabel>
-            <MpFlex direction="column" alignItems="flex-start" gap="1">
-              <MpBadge for="tableStatus" :type="statusBadgeType[log.status] ?? 'information'">{{ log.status }}</MpBadge>
-              <MpText v-for="a in log.approvers" :key="a.user.id" size="label" color="text.secondary">
-                {{ a.user.name }} ({{ a.position.name }}): {{ a.action }}
-                <template v-if="a.notes"> — "{{ a.notes }}"</template>
-              </MpText>
-            </MpFlex>
-          </MpFormControl>
+          <MpTimeline v-else>
+            <MpTimelineItem
+              v-for="log in approvalLogs"
+              :key="log.stage_order"
+              :status="timelineStatus[log.status] ?? 'next'"
+            >
+              <MpTimelineTitle>
+                <MpText weight="semiBold">Stage {{ log.stage_order }} · {{ log.approval_type }}</MpText>
+              </MpTimelineTitle>
+              <MpTimelineCaption v-if="formatDecidedAt(log)">{{ formatDecidedAt(log) }}</MpTimelineCaption>
+              <MpTimelineContent>
+                <MpText v-for="a in log.approvers" :key="a.user.id">
+                  <MpText as="span" weight="semiBold">{{ a.action }}</MpText>
+                  <MpText as="span" color="text.secondary" weight="regular"> by </MpText>
+                  {{ a.user.name }} ({{ a.position.name }})
+                  <template v-if="a.notes"> — "{{ a.notes }}"</template>
+                </MpText>
+              </MpTimelineContent>
+            </MpTimelineItem>
+          </MpTimeline>
         </MpFlex>
       </MpFlex>
     </MpFlex>
@@ -179,7 +193,11 @@ import {
   MpTableRow,
   MpTableCell,
   MpTableContainer,
-  toast,
+  MpTimeline,
+  MpTimelineItem,
+  MpTimelineTitle,
+  MpTimelineCaption,
+  MpTimelineContent,
 } from '@mekari/pixel3'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
 import DynamicFieldInput from '@/components/DynamicFieldInput.vue'
@@ -208,6 +226,20 @@ const statusBadgeType: Partial<
   WAITING_APPROVAL: 'information',
   APPROVED: 'completed',
   REJECTED: 'critical',
+}
+
+const timelineStatus: Partial<
+  Record<ApprovalStageStatus, 'approved' | 'canceled' | 'need-approval' | 'rejected' | 'created' | 'submitted' | 'next'>
+> = {
+  WAITING_APPROVAL: 'need-approval',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+}
+
+function formatDecidedAt(log: ApprovalLog) {
+  const acted = log.approvers.map((a) => a.acted_at).filter((v): v is number => v != null)
+  const value = log.decided_at ?? (acted.length ? Math.max(...acted) : null)
+  return value ? new Date(value).toLocaleString('sv-SE') : null
 }
 
 const route = useRoute()
@@ -296,14 +328,12 @@ async function save() {
       ),
     })),
   })
-  toast.notify({ id: 'evaluate-save', variant: 'success', title: 'Draft saved.' })
 }
 
 async function submit() {
   if (!detail.value || !canSubmitForm.value) return
   await save()
   await submitMutation.mutateAsync(detail.value.id)
-  toast.notify({ id: 'evaluate-submit', variant: 'success', title: 'Submission sent for approval.' })
 }
 
 async function confirmDelete() {

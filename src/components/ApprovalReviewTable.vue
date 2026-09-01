@@ -1,12 +1,17 @@
 <template>
   <MpFlex direction="column" gap="3">
-    <MpFlex justifyContent="space-between" alignItems="center">
+    <MpFlex v-if="selected.size" justifyContent="space-between" alignItems="center">
       <MpText size="label" color="text.secondary">
         {{ selected.size }} selected
       </MpText>
-      <MpButton :is-disabled="!selected.size || isBulkApproving" :is-loading="isBulkApproving" @click="bulkApprove">
-        Bulk Approve
-      </MpButton>
+      <MpButtonGroup>
+        <MpButton :is-disabled="isBulkApproving" :is-loading="isBulkApproving" @click="bulkApprove">
+          Bulk Approve
+        </MpButton>
+        <MpButton variant="danger" :is-disabled="isBulkApproving" @click="openBulkReject">
+          Bulk Reject
+        </MpButton>
+      </MpButtonGroup>
     </MpFlex>
 
     <MpFlex v-if="isLoading" direction="column" gap="2">
@@ -28,14 +33,12 @@
               </MpTableCell>
               <MpTableCell v-for="col in columns" :key="col.key" scope="col">{{ col.label }}</MpTableCell>
               <MpTableCell scope="col">Approval Stage</MpTableCell>
-              <MpTableCell scope="col">Status</MpTableCell>
-              <MpTableCell scope="col">Actions</MpTableCell>
             </MpTableRow>
           </MpTableHead>
           <MpTableBody>
             <template v-for="row in items" :key="row.id">
-              <MpTableRow>
-                <MpTableCell as="td" scope="row">
+              <MpTableRow :class="css({ cursor: 'pointer' })" @click="emit('rowClick', row)">
+                <MpTableCell as="td" scope="row" @click.stop>
                   <MpCheckbox
                     :id="`select-${row.id}`"
                     :is-checked="selected.has(row.id)"
@@ -43,37 +46,11 @@
                     @update:is-checked="(checked: boolean) => toggleRow(row.id, checked)"
                   />
                 </MpTableCell>
-                <MpTableCell v-for="(col, i) in columns" :key="col.key" as="td" scope="row">
-                  <MpButton v-if="i === 0" variant="textLink" size="sm" @click="emit('rowClick', row)">
-                    {{ col.value(row) }}
-                  </MpButton>
-                  <template v-else>{{ col.value(row) }}</template>
+                <MpTableCell v-for="col in columns" :key="col.key" as="td" scope="row">
+                  {{ col.value(row) }}
                 </MpTableCell>
                 <MpTableCell as="td" scope="row">
                   Stage {{ row.current_stage_order }} — {{ currentStage(row)?.approval_type ?? '—' }}
-                </MpTableCell>
-                <MpTableCell as="td" scope="row">
-                  <MpBadge for="tableStatus" :type="statusBadgeType(row.flow_status)">{{ row.flow_status }}</MpBadge>
-                </MpTableCell>
-                <MpTableCell as="td" scope="row">
-                  <MpButtonGroup>
-                    <MpButton
-                      size="sm"
-                      :is-disabled="!isActionable(row) || isRowBusy(row.id)"
-                      :is-loading="approveMutation.isPending.value && actingOnId === row.id"
-                      @click="approveOne(row.id)"
-                    >
-                      Approve
-                    </MpButton>
-                    <MpButton
-                      variant="danger"
-                      size="sm"
-                      :is-disabled="!isActionable(row) || isRowBusy(row.id)"
-                      @click="openReject(row.id)"
-                    >
-                      Reject
-                    </MpButton>
-                  </MpButtonGroup>
                 </MpTableCell>
               </MpTableRow>
 
@@ -96,7 +73,7 @@
       <MpText size="h3" weight="semiBold">{{ emptyTitle }}</MpText>
     </MpFlex>
 
-    <MpModal :is-open="rejectTargetId !== null" size="md" @close="closeReject">
+    <MpModal :is-open="rejectTargetIds.length > 0" size="md" @close="closeReject">
       <MpModalContent>
         <MpModalHeader>
           Reject submission
@@ -113,8 +90,8 @@
             <MpButton variant="ghost" @click="closeReject">Cancel</MpButton>
             <MpButton
               variant="danger"
-              :is-disabled="!canReject(rejectNotes) || rejectMutation.isPending.value"
-              :is-loading="rejectMutation.isPending.value"
+              :is-disabled="!canReject(rejectNotes) || isBulkRejecting"
+              :is-loading="isBulkRejecting"
               @click="confirmReject"
             >
               Reject
@@ -134,7 +111,6 @@ import {
   MpText,
   MpButton,
   MpButtonGroup,
-  MpBadge,
   MpImage,
   MpSkeleton,
   MpCheckbox,
@@ -154,6 +130,7 @@ import {
   MpFormControl,
   MpFormLabel,
   MpTextarea,
+  css,
   toast,
 } from '@mekari/pixel3'
 import { canReject, selectableApprovalIds } from '@/lib/review-approval-validation'
@@ -171,8 +148,8 @@ const props = defineProps<{
   items: TRow[]
   isLoading: boolean
   columns: { key: string; label: string; value: (row: TRow) => string | number }[]
-  approveMutation: { mutateAsync: (payload: { id: string; remarks?: string }) => Promise<unknown>; isPending: { value: boolean } }
-  rejectMutation: { mutateAsync: (payload: { id: string; remarks: string }) => Promise<unknown>; isPending: { value: boolean } }
+  approveMutation: { mutateAsync: (payload: { id: string; remarks?: string; silentToast?: boolean }) => Promise<unknown>; isPending: { value: boolean } }
+  rejectMutation: { mutateAsync: (payload: { id: string; remarks: string; silentToast?: boolean }) => Promise<unknown>; isPending: { value: boolean } }
   emptyTitle?: string
 }>()
 
@@ -181,10 +158,10 @@ const emit = defineEmits<{ rowClick: [row: TRow] }>()
 const emptyTitle = props.emptyTitle ?? 'No submissions waiting for approval'
 
 const selected = ref<Set<string>>(new Set())
-const rejectTargetId = ref<string | null>(null)
+const rejectTargetIds = ref<string[]>([])
 const rejectNotes = ref('')
-const actingOnId = ref<string | null>(null)
 const isBulkApproving = ref(false)
+const isBulkRejecting = ref(false)
 
 const selectableIds = computed(() => selectableApprovalIds(props.items))
 const allSelectableSelected = computed(
@@ -195,22 +172,9 @@ function isActionable(row: ApprovableRow) {
   return selectableIds.value.includes(row.id)
 }
 
-function isRowBusy(id: string) {
-  return actingOnId.value === id && (props.approveMutation.isPending.value || props.rejectMutation.isPending.value)
-}
-
 function currentStage(row: ApprovableRow) {
   return (row.approval_logs ?? []).find((log) => log.stage_order === row.current_stage_order)
 }
-
-// inline per component, per CLAUDE.md's "don't build a shared badge util" convention
-function statusBadgeType(status: string) {
-  if (status === 'approved' || status === 'APPROVED') return 'completed'
-  if (status === 'rejected' || status === 'REJECTED') return 'announcement'
-  if (status === 'draft') return 'warning'
-  return 'information'
-}
-
 
 function toggleRow(id: string, checked: boolean) {
   const next = new Set(selected.value)
@@ -223,26 +187,15 @@ function toggleSelectAll(checked: boolean) {
   selected.value = checked ? new Set(selectableIds.value) : new Set()
 }
 
-async function approveOne(id: string) {
-  actingOnId.value = id
-  try {
-    await props.approveMutation.mutateAsync({ id })
-    toast.notify({ id: `approve-${id}`, variant: 'success', title: 'Approved.' })
-    selected.value.delete(id)
-  } finally {
-    actingOnId.value = null
-  }
-}
-
-// AC-62 — bulk approve is one mutation call per selected row; each mutation's own onSuccess already
-// invalidates the list query on settle (see the module's composables.ts).
+// AC-62 — bulk approve/reject are one mutation call per selected row; each mutation's own onSuccess
+// already invalidates the list query on settle (see the module's composables.ts).
 async function bulkApprove() {
   const ids = Array.from(selected.value)
   if (!ids.length) return
   isBulkApproving.value = true
   try {
     for (const id of ids) {
-      await props.approveMutation.mutateAsync({ id })
+      await props.approveMutation.mutateAsync({ id, silentToast: true })
     }
     toast.notify({ id: 'bulk-approve', variant: 'success', title: `Approved ${ids.length} submission(s).` })
     selected.value = new Set()
@@ -251,27 +204,30 @@ async function bulkApprove() {
   }
 }
 
-function openReject(id: string) {
-  rejectTargetId.value = id
+function openBulkReject() {
+  rejectTargetIds.value = Array.from(selected.value)
   rejectNotes.value = ''
 }
 
 function closeReject() {
-  rejectTargetId.value = null
+  rejectTargetIds.value = []
   rejectNotes.value = ''
 }
 
 async function confirmReject() {
-  const id = rejectTargetId.value
-  if (!id || !canReject(rejectNotes.value)) return
-  actingOnId.value = id
+  const ids = rejectTargetIds.value
+  if (!ids.length || !canReject(rejectNotes.value)) return
+  isBulkRejecting.value = true
   try {
-    await props.rejectMutation.mutateAsync({ id, remarks: rejectNotes.value.trim() })
-    toast.notify({ id: `reject-${id}`, variant: 'success', title: 'Rejected.' })
-    selected.value.delete(id)
+    const remarks = rejectNotes.value.trim()
+    for (const id of ids) {
+      await props.rejectMutation.mutateAsync({ id, remarks, silentToast: true })
+    }
+    toast.notify({ id: 'bulk-reject', variant: 'success', title: `Rejected ${ids.length} submission(s).` })
+    selected.value = new Set()
     closeReject()
   } finally {
-    actingOnId.value = null
+    isBulkRejecting.value = false
   }
 }
 </script>

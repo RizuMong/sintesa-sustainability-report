@@ -80,8 +80,8 @@ export function useDeleteEvaluateGriQuantitative() {
 export function useApproveEvaluateGriQuantitative() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: { id: string; remarks?: string }) =>
-      evaluateGriQuantitativeApi.approve(payload.id, payload.remarks),
+    mutationFn: (payload: { id: string; remarks?: string; silentToast?: boolean }) =>
+      evaluateGriQuantitativeApi.approve(payload.id, payload.remarks, payload.silentToast),
     onSuccess: () => invalidateLists(queryClient),
   })
 }
@@ -89,8 +89,8 @@ export function useApproveEvaluateGriQuantitative() {
 export function useRejectEvaluateGriQuantitative() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: { id: string; remarks: string }) =>
-      evaluateGriQuantitativeApi.reject(payload.id, payload.remarks),
+    mutationFn: (payload: { id: string; remarks: string; silentToast?: boolean }) =>
+      evaluateGriQuantitativeApi.reject(payload.id, payload.remarks, payload.silentToast),
     onSuccess: () => invalidateLists(queryClient),
   })
 }

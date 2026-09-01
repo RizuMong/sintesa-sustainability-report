@@ -12,6 +12,7 @@
   "dependencies": {
     "@mekari/pixel3": "^1.0.14",
     "@mekari/pixel3-postcss": "^1.0.14",
+    "@mekari/pixel3-styled-system": "^0.3.1",
     "@mekari/pixel3-utils": "0.1.0",
     "@tanstack/vue-query": "^5.102.0",
     "axios": "^1.19.0",

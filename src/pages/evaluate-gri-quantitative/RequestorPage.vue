@@ -17,10 +17,34 @@
 
     <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="4">
       <MpFlex gap="4">
-        <SummaryBox label="Draft" :amount="summary.draft" />
-        <SummaryBox label="Awaiting Approval" :amount="summary.awaitingApproval" />
-        <SummaryBox label="Approved" :amount="summary.approved" />
-        <SummaryBox label="Rejected" :amount="summary.rejected" />
+        <SummaryBox
+          variant="gray"
+          label="Draft"
+          :amount="summary.draft"
+          :badge="summary.draft"
+          :is-loading="isLoading"
+        />
+        <SummaryBox
+          variant="orange"
+          label="Awaiting Approval"
+          :amount="summary.awaitingApproval"
+          :badge="summary.awaitingApproval"
+          :is-loading="isLoading"
+        />
+        <SummaryBox
+          variant="green"
+          label="Approved"
+          :amount="summary.approved"
+          :badge="summary.approved"
+          :is-loading="isLoading"
+        />
+        <SummaryBox
+          variant="red"
+          label="Rejected"
+          :amount="summary.rejected"
+          :badge="summary.rejected"
+          :is-loading="isLoading"
+        />
       </MpFlex>
 
       <MpFlex justifyContent="flex-start">
@@ -43,17 +67,22 @@
               </MpTableRow>
             </MpTableHead>
             <MpTableBody>
-              <MpTableRow v-for="row in filteredItems" :key="row.id">
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+              <MpTableRow
+                v-for="row in filteredItems"
+                :key="row.id"
+                @click="goToDetail(row)"
+                :class="css({ cursor: 'pointer' })"
+              >
+                <MpTableCell as="td" scope="row">
                   {{ row.entity_id.name }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row">
                   {{ row.period_id.name }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row">
                   {{ row.template_id.name }}
                 </MpTableCell>
-                <MpTableCell as="td" scope="row" @click="goToDetail(row)" :class="css({ cursor: 'pointer' })">
+                <MpTableCell as="td" scope="row">
                   <MpBadge for="tableStatus" :type="statusBadgeType[row.flow_status] ?? 'information'">
                     {{ row.flow_status }}
                   </MpBadge>
@@ -157,7 +186,6 @@ import {
   MpFormErrorMessage,
   MpSelect,
   css,
-  toast,
 } from '@mekari/pixel3'
 import { useTableFilter } from '@/composables/useTableFilter'
 import TableFilter from '@/components/TableFilter.vue'
@@ -243,7 +271,6 @@ async function createSubmission() {
   form.periodId = ''
   form.templateId = ''
   openCreate.value = false
-  toast.notify({ id: 'evaluate-create', variant: 'success', title: 'Submission created.' })
   router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: created.id } })
 }
 </script>
