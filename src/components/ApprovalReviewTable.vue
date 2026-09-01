@@ -246,12 +246,6 @@ function isActionable(row: ApprovableRow) {
     return selectableIds.value.includes(row.id);
 }
 
-function currentStage(row: ApprovableRow) {
-    return (row.approval_logs ?? []).find(
-        (log) => log.stage_order === row.current_stage_order,
-    );
-}
-
 function toggleRow(id: string, checked: boolean) {
     const next = new Set(selected.value);
     if (checked) next.add(id);

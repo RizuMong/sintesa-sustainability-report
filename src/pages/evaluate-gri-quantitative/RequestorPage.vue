@@ -223,7 +223,6 @@ import {
     MpText,
     MpButton,
     MpButtonGroup,
-    MpBadge,
     MpImage,
     MpSkeleton,
     MpTable,

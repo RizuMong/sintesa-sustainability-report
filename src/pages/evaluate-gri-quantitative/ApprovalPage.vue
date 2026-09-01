@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { MpFlex, MpText, css } from "@mekari/pixel3";
+import { MpFlex, css } from "@mekari/pixel3";
 import ApprovalReviewTable from "@/components/ApprovalReviewTable.vue";
 import SummaryBox from "@/components/SummaryBox.vue";
 import TableFilter from "@/components/TableFilter.vue";
