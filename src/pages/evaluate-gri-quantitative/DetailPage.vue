@@ -295,86 +295,174 @@
                             <MpTimelineCaption>
                                 {{
                                     formatStamp(
-                                        detail.submitted_at ?? detail.created_at,
+                                        detail.submitted_at ??
+                                            detail.created_at,
                                     )
                                 }}
                             </MpTimelineCaption>
                         </MpTimelineItem>
 
-                        <MpTimelineAccordion
+                        <MpTimelineItem
                             v-for="(log, i) in approvalLogs"
                             :key="log.stage_order"
-                            :label="log.approval_type"
+                            :status="timelineStatus[log.status] ?? 'next'"
                             :position="
                                 i === approvalLogs.length - 1
                                     ? 'last'
                                     : undefined
                             "
-                            is-open
                         >
-                            <template #sub-content>
-                                <MpText
-                                    size="label-small"
-                                    weight="semiBold"
-                                    color="text.secondary"
-                                    paddingBottom="3"
+                            <MpTimelineContent>
+                                <MpFlex
+                                    direction="column"
+                                    borderWidth="1px"
+                                    borderColor="border.default"
+                                    rounded="md"
+                                    overflow="hidden"
+                                    marginBottom="4"
                                 >
-                                    {{ stageRule(log) }}
-                                </MpText>
-                            </template>
+                                    <MpAccordion>
+                                        <MpAccordionItem
+                                            is-default-open
+                                            iconPosition="start"
+                                        >
+                                            <MpAccordionHeader
+                                                :class="
+                                                    css({
+                                                        backgroundColor:
+                                                            'background.surface',
+                                                        paddingInline: '2',
+                                                        paddingBottom: '2',
+                                                    })
+                                                "
+                                            >
+                                                <MpAccordionIcon
+                                                    name="chevrons-right"
+                                                    width="16"
+                                                    height="16"
+                                                />
 
-                            <MpTimelineItem
-                                v-for="a in log.approvers"
-                                :key="a.user.id"
-                                :status="timelineStatus[a.action] ?? 'next'"
-                                :icon="
-                                    isNotRequired(log, a) ? 'time' : undefined
-                                "
-                                :icon-color="
-                                    isNotRequired(log, a)
-                                        ? 'icon.subtle'
-                                        : undefined
-                                "
-                            >
-                                <MpTimelineTitle>
-                                    <MpText
-                                        :weight="
-                                            isNotRequired(log, a)
-                                                ? 'regular'
-                                                : 'semiBold'
-                                        "
-                                        :color="
-                                            isNotRequired(log, a)
-                                                ? 'text.secondary'
-                                                : 'text.default'
-                                        "
-                                    >
-                                        {{ approverLabel(log, a) }}
-                                    </MpText>
-                                </MpTimelineTitle>
-                                <MpTimelineCaption>{{
-                                    a.user.name
-                                }}</MpTimelineCaption>
-                                <MpTimelineContent v-if="a.acted_at || a.notes">
-                                    <MpFlex
-                                        direction="column"
-                                        gap="1"
-                                        paddingBottom="4"
-                                    >
-                                        <MpText
-                                            v-if="a.acted_at"
-                                            size="label-small"
-                                            color="text.secondary"
-                                        >
-                                            {{ formatStamp(a.acted_at) }}
-                                        </MpText>
-                                        <MpText v-if="a.notes" size="label"
-                                            >"{{ a.notes }}"</MpText
-                                        >
-                                    </MpFlex>
-                                </MpTimelineContent>
-                            </MpTimelineItem>
-                        </MpTimelineAccordion>
+                                                <MpFlex
+                                                    direction="column"
+                                                    gap="1"
+                                                >
+                                                    <MpText weight="semiBold">{{
+                                                        log.approval_type
+                                                    }}</MpText>
+                                                    <MpText
+                                                        size="label-small"
+                                                        color="text.secondary"
+                                                        weight="semiBold"
+                                                        >{{
+                                                            stageRule(log)
+                                                        }}</MpText
+                                                    >
+                                                </MpFlex>
+                                            </MpAccordionHeader>
+                                            <MpAccordionPanel
+                                                :class="
+                                                    css({ paddingInline: '2' })
+                                                "
+                                            >
+                                                <MpTimeline>
+                                                    <MpTimelineItem
+                                                        v-for="a in log.approvers"
+                                                        :key="a.user.id"
+                                                        :status="
+                                                            timelineStatus[
+                                                                a.action
+                                                            ] ?? 'next'
+                                                        "
+                                                        :icon="
+                                                            isNotRequired(
+                                                                log,
+                                                                a,
+                                                            )
+                                                                ? 'time'
+                                                                : undefined
+                                                        "
+                                                        :icon-color="
+                                                            isNotRequired(
+                                                                log,
+                                                                a,
+                                                            )
+                                                                ? 'icon.subtle'
+                                                                : undefined
+                                                        "
+                                                    >
+                                                        <MpTimelineTitle>
+                                                            <MpText
+                                                                :weight="
+                                                                    isNotRequired(
+                                                                        log,
+                                                                        a,
+                                                                    )
+                                                                        ? 'regular'
+                                                                        : 'semiBold'
+                                                                "
+                                                                :color="
+                                                                    isNotRequired(
+                                                                        log,
+                                                                        a,
+                                                                    )
+                                                                        ? 'text.secondary'
+                                                                        : 'text.default'
+                                                                "
+                                                            >
+                                                                {{
+                                                                    approverLabel(
+                                                                        log,
+                                                                        a,
+                                                                    )
+                                                                }}
+                                                            </MpText>
+                                                        </MpTimelineTitle>
+                                                        <MpTimelineCaption>{{
+                                                            a.user.name
+                                                        }}</MpTimelineCaption>
+                                                        <MpTimelineContent
+                                                            v-if="
+                                                                a.acted_at ||
+                                                                a.notes
+                                                            "
+                                                        >
+                                                            <MpFlex
+                                                                direction="column"
+                                                                gap="1"
+                                                                paddingBottom="4"
+                                                            >
+                                                                <MpText
+                                                                    v-if="
+                                                                        a.acted_at
+                                                                    "
+                                                                    size="label-small"
+                                                                    color="text.secondary"
+                                                                >
+                                                                    {{
+                                                                        formatStamp(
+                                                                            a.acted_at,
+                                                                        )
+                                                                    }}
+                                                                </MpText>
+                                                                <MpText
+                                                                    v-if="
+                                                                        a.notes
+                                                                    "
+                                                                    size="label"
+                                                                    >"{{
+                                                                        a.notes
+                                                                    }}"</MpText
+                                                                >
+                                                            </MpFlex>
+                                                        </MpTimelineContent>
+                                                    </MpTimelineItem>
+                                                </MpTimeline>
+                                            </MpAccordionPanel>
+                                        </MpAccordionItem>
+                                    </MpAccordion>
+                                </MpFlex>
+                            </MpTimelineContent>
+                        </MpTimelineItem>
                     </MpTimeline>
                 </MpFlex>
             </MpFlex>
@@ -414,7 +502,12 @@ import {
     MpTimelineTitle,
     MpTimelineCaption,
     MpTimelineContent,
-    MpTimelineAccordion,
+    MpAccordion,
+    MpAccordionItem,
+    MpAccordionHeader,
+    MpAccordionPanel,
+    css,
+    MpAccordionIcon,
 } from "@mekari/pixel3";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal.vue";
 import DynamicFieldInput from "@/components/DynamicFieldInput.vue";
