@@ -30,7 +30,7 @@
             <MpSkeleton v-for="i in 4" :key="i" height="56px" rounded="md" />
         </MpFlex>
 
-        <template v-else-if="items.length">
+        <template v-else>
             <MpTableContainer>
                 <MpTable>
                     <MpTableHead>
@@ -78,29 +78,20 @@
                                 </MpTableCell>
                             </MpTableRow>
                         </template>
+                        <MpTableRow v-if="!items.length">
+                            <MpTableCell
+                                as="td"
+                                scope="row"
+                                :colspan="columns.length + 1"
+                                :class="css({ textAlign: 'center' })"
+                            >
+                                <MpText color="text.secondary">No data</MpText>
+                            </MpTableCell>
+                        </MpTableRow>
                     </MpTableBody>
                 </MpTable>
             </MpTableContainer>
         </template>
-
-        <MpFlex
-            v-else
-            direction="column"
-            alignItems="center"
-            gap="4"
-            paddingY="20"
-        >
-            <MpImage
-                src="https://cdn.mekari.design/illustration/blank-slate/NoData_PB_L_01.png"
-                alt="empty state illustration"
-                layout="fixed"
-                :width="200"
-                :height="160"
-                object-fit="contain"
-                :is-show-loading="false"
-            />
-            <MpText size="h3" weight="semiBold">{{ emptyTitle }}</MpText>
-        </MpFlex>
 
         <MpModal
             :is-open="rejectTargetIds.length > 0"
@@ -162,7 +153,6 @@ import {
     MpText,
     MpButton,
     MpButtonGroup,
-    MpImage,
     MpSkeleton,
     MpCheckbox,
     MpTable,
@@ -222,12 +212,9 @@ const props = defineProps<{
         }) => Promise<unknown>;
         isPending: { value: boolean };
     };
-    emptyTitle?: string;
 }>();
 
 const emit = defineEmits<{ rowClick: [row: TRow] }>();
-
-const emptyTitle = props.emptyTitle ?? "No submissions waiting for approval";
 
 const selected = ref<Set<string>>(new Set());
 const rejectTargetIds = ref<string[]>([]);

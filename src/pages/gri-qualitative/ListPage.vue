@@ -12,7 +12,7 @@
         <MpText size="label-small" color="text.secondary">GRI Submission</MpText>
         <MpText as="h1" size="h1">Qualitative</MpText>
       </MpFlex>
-      <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
+      <MpButton left-icon="add" @click="openCreate = true">Create Data</MpButton>
     </MpFlex>
 
     <MpFlex direction="column" paddingX="24px" paddingTop="8px" paddingBottom="24px" gap="2">
@@ -69,14 +69,14 @@
           <MpText size="h3" weight="semiBold">No submission yet</MpText>
           <MpText size="label" color="text.secondary">Create your first GRI qualitative submission.</MpText>
         </MpFlex>
-        <MpButton left-icon="add" @click="openCreate = true">New submission</MpButton>
+        <MpButton left-icon="add" @click="openCreate = true">Create Data</MpButton>
       </MpFlex>
     </MpFlex>
 
     <MpModal :is-open="openCreate" size="md" @close="openCreate = false">
       <MpModalContent>
         <MpModalHeader>
-          New submission
+          Create Data
           <MpModalCloseButton />
         </MpModalHeader>
         <MpModalBody>

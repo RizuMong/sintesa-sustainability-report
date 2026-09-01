@@ -28,5 +28,5 @@ export function useTableFilter<T>(items: Ref<T[]> | ComputedRef<T[]>) {
     activeFilter.value = null
   }
 
-  return { filteredItems, applyFilter, resetFilter }
+  return { filteredItems, activeFilter, applyFilter, resetFilter }
 }

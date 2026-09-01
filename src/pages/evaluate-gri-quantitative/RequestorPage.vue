@@ -13,7 +13,7 @@
             backgroundColor="background.surface"
         >
             <MpButton left-icon="add" @click="openCreate = true"
-                >New submission</MpButton
+                >Create Data</MpButton
             >
         </MpFlex>
 
@@ -26,28 +26,15 @@
         >
             <div :class="css({ display: 'flex', gap: '2' })">
                 <SummaryBox
-                    variant="gray"
-                    label="Draft"
-                    :amount="summary.draft"
+                    v-for="box in summaryBoxes"
+                    :key="box.status"
+                    :variant="box.variant"
+                    :label="box.label"
+                    :amount="box.amount"
                     :is-loading="isLoading"
-                />
-                <SummaryBox
-                    variant="orange"
-                    label="Awaiting Approval"
-                    :amount="summary.awaitingApproval"
-                    :is-loading="isLoading"
-                />
-                <SummaryBox
-                    variant="green"
-                    label="Approved"
-                    :amount="summary.approved"
-                    :is-loading="isLoading"
-                />
-                <SummaryBox
-                    variant="red"
-                    label="Rejected"
-                    :amount="summary.rejected"
-                    :is-loading="isLoading"
+                    :is-active="isStatusActive(box.status)"
+                    is-hoverable
+                    @click="toggleStatusFilter(box.status)"
                 />
             </div>
 
@@ -68,7 +55,7 @@
                 />
             </MpFlex>
 
-            <template v-else-if="filteredItems.length">
+            <template v-else>
                 <MpTableContainer>
                     <MpTable>
                         <MpTableHead>
@@ -95,45 +82,28 @@
                                     {{ row.template_id.name }}
                                 </MpTableCell>
                             </MpTableRow>
+                            <MpTableRow v-if="!filteredItems.length">
+                                <MpTableCell
+                                    as="td"
+                                    scope="row"
+                                    :colspan="3"
+                                    :class="css({ textAlign: 'center' })"
+                                >
+                                    <MpText color="text.secondary"
+                                        >No data</MpText
+                                    >
+                                </MpTableCell>
+                            </MpTableRow>
                         </MpTableBody>
                     </MpTable>
                 </MpTableContainer>
             </template>
-
-            <MpFlex
-                v-else
-                direction="column"
-                alignItems="center"
-                gap="4"
-                paddingY="20"
-            >
-                <MpImage
-                    src="https://cdn.mekari.design/illustration/blank-slate/NoData_PB_L_01.png"
-                    alt="empty state illustration"
-                    layout="fixed"
-                    :width="200"
-                    :height="160"
-                    object-fit="contain"
-                    :is-show-loading="false"
-                />
-                <MpFlex direction="column" alignItems="center" gap="1">
-                    <MpText size="h3" weight="semiBold"
-                        >No submission yet</MpText
-                    >
-                    <MpText size="label" color="text.secondary"
-                        >Create your first GRI quantitative submission.</MpText
-                    >
-                </MpFlex>
-                <MpButton left-icon="add" @click="openCreate = true"
-                    >New submission</MpButton
-                >
-            </MpFlex>
         </MpFlex>
 
         <MpModal :is-open="openCreate" size="md" @close="openCreate = false">
             <MpModalContent>
                 <MpModalHeader>
-                    New submission
+                    Create Data
                     <MpModalCloseButton />
                 </MpModalHeader>
                 <MpModalBody>
@@ -223,7 +193,6 @@ import {
     MpText,
     MpButton,
     MpButtonGroup,
-    MpImage,
     MpSkeleton,
     MpTable,
     MpTableHead,
@@ -302,7 +271,35 @@ const filterColumns = computed(() => [
         ),
     },
 ]);
-const { filteredItems, applyFilter, resetFilter } = useTableFilter(items);
+const { filteredItems, activeFilter, applyFilter, resetFilter } =
+    useTableFilter(items);
+
+// Clicking a summary block filters the table by flow_status; clicking the active one clears it.
+// ponytail: reuses TableFilter's substring filter, so the popover's own controls stay out of sync
+// with a box click — swap both onto one shared filter state if that ever confuses anyone.
+const summaryBoxes = computed(() => [
+    { status: "draft", variant: "gray", label: "Draft", amount: summary.value.draft },
+    {
+        status: "sent",
+        variant: "orange",
+        label: "Awaiting Approval",
+        amount: summary.value.awaitingApproval,
+    },
+    { status: "approved", variant: "green", label: "Approved", amount: summary.value.approved },
+    { status: "rejected", variant: "red", label: "Rejected", amount: summary.value.rejected },
+]);
+
+function isStatusActive(status: string) {
+    return (
+        activeFilter.value?.column === "flow_status" &&
+        activeFilter.value.value === status
+    );
+}
+
+function toggleStatusFilter(status: string) {
+    if (isStatusActive(status)) resetFilter();
+    else applyFilter({ column: "flow_status", value: status });
+}
 
 const openCreate = ref(false);
 const form = reactive({ entityId: "", periodId: "", templateId: "" });

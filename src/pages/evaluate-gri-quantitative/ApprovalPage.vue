@@ -15,6 +15,9 @@
                     label="Awaiting Approval"
                     :amount="summary.awaitingApproval"
                     :is-loading="isLoading"
+                    :is-active="isStatusActive('sent')"
+                    is-hoverable
+                    @click="toggleStatusFilter('sent')"
                 />
                 <SummaryBox
                     variant="blue"
@@ -27,17 +30,20 @@
                     label="Approved"
                     :amount="summary.approved"
                     :is-loading="isLoading"
+                    :is-active="isStatusActive('approved')"
+                    is-hoverable
+                    @click="toggleStatusFilter('approved')"
                 />
                 <SummaryBox
                     variant="red"
                     label="Rejected"
                     :amount="summary.rejected"
                     :is-loading="isLoading"
+                    :is-active="isStatusActive('rejected')"
+                    is-hoverable
+                    @click="toggleStatusFilter('rejected')"
                 />
             </div>
-
-            <!-- ponytail: isFilter/isActive card-as-filter affordance from the SummaryBox port isn't wired
-           here — filtering lives in TableFilter below instead. -->
 
             <MpFlex justifyContent="flex-start">
                 <TableFilter
@@ -61,7 +67,6 @@
                 :columns="columns"
                 :approve-mutation="approveMutation"
                 :reject-mutation="rejectMutation"
-                empty-title="No GRI Quantitative submissions waiting for approval"
                 @row-click="onRowClick"
             />
         </MpFlex>
@@ -96,7 +101,22 @@ const filterColumns = computed(() => [
     { value: "period_id.name", label: "Period" },
     { value: "template_id.name", label: "Template" },
 ]);
-const { filteredItems, applyFilter, resetFilter } = useTableFilter(items);
+const { filteredItems, activeFilter, applyFilter, resetFilter } =
+    useTableFilter(items);
+
+// Clicking a status summary block filters the table by flow_status; clicking the active one clears
+// it. "Approved by Me" has no flow_status of its own, so it stays a plain counter.
+function isStatusActive(status: string) {
+    return (
+        activeFilter.value?.column === "flow_status" &&
+        activeFilter.value.value === status
+    );
+}
+
+function toggleStatusFilter(status: string) {
+    if (isStatusActive(status)) resetFilter();
+    else applyFilter({ column: "flow_status", value: status });
+}
 
 function onRowClick(row: EvaluateGriQuantitativeSummary) {
     router.push({
