@@ -2,8 +2,11 @@
 // Approval/Ref2 globals (§3 of the impl plan) are declared here; Stream C owns this file.
 declare global {
   type SubmissionFlowStatus = 'draft' | 'submitted' | 'approved' | 'rejected' | 'cancelled'
-  type ApprovalAction = 'PENDING' | 'APPROVED' | 'REJECTED'
-  type ApprovalStageStatus = 'WAITING_APPROVAL' | 'APPROVED' | 'REJECTED'
+  // one union for both the stage status and an approver's action — the API emits the same
+  // enum in both slots, so keep them aliased rather than drifting into two half-lists
+  type ApprovalStatus = 'WAITING_APPROVAL' | 'PENDING' | 'APPROVE' | 'APPROVED' | 'REJECTED' | 'CANCEL'
+  type ApprovalAction = ApprovalStatus
+  type ApprovalStageStatus = ApprovalStatus
   interface Ref2 {
     id: string
     name: string
