@@ -1,0 +1,304 @@
+image: harbor.mekari.io/library/node:22-alpine
+
+####################### SHARED SCRIPTS #######################
+
+buildScript: &buildScript
+  - corepack enable
+  - pnpm install --frozen-lockfile
+  - rm -rf dist
+  - pnpm run build
+
+deployScript: &deployScript # Show deployment configuration (for audit)
+  - echo "================================================"
+  - echo "Deployment Configuration"
+  - echo "================================================"
+  - echo "Environment     - $DEPLOYMENT_ENV"
+  - echo "OSS Endpoint    - $OSS_ENDPOINT"
+  - echo "OSS Bucket      - $OSS_BUCKET_NAME"
+  - echo "CDN Domain      - ${CDN_DOMAIN:-Not configured}"
+  - echo "================================================"
+
+  # Install ossutil and dependencies (Alpine Linux)
+  - apk add --no-cache wget unzip python3 py3-pip curl
+  - wget -q https://gosspublic.alicdn.com/ossutil/1.7.18/ossutil-v1.7.18-linux-amd64.zip
+  - unzip -q ossutil-v1.7.18-linux-amd64.zip && chmod +x ossutil-v1.7.18-linux-amd64/ossutil64
+  - mv ossutil-v1.7.18-linux-amd64/ossutil64 /usr/local/bin/ossutil
+  - pip3 install -q --break-system-packages aliyun-python-sdk-core aliyun-python-sdk-cdn
+
+  # Auto-select credentials based on environment
+  - |
+    # Convert environment name to uppercase for variable naming convention
+    ENV_SUFFIX=$(echo "$DEPLOYMENT_ENV" | tr '[:lower:]' '[:upper:]' | tr ' -' '_')
+
+    # Use eval for indirect expansion (works in ash/sh)
+    ACCESS_KEY_VAR="OSS_ACCESS_KEY_ID_${ENV_SUFFIX}"
+    SECRET_VAR="OSS_ACCESS_KEY_SECRET_${ENV_SUFFIX}"
+
+    eval "export OSS_ACCESS_KEY_ID=\$$ACCESS_KEY_VAR"
+    eval "export OSS_ACCESS_KEY_SECRET=\$$SECRET_VAR"
+
+    echo "Using credentials for: ${ENV_SUFFIX}"
+
+    # Configure ossutil
+    ossutil config -e $OSS_ENDPOINT -i $OSS_ACCESS_KEY_ID -k $OSS_ACCESS_KEY_SECRET -L CH
+
+  # Static assets are content-hashed and immutable - never delete them.
+  # Old tabs mid-session reference old hashes; deleting them causes
+  # ChunkLoadError / broken auth-check for anyone still on the previous build.
+  - echo "Syncing immutable static assets (no delete)..."
+  - ossutil sync -f dist/assets/ oss://$OSS_BUCKET_NAME/assets/
+
+  - echo "Syncing pages (with delete for removed routes)..."
+  - ossutil sync -f --delete --exclude "assets*" dist/ oss://$OSS_BUCKET_NAME/
+
+  # Purge CDN cache
+  - |
+    if [ ! -z "$CDN_DOMAIN" ]; then
+      echo "Purging CDN cache..."
+      python3 -c "
+    from aliyunsdkcore.client import AcsClient
+    from aliyunsdkcdn.request.v20180510.RefreshObjectCachesRequest import RefreshObjectCachesRequest
+    import os
+    import sys
+
+    domain = os.environ['CDN_DOMAIN'].strip()
+    object_path = f'https://{domain}/'
+
+    client = AcsClient(os.environ['OSS_ACCESS_KEY_ID'], os.environ['OSS_ACCESS_KEY_SECRET'], 'cn-hangzhou')
+    request = RefreshObjectCachesRequest()
+    request.set_ObjectPath(object_path)
+    request.set_ObjectType('Directory')
+    try:
+        response = client.do_action_with_exception(request)
+        print(f'CDN cache purged: {object_path}')
+    except Exception as e:
+        print('CDN purge failed:', e)
+        sys.exit(1)
+    "
+    fi
+  - echo "Deployment completed - $OSS_BUCKET_NAME"
+
+syncCdnPathScript: &syncCdnPathScript
+  # Show sync configuration (for audit)
+  - echo "================================================"
+  - echo "CDN Rewrite Sync Configuration"
+  - echo "================================================"
+  - echo "Environment     - $DEPLOYMENT_ENV"
+  - echo "OSS Endpoint    - $OSS_ENDPOINT"
+  - echo "OSS Bucket      - $OSS_BUCKET_NAME"
+  - echo "CDN Domain      - ${CDN_DOMAIN:-Not configured}"
+  - echo "Function Name   - ${CDN_REWRITE_FUNCTION_NAME:-back_to_origin_url_rewrite}"
+  - echo "Region          - ${CDN_API_REGION:-ap-southeast-5}"
+  - echo "================================================"
+
+  # Install dependencies (Alpine Linux)
+  - apk add --no-cache python3 py3-pip
+  - pip3 install -q --break-system-packages aliyun-python-sdk-core aliyun-python-sdk-cdn
+
+  # Auto-select credentials based on environment
+  - |
+    ENV_SUFFIX=$(echo "$DEPLOYMENT_ENV" | tr '[:lower:]' '[:upper:]' | tr ' -' '_')
+
+    ACCESS_KEY_VAR="OSS_ACCESS_KEY_ID_${ENV_SUFFIX}"
+    SECRET_VAR="OSS_ACCESS_KEY_SECRET_${ENV_SUFFIX}"
+
+    eval "export OSS_ACCESS_KEY_ID=\$$ACCESS_KEY_VAR"
+    eval "export OSS_ACCESS_KEY_SECRET=\$$SECRET_VAR"
+
+    if [ -z "$OSS_ACCESS_KEY_ID" ] || [ -z "$OSS_ACCESS_KEY_SECRET" ]; then
+      echo "Credential for ${ENV_SUFFIX} is not configured"
+      exit 1
+    fi
+
+    if [ -z "$CDN_DOMAIN" ]; then
+      echo "CDN_DOMAIN is required"
+      exit 1
+    fi
+
+    export CDN_REWRITE_FUNCTION_NAME=${CDN_REWRITE_FUNCTION_NAME:-back_to_origin_url_rewrite}
+    export CDN_REWRITE_SOURCE_ARG=${CDN_REWRITE_SOURCE_ARG:-source_url}
+    export CDN_REWRITE_TARGET_ARG=${CDN_REWRITE_TARGET_ARG:-target_url}
+    export CDN_REWRITE_FLAG_ARG=${CDN_REWRITE_FLAG_ARG:-flag}
+    export CDN_REWRITE_FLAG_VALUE=${CDN_REWRITE_FLAG_VALUE:-break}
+    export CDN_API_REGION=${CDN_API_REGION:-ap-southeast-5}
+
+    echo "Using credentials for: ${ENV_SUFFIX}"
+
+  # SPA fallback rewrite: Vue Router runs in history mode (createWebHistory),
+  # so there is no per-route .html file like Next.js static export produces.
+  # Every extension-less path must resolve to /index.html and let the
+  # client-side router take over from there.
+  - |
+    python3 <<'PY'
+    import json
+    import os
+
+    from aliyunsdkcore.client import AcsClient
+    from aliyunsdkcdn.request.v20180510.BatchDeleteCdnDomainConfigRequest import BatchDeleteCdnDomainConfigRequest
+    from aliyunsdkcdn.request.v20180510.BatchSetCdnDomainConfigRequest import BatchSetCdnDomainConfigRequest
+
+    domain = os.environ['CDN_DOMAIN'].strip()
+    function_name = os.environ.get('CDN_REWRITE_FUNCTION_NAME', 'back_to_origin_url_rewrite').strip()
+    source_arg = os.environ.get('CDN_REWRITE_SOURCE_ARG', 'source_url').strip()
+    target_arg = os.environ.get('CDN_REWRITE_TARGET_ARG', 'target_url').strip()
+    flag_arg = os.environ.get('CDN_REWRITE_FLAG_ARG', 'flag').strip()
+    flag_value = os.environ.get('CDN_REWRITE_FLAG_VALUE', 'break').strip()
+
+    client = AcsClient(
+      os.environ['OSS_ACCESS_KEY_ID'],
+      os.environ['OSS_ACCESS_KEY_SECRET'],
+      os.environ.get('CDN_API_REGION', 'ap-southeast-5'),
+    )
+
+    functions = [{
+      'functionName': function_name,
+      'functionArgs': [
+        {'argName': source_arg, 'argValue': r'^/([^.]*)$'},
+        {'argName': target_arg, 'argValue': '/index.html'},
+        {'argName': flag_arg, 'argValue': flag_value},
+      ],
+    }]
+
+    src = functions[0]['functionArgs'][0]['argValue']
+    dst = functions[0]['functionArgs'][1]['argValue']
+    print(f'Rewrite rule to apply: {src} -> {dst} [{flag_value}]')
+
+    delete_req = BatchDeleteCdnDomainConfigRequest()
+    delete_req.set_DomainNames(domain)
+    delete_req.set_FunctionNames(function_name)
+    try:
+      client.do_action_with_exception(delete_req)
+      print('Existing rewrite rules removed (if any).')
+    except Exception as exc:
+      print(f'Delete existing rewrite rules skipped/failed: {exc}')
+
+    set_req = BatchSetCdnDomainConfigRequest()
+    set_req.set_DomainNames(domain)
+    set_req.set_Functions(json.dumps(functions, separators=(',', ':')))
+
+    resp = client.do_action_with_exception(set_req)
+    print('CDN rewrite rule synced successfully.')
+    print(resp.decode('utf-8'))
+    PY
+
+####################### OSS DEPLOYMENT TEMPLATES #######################
+
+# Staging templates
+buildStaging: &buildStaging
+  step:
+    name: Build Application
+    runs-on:
+      - officeless.staging.alicloud
+    script: *buildScript
+    artifacts:
+      - dist/**
+
+deployToOssStaging: &deployToOssStaging
+  step:
+    name: Deploy to OSS Alicloud
+    runs-on:
+      - officeless.staging.alicloud
+    script: *deployScript
+
+syncCDNPathStagingStep: &syncCDNPathStagingStep
+  step:
+    name: Sync CDN Rewrite Path (Staging)
+    runs-on:
+      - officeless.staging.alicloud
+    script: *syncCdnPathScript
+
+# Production templates
+buildProduction: &buildProduction
+  step:
+    name: Build Application
+    runs-on:
+      - officeless.production.alicloud
+    script: *buildScript
+    artifacts:
+      - dist/**
+
+deployToOssProduction: &deployToOssProduction
+  step:
+    name: Deploy to OSS Alicloud
+    runs-on:
+      - officeless.production.alicloud
+    script: *deployScript
+
+syncCDNPathProductionStep: &syncCDNPathProductionStep
+  step:
+    name: Sync CDN Rewrite Path (Production)
+    runs-on:
+      - officeless.production.alicloud
+    script: *syncCdnPathScript
+
+####################### END OSS DEPLOYMENT TEMPLATES #######################
+
+######################## START VARIABLES CONFIGURATION ########################
+
+varStaging: &varStaging
+  variables:
+    - name: DEPLOYMENT_ENV
+      default: STAGING
+    - name: OSS_ENDPOINT
+      default: oss-ap-southeast-5.aliyuncs.com
+    - name: OSS_BUCKET_NAME
+      default: staging-officeless-sintesa-sustainability-bucket
+    - name: CDN_DOMAIN
+      default: sintesa-sustainability.jojonomic.io
+    - name: CDN_API_REGION
+      default: ap-southeast-5
+
+varProduction: &varProduction
+  variables:
+    - name: DEPLOYMENT_ENV
+      default: PRODUCTION
+    - name: OSS_ENDPOINT
+      default: oss-ap-southeast-5.aliyuncs.com
+    - name: OSS_BUCKET_NAME
+      default: production-officeless-sintesa-sustainability-bucket
+    - name: CDN_DOMAIN
+      default: sintesa-sustainability.jojonomic.com
+    - name: CDN_API_REGION
+      default: ap-southeast-5
+
+######################## END VARIABLES CONFIGURATION ##########################
+
+pipelines:
+  custom:
+    # Build only (for testing) - defaults to staging runner
+    buildOnly:
+      - <<: *varStaging
+      - <<: *buildStaging
+
+    # Deploy with separate build step
+    deployStaging:
+      - <<: *varStaging
+      - <<: *buildStaging
+      - <<: *deployToOssStaging
+
+    deployProduction:
+      - <<: *varProduction
+      - <<: *buildProduction
+      - <<: *deployToOssProduction
+
+    syncCDNPathStaging:
+      - <<: *varStaging
+      - <<: *syncCDNPathStagingStep
+
+    syncCDNPathProduction:
+      - <<: *varProduction
+      - <<: *syncCDNPathProductionStep
+
+    # Deploy with custom bucket name (uses staging runner)
+    deployCustomBucket:
+      - variables:
+          - name: OSS_BUCKET_NAME
+            default: ""
+          - name: CDN_DOMAIN
+            default: ""
+          - name: OSS_ENDPOINT
+            default: ""
+          - name: DEPLOYMENT_ENV
+            default: STAGING
+      - <<: *buildStaging
+      - <<: *deployToOssStaging
