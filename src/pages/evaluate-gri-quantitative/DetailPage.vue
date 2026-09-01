@@ -281,18 +281,30 @@
                         >Approval line</MpText
                     >
 
-                    <MpText
-                        v-if="!approvalLogs.length"
-                        size="label"
-                        color="text.secondary"
-                        >No approval stages yet.</MpText
-                    >
+                    <MpTimeline>
+                        <MpTimelineItem status="submitted">
+                            <MpTimelineTitle>
+                                <MpText weight="semiBold">
+                                    Requested by
+                                    {{
+                                        detail.submitted_by ||
+                                        detail.created_by_project_user
+                                    }}
+                                </MpText>
+                            </MpTimelineTitle>
+                            <MpTimelineCaption>
+                                {{
+                                    formatStamp(
+                                        detail.submitted_at ?? detail.created_at,
+                                    )
+                                }}
+                            </MpTimelineCaption>
+                        </MpTimelineItem>
 
-                    <MpTimeline v-else>
                         <MpTimelineAccordion
                             v-for="(log, i) in approvalLogs"
                             :key="log.stage_order"
-                            :label="`Stage ${log.stage_order} · ${log.approval_type}`"
+                            :label="log.approval_type"
                             :position="
                                 i === approvalLogs.length - 1
                                     ? 'last'
@@ -301,46 +313,49 @@
                             is-open
                         >
                             <template #sub-content>
-                                <MpFlex
-                                    alignItems="center"
-                                    gap="2"
+                                <MpText
+                                    size="label-small"
+                                    weight="semiBold"
+                                    color="text.secondary"
                                     paddingBottom="3"
                                 >
-                                    <MpBadge
-                                        for="tableStatus"
-                                        :type="
-                                            statusBadgeType[log.status] ??
-                                            'information'
-                                        "
-                                    >
-                                        {{ log.status }}
-                                    </MpBadge>
-                                    <MpText
-                                        v-if="formatDecidedAt(log)"
-                                        size="label-small"
-                                        color="text.secondary"
-                                    >
-                                        {{ formatDecidedAt(log) }}
-                                    </MpText>
-                                </MpFlex>
+                                    {{ stageRule(log) }}
+                                </MpText>
                             </template>
 
                             <MpTimelineItem
                                 v-for="a in log.approvers"
                                 :key="a.user.id"
                                 :status="timelineStatus[a.action] ?? 'next'"
+                                :icon="
+                                    isNotRequired(log, a) ? 'time' : undefined
+                                "
+                                :icon-color="
+                                    isNotRequired(log, a)
+                                        ? 'icon.subtle'
+                                        : undefined
+                                "
                             >
                                 <MpTimelineTitle>
-                                    <MpText weight="semiBold">{{
-                                        a.action
-                                    }}</MpText>
+                                    <MpText
+                                        :weight="
+                                            isNotRequired(log, a)
+                                                ? 'regular'
+                                                : 'semiBold'
+                                        "
+                                        :color="
+                                            isNotRequired(log, a)
+                                                ? 'text.secondary'
+                                                : 'text.default'
+                                        "
+                                    >
+                                        {{ approverLabel(log, a) }}
+                                    </MpText>
                                 </MpTimelineTitle>
-                                <MpTimelineCaption
-                                    >{{ a.user.name }} ({{
-                                        a.position.name
-                                    }})</MpTimelineCaption
-                                >
-                                <MpTimelineContent v-if="a.acted_at">
+                                <MpTimelineCaption>{{
+                                    a.user.name
+                                }}</MpTimelineCaption>
+                                <MpTimelineContent v-if="a.acted_at || a.notes">
                                     <MpFlex
                                         direction="column"
                                         gap="1"
@@ -351,11 +366,7 @@
                                             size="label-small"
                                             color="text.secondary"
                                         >
-                                            {{
-                                                new Date(
-                                                    a.acted_at,
-                                                ).toLocaleString("sv-SE")
-                                            }}
+                                            {{ formatStamp(a.acted_at) }}
                                         </MpText>
                                         <MpText v-if="a.notes" size="label"
                                             >"{{ a.notes }}"</MpText
@@ -462,12 +473,51 @@ const timelineStatus: Record<
     CANCEL: "canceled",
 };
 
-function formatDecidedAt(log: ApprovalLog) {
-    const acted = log.approvers
-        .map((a) => a.acted_at)
-        .filter((v): v is number => v != null);
-    const value = log.decided_at ?? (acted.length ? Math.max(...acted) : null);
-    return value ? new Date(value).toLocaleString("sv-SE") : null;
+const stampFormat = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+});
+
+function formatStamp(value?: number | null) {
+    return value ? stampFormat.format(new Date(value)) : "";
+}
+
+const PENDING_ACTIONS: ApprovalAction[] = ["WAITING_APPROVAL", "PENDING"];
+
+// a stage that already reached its decision leaves the remaining approvers as "not required"
+function isNotRequired(log: ApprovalLog, a: ApprovalApprover) {
+    return (
+        PENDING_ACTIONS.includes(a.action) &&
+        !PENDING_ACTIONS.includes(log.status)
+    );
+}
+
+const actionVerb: Record<ApprovalAction, string> = {
+    WAITING_APPROVAL: "Waiting approval from",
+    PENDING: "Waiting approval from",
+    APPROVE: "Approved by",
+    APPROVED: "Approved by",
+    REJECTED: "Rejected by",
+    CANCEL: "Canceled by",
+};
+
+function approverLabel(log: ApprovalLog, a: ApprovalApprover) {
+    const verb = isNotRequired(log, a)
+        ? "Not required approval from"
+        : actionVerb[a.action];
+    return `${verb} ${a.position.name} | ${a.user.email}`;
+}
+
+// ponytail: the API sends no wording for the stage rule, only minimum_action — "anyone" vs "all"
+// is derived from it. Swap for a backend-provided label if one shows up.
+function stageRule(log: ApprovalLog) {
+    const total = log.approvers.length;
+    const min = log.minimum_action || 1;
+    return `${min >= total ? "ALL MUST APPROVE" : "ANYONE CAN APPROVE"}, ${min} OF ${total} REQUIRED`;
 }
 
 const route = useRoute();

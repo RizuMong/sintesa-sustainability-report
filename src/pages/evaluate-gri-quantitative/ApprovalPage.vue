@@ -1,58 +1,53 @@
 <template>
-  <MpFlex direction="column" backgroundColor="background.stage" minHeight="100vh">
     <MpFlex
-      justifyContent="space-between"
-      alignItems="center"
-      paddingX="24px"
-      paddingY="24px"
-      backgroundColor="background.surface"
+        direction="column"
+        backgroundColor="background.stage"
+        minHeight="100vh"
     >
-      <MpFlex direction="column">
-        <MpText size="label-small" color="text.secondary">Evaluate GRI Quantitative</MpText>
-        <MpText as="h1" size="h1">Review &amp; Approval</MpText>
-      </MpFlex>
-    </MpFlex>
+        <MpFlex direction="column" padding="24px" gap="4">
+            <div
+                :class="
+                    css({ display: 'flex', flexDirection: 'row', gap: '2' })
+                "
+            >
+                <SummaryBox
+                    variant="orange"
+                    label="Awaiting Approval"
+                    :amount="summary.awaitingApproval"
+                    :is-loading="isLoading"
+                />
+                <SummaryBox
+                    variant="blue"
+                    label="Approved by Me"
+                    :amount="summary.approvedByMe"
+                    :is-loading="isLoading"
+                />
+                <SummaryBox
+                    variant="green"
+                    label="Approved"
+                    :amount="summary.approved"
+                    :is-loading="isLoading"
+                />
+                <SummaryBox
+                    variant="red"
+                    label="Rejected"
+                    :amount="summary.rejected"
+                    :is-loading="isLoading"
+                />
+            </div>
 
-    <MpFlex direction="column" padding="24px" gap="4">
-      <div :class="css({ display: 'grid', gridTemplateColumns: '4', gap: '4' })">
-        <SummaryBox
-          variant="orange"
-          label="Awaiting Approval"
-          :amount="summary.awaitingApproval"
-          :badge="summary.awaitingApproval"
-          :is-loading="isLoading"
-        />
-        <SummaryBox
-          variant="blue"
-          label="Approved by Me"
-          :amount="summary.approvedByMe"
-          :badge="summary.approvedByMe"
-          :is-loading="isLoading"
-        />
-        <SummaryBox
-          variant="green"
-          label="Approved"
-          :amount="summary.approved"
-          :badge="summary.approved"
-          :is-loading="isLoading"
-        />
-        <SummaryBox
-          variant="red"
-          label="Rejected"
-          :amount="summary.rejected"
-          :badge="summary.rejected"
-          :is-loading="isLoading"
-        />
-      </div>
-
-      <!-- ponytail: isFilter/isActive card-as-filter affordance from the SummaryBox port isn't wired
+            <!-- ponytail: isFilter/isActive card-as-filter affordance from the SummaryBox port isn't wired
            here — filtering lives in TableFilter below instead. -->
 
-      <MpFlex justifyContent="flex-start">
-        <TableFilter :columns="filterColumns" @apply="applyFilter" @reset="resetFilter" />
-      </MpFlex>
+            <MpFlex justifyContent="flex-start">
+                <TableFilter
+                    :columns="filterColumns"
+                    @apply="applyFilter"
+                    @reset="resetFilter"
+                />
+            </MpFlex>
 
-      <!--
+            <!--
         ponytail: entity scoping + stage gating enforced server-side (AC-59); the UI only reflects
         approval_logs / current_stage_order returned by the list endpoint, it never filters rows
         client-side as a security control. The TableFilter above is a separate, non-security,
@@ -60,62 +55,77 @@
         already accepts server-side entity_id/period/template_id params (mirrors RequestorPage.vue);
         move filtering there if the approval queue grows large enough for client-side to lag.
       -->
-      <ApprovalReviewTable
-        :items="filteredItems"
-        :is-loading="isLoading"
-        :columns="columns"
-        :approve-mutation="approveMutation"
-        :reject-mutation="rejectMutation"
-        empty-title="No GRI Quantitative submissions waiting for approval"
-        @row-click="onRowClick"
-      />
+            <ApprovalReviewTable
+                :items="filteredItems"
+                :is-loading="isLoading"
+                :columns="columns"
+                :approve-mutation="approveMutation"
+                :reject-mutation="rejectMutation"
+                empty-title="No GRI Quantitative submissions waiting for approval"
+                @row-click="onRowClick"
+            />
+        </MpFlex>
     </MpFlex>
-  </MpFlex>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { MpFlex, MpText, css } from '@mekari/pixel3'
-import ApprovalReviewTable from '@/components/ApprovalReviewTable.vue'
-import SummaryBox from '@/components/SummaryBox.vue'
-import TableFilter from '@/components/TableFilter.vue'
-import { useTableFilter } from '@/composables/useTableFilter'
-import { useCurrentUserEmail } from '@/composables/useCurrentUser'
+import { computed } from "vue";
+import { useRouter } from "vue-router";
+import { MpFlex, MpText, css } from "@mekari/pixel3";
+import ApprovalReviewTable from "@/components/ApprovalReviewTable.vue";
+import SummaryBox from "@/components/SummaryBox.vue";
+import TableFilter from "@/components/TableFilter.vue";
+import { useTableFilter } from "@/composables/useTableFilter";
+import { useCurrentUserEmail } from "@/composables/useCurrentUser";
 import {
-  useGetApprovalList,
-  useApproveEvaluateGriQuantitative,
-  useRejectEvaluateGriQuantitative,
-  approvalSummary,
-} from '@/services/evaluate-gri-quantitative'
+    useGetApprovalList,
+    useApproveEvaluateGriQuantitative,
+    useRejectEvaluateGriQuantitative,
+    approvalSummary,
+} from "@/services/evaluate-gri-quantitative";
 
 // Scoped to GRI Quantitative only — the Qualitative and Action Plan Realization queues have their
 // own portals; this one mirrors the Officeless GRI Quantitative approval screen.
-const router = useRouter()
+const router = useRouter();
 
-const { data, isLoading } = useGetApprovalList()
-const items = computed(() => data.value ?? [])
+const { data, isLoading } = useGetApprovalList();
+const items = computed(() => data.value ?? []);
 
 const filterColumns = computed(() => [
-  { value: 'entity_id.name', label: 'Entity' },
-  { value: 'period_id.name', label: 'Period' },
-  { value: 'template_id.name', label: 'Template' },
-])
-const { filteredItems, applyFilter, resetFilter } = useTableFilter(items)
+    { value: "entity_id.name", label: "Entity" },
+    { value: "period_id.name", label: "Period" },
+    { value: "template_id.name", label: "Template" },
+]);
+const { filteredItems, applyFilter, resetFilter } = useTableFilter(items);
 
 function onRowClick(row: EvaluateGriQuantitativeSummary) {
-  router.push({ path: '/evaluate-gri-quantitative/detail', query: { id: row.id, from: 'approval' } })
+    router.push({
+        path: "/evaluate-gri-quantitative/detail",
+        query: { id: row.id, from: "approval" },
+    });
 }
 
-const { data: myEmail } = useCurrentUserEmail()
-const summary = computed(() => approvalSummary(items.value, myEmail.value))
+const { data: myEmail } = useCurrentUserEmail();
+const summary = computed(() => approvalSummary(items.value, myEmail.value));
 
-const approveMutation = useApproveEvaluateGriQuantitative()
-const rejectMutation = useRejectEvaluateGriQuantitative()
+const approveMutation = useApproveEvaluateGriQuantitative();
+const rejectMutation = useRejectEvaluateGriQuantitative();
 
 const columns = [
-  { key: 'entity', label: 'Entity', value: (row: EvaluateGriQuantitativeSummary) => row.entity_id.name },
-  { key: 'period', label: 'Period', value: (row: EvaluateGriQuantitativeSummary) => row.period_id.name },
-  { key: 'template', label: 'Template', value: (row: EvaluateGriQuantitativeSummary) => row.template_id.name },
-]
+    {
+        key: "entity",
+        label: "Entity",
+        value: (row: EvaluateGriQuantitativeSummary) => row.entity_id.name,
+    },
+    {
+        key: "period",
+        label: "Period",
+        value: (row: EvaluateGriQuantitativeSummary) => row.period_id.name,
+    },
+    {
+        key: "template",
+        label: "Template",
+        value: (row: EvaluateGriQuantitativeSummary) => row.template_id.name,
+    },
+];
 </script>
