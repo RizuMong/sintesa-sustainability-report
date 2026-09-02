@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-Package manager is pnpm (`packageManager: pnpm@11.13.0` — do not use npm/yarn).
+Package manager is pnpm (see `packageManager` in `package.json` — do not use npm/yarn).
 
 - `pnpm dev` — start Vite dev server
 - `pnpm build` — typecheck (`vue-tsc -b`) then production build
@@ -28,7 +28,7 @@ Two token modes coexist. `usePixelTheme().setNextTheme(...)` is toggled per-rout
 
 `src/router/index.ts` — every route points directly at a top-level page component; there is no wrapper layout. This is deliberate so each screen can be deep-linked/embedded independently by the parent Officeless app.
 
-### Services module shape (current convention)
+### Services module shape
 
 Every feature's data layer lives in its own folder under `src/services/<module>/`:
 
@@ -41,14 +41,14 @@ services/<module>/
 ```
 
 - `src/lib/http.ts` — the shared axios instance. Request interceptor sets `baseURL`/`Authorization` from `useOfficelessAuth()`'s config (same token/env the embed auth gate captured); response interceptor unwraps nothing itself but maps the `{code, data, error, message}` envelope through `statusFromResponse()` and calls `markAuthStatus()`, mirroring `authFetch`'s behavior so axios and fetch-based calls agree on auth state. Use the exported `unwrap<T>()` helper in `api.ts` methods to pull `.data.data` out of the envelope.
-- `types.d.ts` uses `declare global` (not a named export) — this is deliberate so `MasterUnit` (etc.) is usable in any file with zero import, matching the shape the user specified. Don't add a second same-named type elsewhere (`src/types/index.ts` is being wound down — see below).
+- `types.d.ts` uses `declare global` (not a named export) — this is deliberate so `MasterUnit` (etc.) is usable in any file with zero import, matching the shape the user specified. Don't add a second same-named type elsewhere (`src/types/index.ts` belongs to the old shape below).
 - Real endpoints: check `api/` (see References) for the actual path/payload/response shape before writing `api.ts` — grep the module's folder there first. If no contract exists yet for a given mutation (create/update/delete), follow the sibling `index`/`GET` convention (`{{base_url}}/v1/<module>/<action>`) as a placeholder and flag it, don't invent an unrelated shape.
 - Query keys: `['<moduleName>Api.<methodName>', ...params]` — see `src/services/master-unit/composables.ts` for the reference implementation.
-- **Migration status**: `master-unit` is the reference module on the new shape. `gri-quantitative`, `evaluate-gri-quantitative`, `master-key-indicator-quantitative`, `master-category` are still on the old shape below (flat `src/services/<feature>.api.ts` + in-memory mock + `useCrud()`) — migrate one module at a time, mirroring `master-unit`, rather than mixing old/new inside one module.
+- **Migration**: `master-unit` is the reference module on this shape. Modules still on the old shape below (flat `src/services/<feature>.api.ts` + in-memory mock + `useCrud()`) get migrated one at a time, mirroring `master-unit`, rather than mixing old/new inside one module. Check `src/services/` for which shape a given module is on.
 
-### Old shape (pre-migration, still in use by unmigrated modules)
+### Old shape (being migrated away from)
 
-- `src/types/index.ts` — one shared file for all domain types belonging to old-shape modules only. Once a module migrates, its types move to that module's own `types.d.ts` (ambient global) and get deleted here — don't add new types here for new modules.
+- `src/types/index.ts` — one shared file for domain types belonging to old-shape modules only. When a module migrates, its types move to that module's own `types.d.ts` (ambient global) and get deleted here — don't add new types here for new modules.
 - `src/services/<feature>.api.ts` — either `createMockApi()` (`src/services/api.ts`, generic in-memory CRUD keyed by `id`) or a hand-rolled mock store (e.g. `master-key-indicator-quantitative.api.ts`, `index/create/update/remove` with soft-delete). Still in-memory mocks, not axios — do not extend this pattern for new modules, use the services module shape above instead.
 - Pages use `useCrud()` (`src/composables/useCrud.ts`) for the generic list/create/update/remove state machine.
 
@@ -71,3 +71,11 @@ Several files use a `// ponytail: ...` comment to flag a deliberate simplificati
   - FSD Platform Administrator: `docs/fsd/platform-administrator.md`
   - FSD Sustainability Reporting: `docs/fsd/sustainability-reporting.md`
 - API collection: `api/` — symlink to `~/Projects/vas-api-collection/SLM/collections/Sintesa` (separate repo, gitignored here). Bruno/opencollection `.yml` files, one folder per feature, mirroring `src/services/*.api.ts`. Real REST contract — grep it before changing a mock API module's request/response shape.
+
+## Glossary
+
+**Officeless**: No-code platform.
+
+**Low-code**: Custom front-end.
+
+**Workflow API**: Backend service developed using Officeless.
