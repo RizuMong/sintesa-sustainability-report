@@ -29,16 +29,6 @@
                         <MpText as="h1" size="h1">{{
                             detail?.template_id.name ?? "Loading..."
                         }}</MpText>
-                        <!-- <MpBadge
-                            v-if="detail"
-                            for="tableStatus"
-                            :type="
-                                statusBadgeType[detail.flow_status] ??
-                                'information'
-                            "
-                        >
-                            {{ detail.flow_status }}
-                        </MpBadge> -->
                     </MpFlex>
                 </MpFlex>
             </MpFlex>
@@ -528,25 +518,6 @@ import {
     toSubmissionValue,
     cellKey,
 } from "@/services/evaluate-gri-quantitative";
-
-const statusBadgeType: Partial<
-    Record<
-        SubmissionFlowStatus | ApprovalStatus,
-        "announcement" | "information" | "completed" | "critical"
-    >
-> = {
-    draft: "announcement",
-    submitted: "information",
-    approved: "completed",
-    rejected: "critical",
-    cancelled: "announcement",
-    WAITING_APPROVAL: "information",
-    PENDING: "information",
-    APPROVE: "completed",
-    APPROVED: "completed",
-    REJECTED: "critical",
-    CANCEL: "announcement",
-};
 
 // MpTimelineItem picks its own dot icon/color from `status` (see pixel3-timeline separator)
 const timelineStatus: Record<
