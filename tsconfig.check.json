@@ -1,0 +1,18 @@
+{
+  // *.check.ts files are node scripts, excluded from tsconfig.app.json so they never reach the
+  // app build. Without a project that owns them the editor resolves every ambient global from
+  // src/services/*/types.d.ts as `any`, so they type-check nothing. This config gives them one.
+  // Referenced from tsconfig.json so the editor's TS server assigns these files to it —
+  // without the reference they land in an inferred project and every ambient global is missing.
+  // Run: node_modules/.bin/tsc -p tsconfig.check.json --noEmit
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.check.tsbuildinfo",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.check.ts", "src/**/*.d.ts"]
+}

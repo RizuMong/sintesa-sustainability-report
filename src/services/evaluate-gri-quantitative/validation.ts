@@ -92,20 +92,25 @@ export function cellKey(rowSequence: number, metricKey: string): string {
 }
 
 export function toSubmissionValue(
-  metric: { key: string; input_type: MkiQuantInputType; unit: { name: string } | null },
+  metric: { key: string; name: string; input_type: MkiQuantInputType; unit: Ref2 | null },
   rowSequence: number,
   raw: string | number | boolean | null | undefined,
 ): EvaluateGriQuantitativeValue {
   const empty = raw === '' || raw === null || raw === undefined
   const isNumeric = metric.input_type === 'NUMBER' || metric.input_type === 'PERCENTAGE'
   const isDate = metric.input_type === 'DATE'
+  // YES_NO is a toggle in the UI (boolean) but the contract wants the literal 'YES'/'NO'
+  const isYesNo = metric.input_type === 'YES_NO'
   return {
     row_key: rowKey(rowSequence),
     metric_key: metric.key,
+    metric_name: metric.name,
+    input_type: metric.input_type,
     value_number: !empty && isNumeric ? Number(raw) : null,
+    value_text: empty || isNumeric || isDate ? null : isYesNo ? (raw ? 'YES' : 'NO') : String(raw),
     value_date: !empty && isDate ? new Date(raw as string | number).getTime() : null,
-    value_text: !empty && !isNumeric && !isDate ? String(raw) : null,
-    unit: metric.unit?.name ?? null,
+    // metric with no unit sends `{}`, not null — Update contract's shape
+    unit: metric.unit ? { id: metric.unit.id, name: metric.unit.name } : {},
   }
 }
 
@@ -115,8 +120,10 @@ export function fromSubmissionValues(
 ): Record<string, string | number | boolean | null> {
   const cells: Record<string, string | number | boolean | null> = {}
   for (const v of values) {
+    // mirror of toSubmissionValue's 'YES'/'NO' <-> boolean toggle mapping
+    const text = v.input_type === 'YES_NO' && v.value_text !== null ? v.value_text === 'YES' : v.value_text
     cells[`${v.row_key}:${v.metric_key}`] =
-      v.value_number ?? (v.value_date ? new Date(v.value_date).toISOString().slice(0, 10) : null) ?? v.value_text
+      v.value_number ?? (v.value_date ? new Date(v.value_date).toISOString().slice(0, 10) : null) ?? text
   }
   return cells
 }

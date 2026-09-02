@@ -1,6 +1,10 @@
 // Verbatim from api/Evaluate GRI - Quantitative/*.yml — do not change field names.
 // Approval/Ref2 globals (§3 of the impl plan) are declared here; Stream C owns this file.
 declare global {
+  // moved here from the removed services/mki-sdg module — this is now the only module
+  // that still uses them (via components/DynamicFieldInput + lib/dynamic-validation)
+  type MkiInputType = 'Number' | 'Text' | 'Percentage' | 'Boolean'
+  type MkiEvidenceAttachment = 'Optional' | 'Required'
   type SubmissionFlowStatus = 'draft' | 'submitted' | 'approved' | 'rejected' | 'cancelled'
   // one union for both the stage status and an approver's action — the API emits the same
   // enum in both slots, so keep them aliased rather than drifting into two half-lists
@@ -44,10 +48,12 @@ declare global {
   interface EvaluateGriQuantitativeValue {
     row_key: string
     metric_key: string
+    metric_name: string
+    input_type: MkiQuantInputType
     value_number: number | null
     value_text: string | null
     value_date: number | null
-    unit: string | null
+    unit: Ref2 | Record<string, never>
   }
 
   // one disclosure line of the submission matrix (Stream A's GriDisclosure, evaluated for one entity/period)
@@ -87,6 +93,9 @@ declare global {
     created_at: number
     created_by: number
     created_by_project_user: string
+    // requester identity — BE adds this alongside the raw ids so the Approval line can show an
+    // email instead of a project-user id. Optional until that BE change is deployed.
+    created_by_user?: { id: string; name: string; email: string }
     current_stage_order: number
     entity_id: Ref2
     period_id: Ref2

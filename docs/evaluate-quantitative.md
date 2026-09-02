@@ -9,7 +9,7 @@ Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
 ### Requestor (`RequestorPage.vue`)
 - Four summary blocks above the table: **Draft**, **Awaiting Approval**, **Approved**, **Rejected**,
   counted client-side off the same list query that feeds the table (`requestorSummary()`).
-- Table + filter + "New submission" modal unchanged (AC-86 duplicate guard still applies).
+- Table + filter + "Create Data" modal unchanged (AC-86 duplicate guard still applies).
 
 ### Detail (`DetailPage.vue`)
 - **Items are grouped by category.** `groupItemsByCategory()` buckets `items[]` on `category_id`,

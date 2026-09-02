@@ -15,6 +15,9 @@
                     label="Awaiting Approval"
                     :amount="summary.awaitingApproval"
                     :is-loading="isLoading"
+                    :is-active="isStatusActive('sent')"
+                    is-hoverable
+                    @click="selectStatusFilter('sent')"
                 />
                 <SummaryBox
                     variant="blue"
@@ -27,17 +30,20 @@
                     label="Approved"
                     :amount="summary.approved"
                     :is-loading="isLoading"
+                    :is-active="isStatusActive('approved')"
+                    is-hoverable
+                    @click="selectStatusFilter('approved')"
                 />
                 <SummaryBox
                     variant="red"
                     label="Rejected"
                     :amount="summary.rejected"
                     :is-loading="isLoading"
+                    :is-active="isStatusActive('rejected')"
+                    is-hoverable
+                    @click="selectStatusFilter('rejected')"
                 />
             </div>
-
-            <!-- ponytail: isFilter/isActive card-as-filter affordance from the SummaryBox port isn't wired
-           here — filtering lives in TableFilter below instead. -->
 
             <MpFlex justifyContent="flex-start">
                 <TableFilter
@@ -61,7 +67,6 @@
                 :columns="columns"
                 :approve-mutation="approveMutation"
                 :reject-mutation="rejectMutation"
-                empty-title="No GRI Quantitative submissions waiting for approval"
                 @row-click="onRowClick"
             />
         </MpFlex>
@@ -71,7 +76,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { MpFlex, MpText, css } from "@mekari/pixel3";
+import { MpFlex, css } from "@mekari/pixel3";
 import ApprovalReviewTable from "@/components/ApprovalReviewTable.vue";
 import SummaryBox from "@/components/SummaryBox.vue";
 import TableFilter from "@/components/TableFilter.vue";
@@ -96,7 +101,23 @@ const filterColumns = computed(() => [
     { value: "period_id.name", label: "Period" },
     { value: "template_id.name", label: "Template" },
 ]);
-const { filteredItems, applyFilter, resetFilter } = useTableFilter(items);
+// The queue is always scoped to one flow_status: it opens on Awaiting Approval and a box click
+// switches status, there is no unfiltered "all" state (the popover's Reset returns here too).
+// "Approved by Me" has no flow_status of its own, so it stays a plain counter.
+const DEFAULT_STATUS_FILTER = { column: "flow_status", value: "sent" };
+const { filteredItems, activeFilter, applyFilter, resetFilter } =
+    useTableFilter(items, DEFAULT_STATUS_FILTER);
+
+function isStatusActive(status: string) {
+    return (
+        activeFilter.value?.column === "flow_status" &&
+        activeFilter.value.value === status
+    );
+}
+
+function selectStatusFilter(status: string) {
+    applyFilter({ column: "flow_status", value: status });
+}
 
 function onRowClick(row: EvaluateGriQuantitativeSummary) {
     router.push({
