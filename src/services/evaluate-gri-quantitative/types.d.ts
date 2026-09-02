@@ -1,6 +1,10 @@
 // Verbatim from api/Evaluate GRI - Quantitative/*.yml — do not change field names.
 // Approval/Ref2 globals (§3 of the impl plan) are declared here; Stream C owns this file.
 declare global {
+  // moved here from the removed services/mki-sdg module — this is now the only module
+  // that still uses them (via components/DynamicFieldInput + lib/dynamic-validation)
+  type MkiInputType = 'Number' | 'Text' | 'Percentage' | 'Boolean'
+  type MkiEvidenceAttachment = 'Optional' | 'Required'
   type SubmissionFlowStatus = 'draft' | 'submitted' | 'approved' | 'rejected' | 'cancelled'
   // one union for both the stage status and an approver's action — the API emits the same
   // enum in both slots, so keep them aliased rather than drifting into two half-lists

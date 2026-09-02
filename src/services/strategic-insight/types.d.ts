@@ -4,6 +4,8 @@
 // plan): row-level breakdown per entity+period so the FE can do the AC-75 All-Entities/All-Periods
 // aggregation itself (see ./aggregate.ts). Reconcile field names once the backend returns a real payload.
 declare global {
+  // moved here from the removed services/action-plan-submission module
+  type TakeSkipDecision = 'Take' | 'Skip' | null
   interface StrategicInsightFilterParams {
     period?: string // MasterPeriod.year as a string; omitted = All Periods
     entity_id?: string // MasterEntity id; omitted = All Entities
