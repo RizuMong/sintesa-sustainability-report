@@ -262,6 +262,22 @@
                             >Update</MpButton
                         >
                     </MpFlex>
+
+                    <!-- approver-facing actions — only on rows opened from the Review & Approval queue -->
+                    <MpFlex v-if="canAct" gap="3" paddingTop="2">
+                        <MpButton
+                            :is-disabled="isApproving"
+                            :is-loading="isApproving"
+                            @click="approve"
+                            >Approve</MpButton
+                        >
+                        <MpButton
+                            variant="danger"
+                            :is-disabled="isApproving"
+                            @click="openReject"
+                            >Reject</MpButton
+                        >
+                    </MpFlex>
                 </MpFlex>
 
                 <!-- approval line — moved here from the Review & Approval table's inline expand row;
@@ -466,6 +482,42 @@
             @close="isConfirmingDelete = false"
             @confirm="confirmDelete"
         />
+
+        <MpModal :is-open="isRejecting" size="md" @close="closeReject">
+            <MpModalContent>
+                <MpModalHeader>
+                    Reject submission
+                    <MpModalCloseButton />
+                </MpModalHeader>
+                <MpModalBody>
+                    <MpFormControl id="detail-reject-notes" is-required>
+                        <MpFormLabel>Reviewer Notes</MpFormLabel>
+                        <MpTextarea
+                            v-model="rejectNotes"
+                            placeholder="Explain why this is being rejected"
+                        />
+                    </MpFormControl>
+                </MpModalBody>
+                <MpModalFooter>
+                    <MpButtonGroup>
+                        <MpButton variant="ghost" @click="closeReject"
+                            >Cancel</MpButton
+                        >
+                        <MpButton
+                            variant="danger"
+                            :is-disabled="
+                                !canReject(rejectNotes) || isRejectSubmitting
+                            "
+                            :is-loading="isRejectSubmitting"
+                            @click="confirmReject"
+                        >
+                            Reject
+                        </MpButton>
+                    </MpButtonGroup>
+                </MpModalFooter>
+            </MpModalContent>
+            <MpModalOverlay />
+        </MpModal>
     </MpFlex>
 </template>
 
@@ -497,6 +549,15 @@ import {
     MpAccordionItem,
     MpAccordionHeader,
     MpAccordionPanel,
+    MpModal,
+    MpModalContent,
+    MpModalHeader,
+    MpModalBody,
+    MpModalFooter,
+    MpModalOverlay,
+    MpModalCloseButton,
+    MpButtonGroup,
+    MpTextarea,
     css,
     MpAccordionIcon,
 } from "@mekari/pixel3";
@@ -506,11 +567,14 @@ import {
     isAllowedEvidenceFile,
     canSubmit as canSubmitEvidence,
 } from "@/lib/dynamic-validation";
+import { canReject, selectableApprovalIds } from "@/lib/review-approval-validation";
 import {
     useGetEvaluateGriQuantitativeDetail,
     useUpdateEvaluateGriQuantitative,
     useSubmitEvaluateGriQuantitative,
     useDeleteEvaluateGriQuantitative,
+    useApproveEvaluateGriQuantitative,
+    useRejectEvaluateGriQuantitative,
     isReadOnly,
     latestRejectionNote,
     groupItemsByCategory,
@@ -724,5 +788,55 @@ async function confirmDelete() {
             ? "/evaluate-gri-quantitative/approval"
             : "/evaluate-gri-quantitative/requestor",
     );
+}
+
+// approver actions — only reachable from the Review & Approval queue, same actionable-status rule
+// as the queue's bulk actions (ApprovalReviewTable.vue / selectableApprovalIds)
+const canAct = computed(
+    () =>
+        route.query.from === "approval" &&
+        Boolean(detail.value) &&
+        selectableApprovalIds([detail.value!]).length > 0,
+);
+
+const approveMutation = useApproveEvaluateGriQuantitative();
+const rejectMutation = useRejectEvaluateGriQuantitative();
+const isApproving = computed(() => approveMutation.isPending.value);
+const isRejectSubmitting = computed(() => rejectMutation.isPending.value);
+const isRejecting = ref(false);
+const rejectNotes = ref("");
+
+async function approve() {
+    if (!detail.value) return;
+    try {
+        await approveMutation.mutateAsync({ id: detail.value.id });
+        router.push("/evaluate-gri-quantitative/approval");
+    } catch {
+        return;
+    }
+}
+
+function openReject() {
+    rejectNotes.value = "";
+    isRejecting.value = true;
+}
+
+function closeReject() {
+    isRejecting.value = false;
+    rejectNotes.value = "";
+}
+
+async function confirmReject() {
+    if (!detail.value || !canReject(rejectNotes.value)) return;
+    try {
+        await rejectMutation.mutateAsync({
+            id: detail.value.id,
+            remarks: rejectNotes.value.trim(),
+        });
+    } catch {
+        return;
+    }
+    closeReject();
+    router.push("/evaluate-gri-quantitative/approval");
 }
 </script>
