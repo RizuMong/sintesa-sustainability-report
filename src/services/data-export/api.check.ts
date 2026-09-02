@@ -12,6 +12,6 @@ assert.deepEqual(buildExportPayload({ period: '2025', entity: 'e1', category: 'S
   category: 'SDG',
 })
 // @ts-expect-error status is not settable from the filter — it must always come out 'Approved'
-assert.equal(buildExportPayload({ category: 'GRI Disclosure' }).status, 'Approved')
+assert.equal(buildExportPayload({ category: 'GRI Disclosure', status: 'Draft' }).status, 'Approved')
 
 console.log('ok')

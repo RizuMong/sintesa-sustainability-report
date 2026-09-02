@@ -44,10 +44,12 @@ declare global {
   interface EvaluateGriQuantitativeValue {
     row_key: string
     metric_key: string
+    metric_name: string
+    input_type: MkiQuantInputType
     value_number: number | null
     value_text: string | null
     value_date: number | null
-    unit: string | null
+    unit: Ref2 | Record<string, never>
   }
 
   // one disclosure line of the submission matrix (Stream A's GriDisclosure, evaluated for one entity/period)
@@ -87,6 +89,9 @@ declare global {
     created_at: number
     created_by: number
     created_by_project_user: string
+    // requester identity — BE adds this alongside the raw ids so the Approval line can show an
+    // email instead of a project-user id. Optional until that BE change is deployed.
+    created_by_user?: { id: string; name: string; email: string }
     current_stage_order: number
     entity_id: Ref2
     period_id: Ref2

@@ -114,19 +114,39 @@ assert.deepEqual(approvalSummary(approvalBoard, 'me@x.com'), {
 assert.equal(approvalSummary(approvalBoard, null).approvedByMe, 0, 'no identity means nothing counts as mine')
 
 // matrix cell <-> Update.yml items[].values[] mapping
-const numberMetric = { key: 'new_hire_count', input_type: 'NUMBER' as MkiQuantInputType, unit: { name: 'Person' } }
+const numberMetric = {
+  key: 'new_hire_count',
+  name: 'New Hire Count',
+  input_type: 'NUMBER' as MkiQuantInputType,
+  unit: { id: '1', name: 'Person' },
+}
 assert.deepEqual(toSubmissionValue(numberMetric, 1, '12'), {
   row_key: 'row_1',
   metric_key: 'new_hire_count',
+  metric_name: 'New Hire Count',
+  input_type: 'NUMBER',
   value_number: 12,
-  value_date: null,
   value_text: null,
-  unit: 'Person',
+  value_date: null,
+  unit: { id: '1', name: 'Person' },
 })
-const dateMetric = { key: 'effective_date', input_type: 'DATE' as MkiQuantInputType, unit: null }
+const dateMetric = {
+  key: 'effective_date',
+  name: 'Effective Date',
+  input_type: 'DATE' as MkiQuantInputType,
+  unit: null,
+}
 assert.equal(toSubmissionValue(dateMetric, 2, '2026-01-15').value_date, Date.parse('2026-01-15'))
-const textMetric = { key: 'is_reported', input_type: 'YES_NO' as MkiQuantInputType, unit: null }
-assert.equal(toSubmissionValue(textMetric, 1, true).value_text, 'true')
+assert.deepEqual(toSubmissionValue(dateMetric, 2, '2026-01-15').unit, {}, 'unitless metric sends {}, not null')
+const textMetric = { key: 'is_reported', name: 'Is Reported', input_type: 'YES_NO' as MkiQuantInputType, unit: null }
+assert.equal(toSubmissionValue(textMetric, 1, true).value_text, 'YES')
+assert.equal(toSubmissionValue(textMetric, 1, false).value_text, 'NO', 'YES_NO false is NO, not null')
+assert.equal(toSubmissionValue(textMetric, 1, null).value_text, null, 'untouched toggle stays null')
+assert.equal(
+  fromSubmissionValues([toSubmissionValue(textMetric, 1, false)])['row_1:is_reported'],
+  false,
+  'NO seeds the toggle back as boolean false',
+)
 assert.equal(toSubmissionValue(numberMetric, 1, '').value_number, null, 'blank cell stays null, not 0')
 
 assert.deepEqual(

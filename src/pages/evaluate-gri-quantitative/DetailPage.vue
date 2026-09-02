@@ -287,6 +287,7 @@
                                 <MpText weight="semiBold">
                                     Requested by
                                     {{
+                                        detail.created_by_user?.email ||
                                         detail.submitted_by ||
                                         detail.created_by_project_user
                                     }}

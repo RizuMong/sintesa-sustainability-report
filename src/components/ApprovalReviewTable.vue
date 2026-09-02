@@ -246,13 +246,27 @@ function toggleSelectAll(checked: boolean) {
 
 // AC-62 — bulk approve/reject are one mutation call per selected row; each mutation's own onSuccess
 // already invalidates the list query on settle (see the module's composables.ts).
+// bulk calls pass silentToast so the loop emits one summary toast instead of N — that also silences
+// the interceptor's per-call error toast, so a BE validation failure has to be surfaced here.
+function bulkErrorTitle(error: unknown, done: number, total: number) {
+    const message =
+        error instanceof Error && error.message
+            ? error.message
+            : "Request failed. Please try again.";
+    return done
+        ? `${done} of ${total} processed, then stopped: ${message}`
+        : message;
+}
+
 async function bulkApprove() {
     const ids = Array.from(selected.value);
     if (!ids.length) return;
     isBulkApproving.value = true;
+    let done = 0;
     try {
         for (const id of ids) {
             await props.approveMutation.mutateAsync({ id, silentToast: true });
+            done += 1;
         }
         toast.notify({
             id: "bulk-approve",
@@ -260,6 +274,12 @@ async function bulkApprove() {
             title: `Approved ${ids.length} submission(s).`,
         });
         selected.value = new Set();
+    } catch (error) {
+        toast.notify({
+            id: "bulk-approve",
+            variant: "error",
+            title: bulkErrorTitle(error, done, ids.length),
+        });
     } finally {
         isBulkApproving.value = false;
     }
@@ -279,6 +299,7 @@ async function confirmReject() {
     const ids = rejectTargetIds.value;
     if (!ids.length || !canReject(rejectNotes.value)) return;
     isBulkRejecting.value = true;
+    let done = 0;
     try {
         const remarks = rejectNotes.value.trim();
         for (const id of ids) {
@@ -287,6 +308,7 @@ async function confirmReject() {
                 remarks,
                 silentToast: true,
             });
+            done += 1;
         }
         toast.notify({
             id: "bulk-reject",
@@ -295,6 +317,12 @@ async function confirmReject() {
         });
         selected.value = new Set();
         closeReject();
+    } catch (error) {
+        toast.notify({
+            id: "bulk-reject",
+            variant: "error",
+            title: bulkErrorTitle(error, done, ids.length),
+        });
     } finally {
         isBulkRejecting.value = false;
     }

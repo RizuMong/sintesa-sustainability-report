@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { toast } from '@mekari/pixel3'
+import { envelopeErrorMessage } from './envelope-error'
 import { markAuthStatus, statusFromResponse, useOfficelessAuth, workflowApiBaseUrl } from '@/composables/useOfficelessAuth'
 
 declare module 'axios' {
@@ -34,6 +35,11 @@ http.interceptors.response.use(
     const next = statusFromResponse(response.data, response.status)
     markAuthStatus(next)
     if (next !== 'ok') return Promise.reject(new Error(response.data?.message ?? 'ERR_UNAUTHORIZED'))
+    if (response.data?.error) {
+      const title = envelopeErrorMessage(response.data)
+      if (!response.config.meta?.silentToast) toast.notify({ variant: 'error', title })
+      return Promise.reject(new Error(title))
+    }
     const method = response.config.method?.toLowerCase()
     if (method && method !== 'get' && method !== 'head' && response.data?.message && !response.config.meta?.silentToast) {
       toast.notify({ id: `${method}-${response.config.url}`, variant: 'success', title: response.data.message })
@@ -44,7 +50,7 @@ http.interceptors.response.use(
     const next = statusFromResponse(error.response?.data ?? null, error.response?.status ?? 0)
     markAuthStatus(next)
     if (next === 'ok' && !error.config?.meta?.silentToast) {
-      toast.notify({ variant: 'error', title: error.response?.data?.message ?? error.message })
+      toast.notify({ variant: 'error', title: error.response?.data ? envelopeErrorMessage(error.response.data) : error.message })
     }
     return Promise.reject(error)
   },
