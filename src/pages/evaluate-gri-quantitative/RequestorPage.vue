@@ -34,7 +34,7 @@
                     :is-loading="isLoading"
                     :is-active="isStatusActive(box.status)"
                     is-hoverable
-                    @click="toggleStatusFilter(box.status)"
+                    @click="selectStatusFilter(box.status)"
                 />
             </div>
 
@@ -226,17 +226,6 @@ import {
     requestorSummary,
 } from "@/services/evaluate-gri-quantitative";
 
-const statusBadgeType: Record<
-    SubmissionFlowStatus,
-    "announcement" | "information" | "completed" | "critical"
-> = {
-    draft: "announcement",
-    submitted: "information",
-    approved: "completed",
-    rejected: "critical",
-    cancelled: "announcement",
-};
-
 const router = useRouter();
 
 const { data, isLoading } = useGetRequestorList();
@@ -259,24 +248,22 @@ const publishedTemplates = computed(() =>
     (templateData.value ?? []).filter((t) => t.status === "Published"),
 );
 
+// Status lives on the summary blocks, not in the popover — the boxes are the status tabs.
 const filterColumns = computed(() => [
     { value: "entity_id.name", label: "Entity" },
     { value: "period_id.name", label: "Period" },
     { value: "template_id.name", label: "Template" },
-    {
-        value: "flow_status",
-        label: "Status",
-        options: (Object.keys(statusBadgeType) as SubmissionFlowStatus[]).map(
-            (value) => ({ value, label: value }),
-        ),
-    },
 ]);
-const { filteredItems, activeFilter, applyFilter, resetFilter } =
-    useTableFilter(items);
 
-// Clicking a summary block filters the table by flow_status; clicking the active one clears it.
-// ponytail: reuses TableFilter's substring filter, so the popover's own controls stay out of sync
-// with a box click — swap both onto one shared filter state if that ever confuses anyone.
+// The table is always scoped to one flow_status: it opens on Draft and a box click switches status,
+// there is no unfiltered "all" state (the popover's Reset returns here too).
+const DEFAULT_STATUS_FILTER = { column: "flow_status", value: "draft" };
+const { filteredItems, activeFilter, applyFilter, resetFilter } =
+    useTableFilter(items, DEFAULT_STATUS_FILTER);
+
+// ponytail: reuses TableFilter's single substring filter, so picking an Entity/Period/Template in
+// the popover replaces the status scope instead of narrowing within it — split into two filter
+// states if that ever confuses anyone.
 const summaryBoxes = computed(() => [
     { status: "draft", variant: "gray", label: "Draft", amount: summary.value.draft },
     {
@@ -296,9 +283,8 @@ function isStatusActive(status: string) {
     );
 }
 
-function toggleStatusFilter(status: string) {
-    if (isStatusActive(status)) resetFilter();
-    else applyFilter({ column: "flow_status", value: status });
+function selectStatusFilter(status: string) {
+    applyFilter({ column: "flow_status", value: status });
 }
 
 const openCreate = ref(false);

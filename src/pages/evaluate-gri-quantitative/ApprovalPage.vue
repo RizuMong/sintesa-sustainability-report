@@ -17,7 +17,7 @@
                     :is-loading="isLoading"
                     :is-active="isStatusActive('sent')"
                     is-hoverable
-                    @click="toggleStatusFilter('sent')"
+                    @click="selectStatusFilter('sent')"
                 />
                 <SummaryBox
                     variant="blue"
@@ -32,7 +32,7 @@
                     :is-loading="isLoading"
                     :is-active="isStatusActive('approved')"
                     is-hoverable
-                    @click="toggleStatusFilter('approved')"
+                    @click="selectStatusFilter('approved')"
                 />
                 <SummaryBox
                     variant="red"
@@ -41,7 +41,7 @@
                     :is-loading="isLoading"
                     :is-active="isStatusActive('rejected')"
                     is-hoverable
-                    @click="toggleStatusFilter('rejected')"
+                    @click="selectStatusFilter('rejected')"
                 />
             </div>
 
@@ -101,11 +101,13 @@ const filterColumns = computed(() => [
     { value: "period_id.name", label: "Period" },
     { value: "template_id.name", label: "Template" },
 ]);
+// The queue is always scoped to one flow_status: it opens on Awaiting Approval and a box click
+// switches status, there is no unfiltered "all" state (the popover's Reset returns here too).
+// "Approved by Me" has no flow_status of its own, so it stays a plain counter.
+const DEFAULT_STATUS_FILTER = { column: "flow_status", value: "sent" };
 const { filteredItems, activeFilter, applyFilter, resetFilter } =
-    useTableFilter(items);
+    useTableFilter(items, DEFAULT_STATUS_FILTER);
 
-// Clicking a status summary block filters the table by flow_status; clicking the active one clears
-// it. "Approved by Me" has no flow_status of its own, so it stays a plain counter.
 function isStatusActive(status: string) {
     return (
         activeFilter.value?.column === "flow_status" &&
@@ -113,9 +115,8 @@ function isStatusActive(status: string) {
     );
 }
 
-function toggleStatusFilter(status: string) {
-    if (isStatusActive(status)) resetFilter();
-    else applyFilter({ column: "flow_status", value: status });
+function selectStatusFilter(status: string) {
+    applyFilter({ column: "flow_status", value: status });
 }
 
 function onRowClick(row: EvaluateGriQuantitativeSummary) {
