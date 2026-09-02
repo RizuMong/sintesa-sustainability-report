@@ -29,7 +29,7 @@
                         <MpText as="h1" size="h1">{{
                             detail?.template_id.name ?? "Loading..."
                         }}</MpText>
-                        <MpBadge
+                        <!-- <MpBadge
                             v-if="detail"
                             for="tableStatus"
                             :type="
@@ -38,7 +38,7 @@
                             "
                         >
                             {{ detail.flow_status }}
-                        </MpBadge>
+                        </MpBadge> -->
                     </MpFlex>
                 </MpFlex>
             </MpFlex>

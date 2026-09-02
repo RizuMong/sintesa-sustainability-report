@@ -10,7 +10,9 @@ const app = createApp(App)
 
 app.use(router)
 app.use(PixelPlugin, {
-  pixelTheme: true
+  pixelTheme: true,
+  // mounts the toast container — toast.notify() is a silent no-op without it (defaults to false)
+  toastManager: true
 } as PixelPluginConfig)
 app.use(VueQueryPlugin)
 
