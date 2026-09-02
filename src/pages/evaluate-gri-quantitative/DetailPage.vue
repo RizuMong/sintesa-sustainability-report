@@ -704,36 +704,49 @@ const isSubmitting = computed(() => submitMutation.isPending.value);
 const isConfirmingDelete = ref(false);
 
 async function save() {
-    if (!detail.value) return;
-    await updateMutation.mutateAsync({
-        id: detail.value.id,
-        template_id: detail.value.template_id,
-        period_id: detail.value.period_id,
-        entity_id: detail.value.entity_id,
-        items: items.value.map((item) => ({
-            item_id: item.id,
-            values: item.rows.flatMap((row) =>
-                item.metrics.map((metric) =>
-                    toSubmissionValue(
-                        metric,
-                        row.sequence,
-                        cells[cellId(item.id, row.sequence, metric.key)],
+    if (!detail.value) return false;
+    try {
+        await updateMutation.mutateAsync({
+            id: detail.value.id,
+            template_id: detail.value.template_id,
+            period_id: detail.value.period_id,
+            entity_id: detail.value.entity_id,
+            items: items.value.map((item) => ({
+                item_id: item.id,
+                values: item.rows.flatMap((row) =>
+                    item.metrics.map((metric) =>
+                        toSubmissionValue(
+                            metric,
+                            row.sequence,
+                            cells[cellId(item.id, row.sequence, metric.key)],
+                        ),
                     ),
                 ),
-            ),
-        })),
-    });
+            })),
+        });
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 async function submit() {
     if (!detail.value || !canSubmitForm.value) return;
-    await save();
-    await submitMutation.mutateAsync(detail.value.id);
+    if (!(await save())) return;
+    try {
+        await submitMutation.mutateAsync(detail.value.id);
+    } catch {
+        return;
+    }
 }
 
 async function confirmDelete() {
     if (!detail.value) return;
-    await deleteMutation.mutateAsync(detail.value.id);
+    try {
+        await deleteMutation.mutateAsync(detail.value.id);
+    } catch {
+        return;
+    }
     isConfirmingDelete.value = false;
     router.push(
         route.query.from === "approval"
