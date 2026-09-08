@@ -94,7 +94,7 @@ declare global {
     created_by: number
     created_by_project_user: string
     // requester identity — BE adds this alongside the raw ids so the Approval line can show an
-    // email instead of a project-user id. Optional until that BE change is deployed.
+    // email instead of a project-user id. Optional until that BE change is deployed (GROU-649).
     created_by_user?: { id: string; name: string; email: string }
     current_stage_order: number
     entity_id: Ref2
@@ -107,8 +107,12 @@ declare global {
     submitted_by: string
     rejected_at?: number | null
     rejected_by?: string
+    // detail-only (Detail.yml) — absent on the flat Index/Approval list examples
+    approved_at?: number | null
+    approved_by_email?: string
     updated_at: number
     updated_by: number
+    updated_by_project_user?: string
   }
 
   interface EvaluateGriQuantitative extends EvaluateGriQuantitativeSummary {
