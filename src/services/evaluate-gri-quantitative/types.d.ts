@@ -42,6 +42,12 @@ declare global {
   interface EvaluateGriQuantitativeRow {
     labels: Record<string, string>
     sequence: number
+    // ponytail: GROU-651 — mirrors MkiQuantRow's new optional fields (types.d.ts in the mki-quant
+    // module), unconfirmed with BE. Absent === plain data row, identical to today.
+    row_type?: 'SECTION' | 'ROW'
+    title?: string
+    parent_sequence?: number | null
+    unit?: Ref2 | null
   }
 
   // one filled cell of the matrix — Update.yml's items[].values[] shape
@@ -83,6 +89,10 @@ declare global {
     // ponytail: unconfirmed — no evidence_attachment on the item in the contract. Assumed
     // denormalized from the MKI behind the disclosure.
     evidence_attachment?: MkiEvidenceAttachment
+    // ponytail: GROU-651 — mirrors MkiGriQuantitative.unit_mode/unit, unconfirmed with BE.
+    // Absent === 'NONE', identical to today's metric-level-unit-only rendering.
+    unit_mode?: MkiQuantUnitMode
+    unit?: Ref2 | null
   }
 
   // list-mode shape (Index Requestor / Index Approval) — no `items`, detail-only field
