@@ -84,6 +84,32 @@ unit `null`** — that property is what guarantees AC-5, and it gets its own ass
 `row_key`/cell identity is unchanged: `row_<sequence>` for data rows. Section rows are never
 serialized into `values[]`.
 
+## Accepted risks (decided 2026-09-08 — do not block on BE)
+
+BE will not be consulted before implementation. These are **known, accepted** unknowns, not
+oversights. Each is to be coded to the safest assumption and flagged `ponytail:` at the call site
+so it is greppable when BE eventually answers. The user verifies them manually against the running
+app rather than up front.
+
+| # | Unknown | Assumption to build on | Blast radius if wrong |
+|---|---------|------------------------|-----------------------|
+| R1 | Does BE persist the new row fields at all? | Additive optional fields on the existing `rows[]` | Sections don't survive a reload. FE-only until BE lands; nothing existing breaks. |
+| R2 | Are `EvaluateGriQuantitativeItem.rows` frozen snapshots? | **No** — assumed live-read, so sequence stability is enforced | If they are snapshots we were merely over-careful. Harmless. |
+| R3 | Does BE re-sort `rows` by `sequence` on read? | No; `display_order` carries visual order | Reordering reverts on reload. Cosmetic, no data loss. |
+| R4 | Is `/v2/mki/gri-quantitative/*` the intended endpoint? | Stay on `/v1/`, unchanged | One-line URL swap in `api.ts`. |
+| R5 | Does the metric-level unit survive alongside table `unit_mode`? | Yes; `unit_mode` wins when not `NONE` | Preview shows a unit in the wrong column. Cosmetic. |
+
+R2 is the only one that could cost data, and the plan assumes the dangerous branch is true, so the
+sequence rules below stand regardless of the answer.
+
+**Manual test checklist for the user, once the phases land** (acceptance items no automated check
+can cover):
+1. Open an existing indicator, change nothing, Update → old rows keep their sequences.
+2. Delete a middle row, add a new one → new row gets `max+1`, never a recycled number.
+3. Open an existing **filled** submission in Evaluate → every value still in its cell.
+4. New indicator with a section + `Per baris` units → renders grouped in Evaluate, saves, reloads.
+5. Reorder rows, save, reload → check whether order survives (this is R3 answering itself).
+
 ## Sequence handling (the load-bearing rule)
 
 `sequence` currently does three jobs at once. Split them:
@@ -152,20 +178,13 @@ Manual: open an **existing** indicator in the builder and an **existing filled**
 Evaluate — both must look exactly as they do on `main` (AC-5). Then create a new indicator with a
 section and `Per baris` units and confirm it renders grouped in Evaluate.
 
-## Open questions to raise before merge
+## Open questions — deferred, not blocking
 
-1. **BE schema (AC-6)** — is the nested structure `row_type`/`parent_sequence` on the existing flat
-   `rows` array acceptable, or does BE want a truly nested `sections[]`? Our shape was chosen because it
-   keeps `row_<sequence>` cell identity intact, which is what protects already-submitted data.
-2. **Metric-level unit vs table-level unit** — the ticket adds a table Unit setting but does not say
-   the per-metric unit goes away. Assumed: metric unit stays, table `unit_mode` wins when it is not
-   `NONE`. Confirm with design.
-3. **Reordering** — move-up/down buttons unless the user funds a DnD dependency.
-4. **Are submission items frozen snapshots?** `EvaluateGriQuantitativeItem` carries its own
-   `columns`/`metrics`/`rows`. If those are copied at submission time, editing an MKI cannot break
-   existing submissions and most of the sequence risk disappears. **Ask this first — it sizes the
-   whole ticket.**
-5. **Does `display_order` exist, and does BE re-sort `rows` by `sequence` on read?** If it sorts
-   and there is no `display_order`, reordering silently reverts on reload.
-6. **Is `/v2/mki/gri-quantitative/*` the intended home for this change?** The contract folder
-   already has an empty V2 (see above).
+Superseded by §"Accepted risks": R1-R5 cover the BE-facing unknowns and are explicitly accepted.
+What remains is a design call the user can make without BE:
+
+- **Reordering UX** — move-up/down buttons, since the repo has no DnD dependency and the ticket's
+  "drag handle" wording would require adding one. Say so if a real drag handle is wanted.
+- **Tell BE after the fact** — when this is demoed, hand over the shape in §"Shared contract" plus
+  the R1/R3/R4 answers the manual testing produced. That closes AC-6 with evidence instead of
+  speculation.
