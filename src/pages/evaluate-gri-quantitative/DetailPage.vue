@@ -292,11 +292,7 @@
                             <MpTimelineTitle>
                                 <MpText weight="semiBold">
                                     Requested by
-                                    {{
-                                        detail.created_by_user?.email ||
-                                        detail.submitted_by ||
-                                        detail.created_by_project_user
-                                    }}
+                                    {{ requestedBy }}
                                 </MpText>
                             </MpTimelineTitle>
                             <MpTimelineCaption>
@@ -567,7 +563,10 @@ import {
     isAllowedEvidenceFile,
     canSubmit as canSubmitEvidence,
 } from "@/lib/dynamic-validation";
-import { canReject, selectableApprovalIds } from "@/lib/review-approval-validation";
+import {
+    canReject,
+    selectableApprovalIds,
+} from "@/lib/review-approval-validation";
 import {
     useGetEvaluateGriQuantitativeDetail,
     useUpdateEvaluateGriQuantitative,
@@ -575,13 +574,16 @@ import {
     useDeleteEvaluateGriQuantitative,
     useApproveEvaluateGriQuantitative,
     useRejectEvaluateGriQuantitative,
-    isReadOnly,
+    isDetailReadOnly,
     latestRejectionNote,
     groupItemsByCategory,
     fromSubmissionValues,
     toSubmissionValue,
     cellKey,
+    requesterLabel,
 } from "@/services/evaluate-gri-quantitative";
+import { useGetUserProfile } from "@/services/user-profile";
+import { logger } from "@/lib/logger";
 
 // MpTimelineItem picks its own dot icon/color from `status` (see pixel3-timeline separator)
 const timelineStatus: Record<
@@ -655,8 +657,21 @@ const id = computed(() => route.query.id as string | undefined);
 
 const { data: detail, isLoading } = useGetEvaluateGriQuantitativeDetail(id);
 
+const fromApproval = computed(() => route.query.from === "approval");
 const readOnly = computed(
-    () => !detail.value || isReadOnly(detail.value.flow_status),
+    () =>
+        !detail.value ||
+        isDetailReadOnly(detail.value.flow_status, fromApproval.value),
+);
+const { data: profile } = useGetUserProfile();
+const requestedBy = computed(() =>
+    detail.value
+        ? requesterLabel(
+              detail.value,
+              profile.value?.email,
+              !fromApproval.value,
+          )
+        : "",
 );
 const approvalLogs = computed(() =>
     [...(detail.value?.approval_logs ?? [])].sort(
@@ -760,19 +775,31 @@ async function save() {
             })),
         });
         return true;
-    } catch {
+    } catch (error) {
+        logger.error("Cannot save", error);
         return false;
     }
 }
 
 async function submit() {
-    if (!detail.value || !canSubmitForm.value) return;
-    if (!(await save())) return;
+    if (!detail.value || !canSubmitForm.value) {
+        logger.warn("Cannot submit", {
+            detail: detail.value,
+            canSubmitForm: canSubmitForm.value,
+        });
+        return;
+    }
+    if (!(await save())) {
+        logger.warn("Cannot submit due to saving failure");
+        return;
+    }
     try {
+        console.log("Submitting");
         await submitMutation.mutateAsync(detail.value.id);
     } catch {
         return;
     }
+    router.push("/evaluate-gri-quantitative/requestor");
 }
 
 async function confirmDelete() {
@@ -784,7 +811,7 @@ async function confirmDelete() {
     }
     isConfirmingDelete.value = false;
     router.push(
-        route.query.from === "approval"
+        fromApproval.value
             ? "/evaluate-gri-quantitative/approval"
             : "/evaluate-gri-quantitative/requestor",
     );
@@ -794,7 +821,7 @@ async function confirmDelete() {
 // as the queue's bulk actions (ApprovalReviewTable.vue / selectableApprovalIds)
 const canAct = computed(
     () =>
-        route.query.from === "approval" &&
+        fromApproval.value &&
         Boolean(detail.value) &&
         selectableApprovalIds([detail.value!]).length > 0,
 );

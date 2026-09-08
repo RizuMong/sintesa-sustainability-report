@@ -5,6 +5,7 @@ import {
   fromSubmissionValues,
   groupItemsByCategory,
   hasDuplicateSubmission,
+  isDetailReadOnly,
   isReadOnly,
   latestRejectionNote,
   requestorSummary,
@@ -52,6 +53,12 @@ assert.equal(isReadOnly('submitted'), true)
 assert.equal(isReadOnly('approved'), true)
 assert.equal(isReadOnly('cancelled'), true)
 assert.equal(isReadOnly('sent'), true, 'unknown/live flow_status values are treated as locked, defensively')
+
+// GROU-650 — approval context is always view-only; requestor context keeps isReadOnly()'s behaviour
+assert.equal(isDetailReadOnly('rejected', true), true, 'GROU-650: rejected is view-only in the approval context')
+assert.equal(isDetailReadOnly('draft', true), true)
+assert.equal(isDetailReadOnly('rejected', false), false, 'requestor still revises a rejected submission')
+assert.equal(isDetailReadOnly('draft', false), false)
 
 // AC-85 — reopened rejected submissions show the latest reviewer note
 const approvalLogs: ApprovalLog[] = [

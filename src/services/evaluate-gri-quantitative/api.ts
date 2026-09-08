@@ -7,6 +7,7 @@ export {
   fromSubmissionValues,
   groupItemsByCategory,
   hasDuplicateSubmission,
+  isDetailReadOnly,
   isReadOnly,
   latestRejectionNote,
   requestorSummary,

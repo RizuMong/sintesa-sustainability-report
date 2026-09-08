@@ -30,6 +30,13 @@ export function isReadOnly(flowStatus: SubmissionFlowStatus | string): boolean {
   return flowStatus !== 'draft' && flowStatus !== 'rejected'
 }
 
+// GROU-650 — the detail screen is shared by the requestor and the approver. isReadOnly() lets a
+// rejected submission reopen for edit/resubmit (AC-84), which is correct for the requestor only;
+// opened from the Review & Approval queue the screen is approve/reject/view-only.
+export function isDetailReadOnly(flowStatus: SubmissionFlowStatus | string, fromApproval: boolean): boolean {
+  return fromApproval || isReadOnly(flowStatus)
+}
+
 // latest reviewer note shown when a rejected submission reopens (AC-85) — most recent approver
 // action with a note, across every approval stage.
 export function latestRejectionNote(approvalLogs: ApprovalLog[]): string | null {
