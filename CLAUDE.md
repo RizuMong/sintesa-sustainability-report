@@ -56,6 +56,10 @@ Detail pages in old-shape modules receive their record via `history.pushState` f
 
 Design decisions and deviations from an original spec for a given feature are written up in `docs/<feature>.md` as an "As Built" doc (see `docs/mki-quantitative.md`) — check for one before assuming a feature's contract; it documents intentional differences from what may be in git history/PRs.
 
+### Logging
+
+`src/lib/logger.ts` exports `logger` (`log`/`warn`/`error`), gated on `import.meta.env.DEV` — no-ops in production builds. Use it instead of raw `console.*` for anything that shouldn't ship to prod consoles.
+
 ### Pixel 3 UI conventions
 
 A `pixel` skill (`.agents/skills/pixel/SKILL.md`, symlinked for Claude Code) governs how Pixel 3 components get built here — load it when implementing or modifying UI. Key rules it enforces: import from `@mekari/pixel3`; use `Mp*`/`Pixel.*` components and their CSS props over raw HTML/CSS; use `get-block`/`get-component`/`get-icon-name` (pixel-hub MCP tools) to verify blocks, props, and icon names instead of guessing; prefer semantic design tokens (`background.surface`, `text.default`, `pxl-space-md`) over raw values; token mode defaults to 2.4.

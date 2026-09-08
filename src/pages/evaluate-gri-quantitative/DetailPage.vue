@@ -794,7 +794,6 @@ async function submit() {
         return;
     }
     try {
-        console.log("Submitting");
         await submitMutation.mutateAsync(detail.value.id);
     } catch {
         return;
