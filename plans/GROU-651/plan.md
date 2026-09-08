@@ -47,6 +47,7 @@ interface MkiQuantRow {
   title?: string                   // SECTION only: the group header text
   parent_sequence?: number | null  // ROW only: sequence of the SECTION it sits under, null = top level
   unit?: Ref2 | null               // only meaningful when unit_mode === 'PER_ROW'
+  display_order?: number           // visual position; sequence no longer tracks order (see below)
 }
 
 interface MkiGriQuantitative { /* ...unchanged... */
@@ -83,6 +84,50 @@ unit `null`** — that property is what guarantees AC-5, and it gets its own ass
 `row_key`/cell identity is unchanged: `row_<sequence>` for data rows. Section rows are never
 serialized into `values[]`.
 
+## Sequence handling (the load-bearing rule)
+
+`sequence` currently does three jobs at once. Split them:
+
+| Concept | Field | Mutable? |
+|---|---|---|
+| Storage identity — the `row_<n>` in a saved cell's `row_key` | `sequence` | **Never**, once allocated |
+| Visual order | `display_order` (new) / array index | Freely |
+| Grouping | `parent_sequence` | Freely |
+
+```ts
+const nextSeq = () => Math.max(0, ...form.rows.map(r => r.sequence)) + 1   // monotonic, never reuse
+rows: form.rows.map((r, i) => ({ ...r, sequence: r.sequence, display_order: i + 1 }))
+```
+
+Gotchas, in descending order of damage:
+
+1. **Never reuse a sequence.** `max+1`, not `length+1`. Delete row 3 of 4 then add one and
+   `length+1` yields `4`, colliding with the surviving row. Worse, reusing a *deleted* row's
+   number makes the new row inherit the dead row's submitted values via `fromSubmissionValues`.
+   Silent, and it looks like data corruption to the user.
+2. **Array order is not durable unless persisted.** If BE sorts `rows` by `sequence` on read,
+   reordering evaporates on reload, because sequence no longer tracks order. Hence
+   `display_order` — confirm it with BE alongside AC-6, or reordering appears to work and reverts.
+3. **Sections and rows share one numbering space.** Independent counters make `parent_sequence`
+   ambiguous.
+4. **Deleting a section unparents its children** (`parent_sequence = null`), never renumbers or
+   cascades, or every cell beneath it is orphaned.
+5. **Orphaned values are harmless, reassigned ones are not.** `fromSubmissionValues` ignores
+   unknown `row_key`s. Only gotcha 1 actually loses data.
+6. **Verify first — this may all be moot.** `EvaluateGriQuantitativeItem` carries its own
+   `columns`/`metrics`/`rows` with `parent_id` pointing back at the MKI, i.e. it looks like a
+   snapshot taken at submission time. If snapshots are frozen, editing an indicator cannot
+   retro-break existing submissions and AC-5 reduces to "render the old snapshot shape". If BE
+   re-reads the live MKI instead, the rules above are load-bearing. **Ask BE this first.**
+
+## API version note
+
+`api/Master Key Indicator/GRI - Quantitative/` has a **`V2/`** folder (`/v2/mki/gri-quantitative/
+create|update`) that is byte-identical to `V1/` except for the URL, with its `examples:` block
+stripped. The app calls `/v1/` (`services/master-key-indicator-quantitative/api.ts`). That empty V2
+is very likely BE's placeholder for this ticket — check whether the new fields are meant to land on
+`/v2/` before assuming the endpoint stays `/v1/`.
+
 ## Phases
 
 | # | Goal | Files owned | Depends on |
@@ -116,3 +161,11 @@ section and `Per baris` units and confirm it renders grouped in Evaluate.
    the per-metric unit goes away. Assumed: metric unit stays, table `unit_mode` wins when it is not
    `NONE`. Confirm with design.
 3. **Reordering** — move-up/down buttons unless the user funds a DnD dependency.
+4. **Are submission items frozen snapshots?** `EvaluateGriQuantitativeItem` carries its own
+   `columns`/`metrics`/`rows`. If those are copied at submission time, editing an MKI cannot break
+   existing submissions and most of the sequence risk disappears. **Ask this first — it sizes the
+   whole ticket.**
+5. **Does `display_order` exist, and does BE re-sort `rows` by `sequence` on read?** If it sorts
+   and there is no `display_order`, reordering silently reverts on reload.
+6. **Is `/v2/mki/gri-quantitative/*` the intended home for this change?** The contract folder
+   already has an empty V2 (see above).

@@ -50,7 +50,8 @@ comment, importing by **relative** path (no `@/` alias — see the header of
    in that file.
 3. Write `sections.ts` exporting `QuantDisplayRow` and `toDisplayRows(rows, opts)` per the contract:
    sections in order each followed by their children, orphans last at depth 0, unit resolved by
-   `unit_mode`.
+   `unit_mode`. Order rows by `display_order` when present, falling back to array order — **never**
+   sort by `sequence`, which no longer tracks visual order.
 4. Export it from the module's `index.ts`.
 5. Write `sections.check.ts` covering, at minimum:
    - **legacy passthrough**: a flat old-shape `rows` array with no new fields and no `opts` returns
@@ -59,6 +60,8 @@ comment, importing by **relative** path (no `@/` alias — see the header of
    - orphan row pointing at a `parent_sequence` that does not exist lands at the end, depth 0.
    - `UNIFORM` gives every row the table unit; `PER_ROW` gives each row its own; `NONE` gives null.
    - section rows never carry a unit.
+   - **order is not sequence**: rows whose `display_order` disagrees with their `sequence` come back
+     in `display_order` order (guards `plan.md` §Sequence handling gotcha 2).
 
 ## Acceptance
 

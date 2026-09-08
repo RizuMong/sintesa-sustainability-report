@@ -33,12 +33,14 @@ data, because Evaluate stores cells keyed `row_<sequence>` (`validation.ts:93`).
 reordered and interleaved with sections, renumbering is guaranteed. So:
 
 > Carry `sequence` in form state. Rows loaded from `detail` keep the sequence they came with,
-> forever. New rows/sections get `max(existing sequence) + 1`. `buildPayload` **must not**
-> renumber. Display order is the array order, persisted separately — reorder by array position,
-> not by rewriting sequence.
+> forever. New rows/sections get `Math.max(...) + 1` — **never `length + 1`**, which collides with
+> a surviving row after a delete and makes the new row inherit the dead row's submitted values.
+> `buildPayload` **must not** renumber. Reorder by array position and persist that as a separate
+> `display_order`; sections and rows share one numbering space; deleting a section unparents its
+> children rather than cascading.
 
-If ordering must be persisted as a number for the BE, add a separate `display_order` field rather
-than reusing `sequence` — and flag it under the open questions in `plan.md`.
+See `plan.md` §"Sequence handling" for the full gotcha list — items 1-4 are this phase's
+responsibility and each one needs a `sections.check.ts`-style assertion or a manual check.
 
 No drag-and-drop dependency exists in this repo. Implement reordering as up/down `MpButton`s with
 `arrows-up`/`arrows-down` icons; moving a section moves its children with it. Do not add a DnD
@@ -59,10 +61,10 @@ dashed full-width ghost add button, e.g. `:100-104`).
    `title`; row entries keep today's per-column inputs, plus a Master Unit select shown only when
    `unitMode === 'PER_ROW'`. Add `Tambah Section` next to the existing add-row button; a new row
    attaches to the section it was added under.
-4. Add move-up / move-down / delete per entry. Deleting a section deletes or unparents its children
-   (pick one, state it in the docs; unparenting is the safer default).
-5. Rewrite `buildPayload`'s `rows` mapping to emit the new optional fields and **preserve
-   `sequence`** as described above.
+4. Add move-up / move-down / delete per entry. Deleting a section unparents its children
+   (`parent_sequence = null`) — it must not cascade-delete or renumber them.
+5. Rewrite `buildPayload`'s `rows` mapping to emit the new optional fields, **preserve `sequence`**
+   and emit `display_order: i + 1` for the visual order.
 6. Replace the Live Preview table body with `<QuantSchemaTable>` from phase 2, passing
    `form.unitMode`/resolved unit, and keeping the existing input-type icon in the `#metric-cell`
    slot.
@@ -75,6 +77,11 @@ dashed full-width ghost add button, e.g. `:100-104`).
 - Open an existing indicator, change nothing, hit Update: the payload's `rows` is identical to what
   was loaded (same sequences, same order, no new fields materially changed). Verify in the network
   tab or by logging `buildPayload()` before the call.
+- **Sequence collision guard:** load an indicator with rows 1-4, delete row 3, add a new row. The
+  new row must get `sequence: 5`, not `4`. Check `buildPayload()` output directly. This is the one
+  that silently corrupts submitted data if it regresses.
 - Add a section `Limbah Non B3` with three rows under it and a `Per baris` unit on each; Live
   Preview shows the header row, the three indented rows, and a Satuan column.
-- Reorder the section: its child rows move with it and no `sequence` value changes.
+- Reorder the section: its child rows move with it, `display_order` changes, and no `sequence`
+  value changes.
+- Delete a section that has children: the children survive at top level with their sequences intact.
