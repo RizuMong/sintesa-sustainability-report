@@ -123,10 +123,21 @@ committed; `grep -rn "VITE_MOCK_API" src/` returns nothing. Every other row is a
 development API.
 
 B7, B8, B12, A4 and A5 are CSS/layout properties with no behaviour to drive, so they were confirmed
-by inspecting the **rendered DOM** rather than the source: 9 of 9 form controls carry
-`mp-*__control--size_md` with zero `size_sm`, the breadcrumb is no longer a `<button>`, `560px`
-appears on the identity field wrappers, and the list stage carries its top/left border plus
-`roundedTopLeft` with the table wrapper bordered.
+by inspecting the **rendered DOM** on the specific elements (an earlier pass used page-wide greps,
+which could match anywhere and was not sound evidence):
+
+- B7 — 27 of 27 `mp-*__control` elements carry `size_md`, zero carry `size_sm`.
+- B12 — the breadcrumb is a `<p class="mp-text--size_label-small mp-text--weight_regular">` with
+  `role` and `tabindex`, not a `<button>`.
+- A4 — exactly one stage element carries `mp-bd-t-w_1px mp-bd-l-w_1px mp-bd-c_border.default
+  mp-bdr-tl_md`.
+- A5 — the table's direct wrapper carries `mp-bd-w_1px mp-bd-c_border.default mp-bdr_md`.
+- B8 — **initially failed.** Only one `mp-max-w_560px` element existed, not two: `MpFormControl`
+  does not forward layout props, so the description field's cap was dropped and it stretched the
+  full width. Fixed in `6a3caf6` by moving the cap onto a wrapping `MpFlex`; re-confirmed in the DOM.
+
+That B8 miss is the reason this section now names the element it checked. A page-wide grep for
+`560px` passed while the field was still uncapped.
 
 Two apparent defects during this run turned out to be bugs in my own stub, not the app: the first
 version matched `master-key-indicator` instead of the real `/v1/mki/gri-quantitative/index` path,
@@ -139,6 +150,11 @@ The live run caught a defect that the typecheck and the source review both misse
 on Next took the pager to "Showing 21–16 of 16 / Page 3 of 2" on an empty table, with Next still
 enabled and no way back except Previous. Fixed in `eac9ffd` by clamping the page cursor on read
 instead of trusting the button's disabled state, and re-verified on the same repro.
+
+### Known Pixel gotcha
+
+`MpFormControl` silently swallows `flex`, `minWidth` and `maxWidth`. Nine call sites in this repo
+pass them and none take effect. Put layout props on a wrapping `MpFlex` instead.
 
 ### Not verified
 
