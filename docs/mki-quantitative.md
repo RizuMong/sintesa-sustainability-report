@@ -100,19 +100,38 @@ so `useMkiGriQuantitativeDetail(id)` picks it out of the list query, mirroring
 - Delete lives on the detail screen → confirm modal → hard `DELETE`.
 
 ### 4.2 Create/Edit Screen (`DetailPage.vue`)
+
+Laid out to match the reviewed HTML mockup (`Master Key Indicator - Global Reporting Initiative
+Quantitative.html`): an identity panel on top, then numbered step panels side-by-side with the
+preview. The mockup's own top bar (Cancel / Save Configuration) was **not** adopted — the existing
+back-button + breadcrumb + status + Delete header stays.
+
+The mockup also shows two features that are deliberately **not** built: row **Sections** (grouped /
+nested rows) and a table-level **Unit mode** (none / uniform / per-row). Both were implemented and
+then reverted in `b7c7d52` because no field for them exists in `api/**/*.yml` — `rows[]` is still
+`{sequence, labels}` and `unit` is still per-metric. The work is parked on
+`GROU-651/fe-sections-pending-be`; rebase it once BE confirms the shape rather than rewriting it.
+
 - Category dropdown (`master-category`), Code dropdown (`master-gri`, Active only), Description field.
 - Status badge beside the page heading in edit mode (reads `status ?? 'Active'` — see Section 2).
-- **Columns** — add/remove; Key auto-derived from Column name (slugify), shown read-only to the right of the name field (disabled input, not user-editable).
-- **Metrics** — add/remove; Metric name, Input type, optional Unit.
-  - **Input type** is a dropdown-style popover (`MpPopover` + `MpPopoverList`), not a native `<select>`. Each option shows an icon beside its label (Number/Text/Date/Yes-No have real pixel3 icons; Percentage has no icon in the set, so it shows a "%" glyph instead). The trigger button width is forced via inline `style` (not a `css()` class) since `is-full-width` doesn't reliably stretch through the `MpPopoverTrigger` wrapper. The underlying value sent to the API is still the raw enum string (`NUMBER`/`TEXT`/`PERCENTAGE`/`DATE`/`YES_NO`) — only the display changed.
-  - Each metric row's three fields (`name`/`input_type`/`unit`) use `minWidth="0"` on their `MpFormControl` so equal `flex` ratios actually render equal widths regardless of option-label length.
-- **Rows** — add/remove; one text input per existing column.
-- All three "Add" buttons (Column/Metric/Row) render as a full-width dashed ghost button below their list, not a small button in the section header — sits where the next item will appear.
-- Delete icon buttons on each Column/Metric/Row line carry a hidden label spacer (`visibility: hidden`, matching the real `MpFormLabel`) on row 0 only, so `alignItems="flex-end"` lines the icon up with the input controls instead of the label.
-- Sections separated by `MpDivider`, not boxed cards.
-- **Live Preview** panel rendered as a distinct framed aside (`background.surface` + border + rounded), not floating flat next to the form — columns as label headers, metrics shown via the same icon/`%` treatment as the input-type picker.
-- Save → `create()`/`update()`, redirect to List.
+- **Step 1 — Table Structure**, two subpanels side by side:
+  - **Label Columns** (row identity) — the `columns[]` of the payload. The derived `key` is no longer
+    shown; it is still slugified from the name behind the scenes. Renaming a column migrates the
+    already-typed `rows[].labels` across to the new key instead of dropping them.
+  - **Value / Metric Columns** — the `metrics[]` of the payload: header, input type, optional unit.
+    A live hint states whether the columns render flat or as sub-columns.
+- **Step 2 — Rows** — an editable table (one input per label column) rather than stacked form rows,
+  matching the mockup's row grid.
+- All three lists are **drag-to-reorder**; `sequence` is stamped from array position in
+  `buildPayload()`, so a drop is the whole interaction.
+- **Live Preview** — mirrors what the subsidiary sees. With 2+ metrics the header becomes two rows:
+  the period spanning all metric columns, metrics as sub-columns beneath it; with one metric it stays
+  flat. Cells render via the shared `DynamicFieldInput`, so each input type previews as its real
+  control. The period shown is the current year and is **preview-only** — the schema has no period
+  field, the submission owns it. "Client View" hides the input-type captions.
+- Save → `create()`/`update()`, redirect to List. The payload shape is unchanged by the restyle.
 - Delete (edit mode only) → confirm modal → hard delete → redirect to List.
+
 
 ---
 

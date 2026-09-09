@@ -19,9 +19,9 @@
     </MpFlex>
 
     <MpFlex
-      direction="row"
+      direction="column"
       flex="1"
-      gap="6"
+      gap="5"
       backgroundColor="background.stage"
       borderTopWidth="1px"
       borderLeftWidth="1px"
@@ -34,16 +34,17 @@
       </MpFlex>
 
       <template v-else>
-        <MpFlex direction="column" gap="6" flex="1" maxWidth="640px">
-          <MpFlex gap="6">
-            <MpFormControl id="mki-category" is-required flex="1">
+        <!-- identity -->
+        <MpFlex v-bind="panel" direction="column" gap="5">
+          <MpFlex gap="5" flexWrap="wrap">
+            <MpFormControl id="mki-category" is-required flex="1" minWidth="220px">
               <MpFormLabel>Category</MpFormLabel>
               <MpSelect v-model="form.categoryId" placeholder="Select category" is-full-width>
                 <option value="" disabled>Select category</option>
                 <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
               </MpSelect>
             </MpFormControl>
-            <MpFormControl id="mki-code" is-required flex="1">
+            <MpFormControl id="mki-code" is-required flex="1" minWidth="220px">
               <MpFormLabel>Code</MpFormLabel>
               <MpSelect v-model="form.code" placeholder="Select code" is-full-width>
                 <option value="" disabled>Select code</option>
@@ -53,201 +54,275 @@
               </MpSelect>
             </MpFormControl>
           </MpFlex>
-
           <MpFormControl id="mki-description" is-required>
             <MpFormLabel>Description</MpFormLabel>
-            <MpInput v-model="form.description" placeholder="e.g. Work-related Injuries (403-9)" />
+            <MpInput
+              v-model="form.description"
+              placeholder="e.g. report the total number of employees, and a breakdown of this total by gender and by region"
+            />
           </MpFormControl>
-
-          <MpDivider />
-
-          <MpFlex direction="column" gap="3">
-            <MpText size="h3" weight="semiBold">Columns</MpText>
-            <MpFlex
-              v-for="(col, i) in form.columns"
-              :key="i"
-              gap="3"
-              alignItems="flex-end"
-              paddingBottom="3"
-            >
-              <MpFormControl :id="`col-name-${i}`" flex="1">
-                <MpFormLabel v-if="i === 0">Column name</MpFormLabel>
-                <MpInput v-model="col.name" placeholder="e.g. Employee Type" @update:model-value="syncColumnKey(col)" />
-              </MpFormControl>
-              <MpFormControl :id="`col-key-${i}`" flex="1">
-                <MpFormLabel v-if="i === 0">Key</MpFormLabel>
-                <MpInput :model-value="col.key" is-disabled placeholder="employee_type" />
-              </MpFormControl>
-              <MpFlex direction="column" gap="1">
-                <MpText v-if="i === 0" size="label" :class="css({ visibility: 'hidden' })">Action</MpText>
-                <MpButton variant="ghost" left-icon="delete" aria-label="Remove column" @click="removeColumn(i)" />
-              </MpFlex>
-            </MpFlex>
-            <MpButton
-              size="sm"
-              variant="ghost"
-              left-icon="add"
-              is-full-width
-              :class="css({ borderWidth: '1px', borderStyle: 'dashed', borderColor: 'border.default', justifyContent: 'center' })"
-              @click="addColumn"
-            >
-              Add Column
-            </MpButton>
-          </MpFlex>
-
-          <MpDivider />
-
-          <MpFlex direction="column" gap="3">
-            <MpText size="h3" weight="semiBold">Metrics</MpText>
-            <MpFlex
-              v-for="(metric, i) in form.metrics"
-              :key="i"
-              gap="3"
-              alignItems="flex-end"
-              paddingBottom="3"
-            >
-              <MpFormControl :id="`metric-name-${i}`" flex="2" minWidth="0">
-                <MpFormLabel v-if="i === 0">Metric name</MpFormLabel>
-                <MpInput v-model="metric.name" placeholder="e.g. Number of Injury" @update:model-value="syncMetricKey(metric)" />
-              </MpFormControl>
-              <MpFormControl :id="`metric-type-${i}`" flex="1" minWidth="0">
-                <MpFormLabel v-if="i === 0">Input type</MpFormLabel>
-                <MpPopover :id="`metric-type-popover-${i}`" placement="bottom-start" use-portal>
-                  <MpPopoverTrigger>
-                    <MpButton
-                      variant="secondary"
-                      is-full-width
-                      :left-icon="inputTypeIcon(metric.input_type)"
-                      right-icon="chevrons-down"
-                      :class="css({ justifyContent: 'space-between' })"
-                      :style="{ width: '100%' }"
-                    >
-                      {{ inputTypeLabel(metric.input_type) }}
-                    </MpButton>
-                  </MpPopoverTrigger>
-                  <MpPopoverContent>
-                    <MpPopoverList>
-                      <MpPopoverListItem
-                        v-for="opt in inputTypeOptions"
-                        :key="opt.value"
-                        @click="metric.input_type = opt.value"
-                      >
-                        <MpFlex gap="2" alignItems="center">
-                          <MpIcon v-if="opt.icon" :name="opt.icon" size="sm" />
-                          <MpText v-else size="label" color="text.secondary">%</MpText>
-                          {{ opt.label }}
-                        </MpFlex>
-                      </MpPopoverListItem>
-                    </MpPopoverList>
-                  </MpPopoverContent>
-                </MpPopover>
-              </MpFormControl>
-              <MpFormControl :id="`metric-unit-${i}`" flex="1" minWidth="0">
-                <MpFormLabel v-if="i === 0">Unit</MpFormLabel>
-                <MpSelect v-model="metric.unitId" placeholder="No unit" is-full-width is-clearable>
-                  <option value="">No unit</option>
-                  <option v-for="u in units" :key="u.id" :value="u.id">{{ u.name }}</option>
-                </MpSelect>
-              </MpFormControl>
-              <MpFlex direction="column" gap="1">
-                <MpText v-if="i === 0" size="label" :class="css({ visibility: 'hidden' })">Action</MpText>
-                <MpButton variant="ghost" left-icon="delete" aria-label="Remove metric" @click="removeMetric(i)" />
-              </MpFlex>
-            </MpFlex>
-            <MpButton
-              size="sm"
-              variant="ghost"
-              left-icon="add"
-              is-full-width
-              :class="css({ borderWidth: '1px', borderStyle: 'dashed', borderColor: 'border.default', justifyContent: 'center' })"
-              @click="addMetric"
-            >
-              Add Metric
-            </MpButton>
-          </MpFlex>
-
-          <MpDivider />
-
-          <MpFlex direction="column" gap="3">
-            <MpText size="h3" weight="semiBold">Rows</MpText>
-            <MpText v-if="!form.columns.length" size="label" color="text.secondary">Add at least one column first.</MpText>
-            <MpFlex
-              v-for="(row, i) in form.rows"
-              :key="i"
-              gap="3"
-              alignItems="flex-end"
-              paddingBottom="3"
-            >
-              <MpFormControl v-for="col in form.columns" :key="col.key" :id="`row-${i}-${col.key}`" flex="1">
-                <MpFormLabel v-if="i === 0">{{ col.name || col.key }}</MpFormLabel>
-                <MpInput v-model="row.labels[col.key]" :placeholder="col.name" />
-              </MpFormControl>
-              <MpFlex direction="column" gap="1">
-                <MpText v-if="i === 0" size="label" :class="css({ visibility: 'hidden' })">Action</MpText>
-                <MpButton variant="ghost" left-icon="delete" aria-label="Remove row" @click="removeRow(i)" />
-              </MpFlex>
-            </MpFlex>
-            <MpButton
-              size="sm"
-              variant="ghost"
-              left-icon="add"
-              is-full-width
-              :is-disabled="!form.columns.length"
-              :class="css({ borderWidth: '1px', borderStyle: 'dashed', borderColor: 'border.default', justifyContent: 'center' })"
-              @click="addRow"
-            >
-              Add Row
-            </MpButton>
-          </MpFlex>
-
-          <MpDivider />
-
-          <MpFlex>
-            <MpButton :is-disabled="!canSave" @click="save">{{ isEdit ? 'Update' : 'Create' }}</MpButton>
-          </MpFlex>
         </MpFlex>
 
-        <MpFlex
-          direction="column"
-          gap="3"
-          flex="1"
-          minWidth="0"
-          backgroundColor="background.surface"
-          borderWidth="1px"
-          borderColor="border.default"
-          rounded="md"
-          padding="16px"
-          height="fit-content"
-        >
-          <MpText size="h3" weight="semiBold">Live Preview</MpText>
-          <MpTableContainer>
-            <MpTable>
-              <MpTableHead>
-                <MpTableRow>
-                  <MpTableCell v-for="col in form.columns" :key="col.key" scope="col">{{ col.name || col.key }}</MpTableCell>
-                  <MpTableCell v-for="metric in form.metrics" :key="metric.key" scope="col">
-                    {{ metric.name || metric.key }}
-                  </MpTableCell>
-                </MpTableRow>
-              </MpTableHead>
-              <MpTableBody>
-                <MpTableRow v-for="(row, i) in form.rows" :key="i">
-                  <MpTableCell v-for="col in form.columns" :key="col.key" as="td" scope="row">
-                    {{ row.labels[col.key] || '—' }}
-                  </MpTableCell>
-                  <MpTableCell v-for="metric in form.metrics" :key="metric.key" as="td" scope="row">
-                    <MpIcon v-if="inputTypeIcon(metric.input_type)" :name="inputTypeIcon(metric.input_type)!" size="sm" />
-                    <MpText v-else size="label" color="text.secondary">%</MpText>
-                  </MpTableCell>
-                </MpTableRow>
-                <MpTableRow v-if="!form.rows.length">
-                  <MpTableCell as="td" :colspan="form.columns.length + form.metrics.length || 1">
-                    <MpText size="label" color="text.secondary">No rows yet</MpText>
-                  </MpTableCell>
-                </MpTableRow>
-              </MpTableBody>
-            </MpTable>
-          </MpTableContainer>
+        <MpFlex direction="row" gap="5" alignItems="flex-start" flexWrap="wrap">
+          <MpFlex direction="column" gap="5" flex="1.15" minWidth="420px">
+            <!-- step 1 — table structure -->
+            <MpFlex v-bind="panel" direction="column" gap="4">
+              <MpFlex gap="3" alignItems="flex-start">
+                <MpFlex v-bind="stepBadge">1</MpFlex>
+                <MpFlex direction="column">
+                  <MpText size="h3" weight="semiBold">Table Structure</MpText>
+                  <MpText size="label" color="text.secondary">
+                    Define the label columns that identify each row and the value columns the
+                    subsidiary fills in. The period is not configured here.
+                  </MpText>
+                </MpFlex>
+              </MpFlex>
+
+              <MpFlex gap="4" alignItems="flex-start" flexWrap="wrap">
+                <!-- label columns -->
+                <MpFlex v-bind="subpanel" direction="column" gap="3" flex="1" minWidth="240px">
+                  <MpFlex direction="column">
+                    <MpText size="label" weight="semiBold">Label Columns (row identity)</MpText>
+                    <MpText size="label" color="text.secondary">
+                      Categories that identify each row (e.g. Type, Area).
+                    </MpText>
+                  </MpFlex>
+
+                  <MpText v-if="!form.columns.length" size="label" color="text.placeholder">
+                    No label columns yet. Add at least one.
+                  </MpText>
+                  <MpFlex
+                    v-for="(col, i) in form.columns"
+                    :key="`col-${i}`"
+                    v-bind="dragRow"
+                    draggable="true"
+                    @dragstart="onDragStart('columns', i)"
+                    @dragover.prevent
+                    @drop.prevent="onDrop('columns', i)"
+                    @dragend="dragging = null"
+                  >
+                    <MpIcon name="drag" size="sm" :class="css({ cursor: 'grab', color: 'text.placeholder' })" />
+                    <MpFormControl :id="`col-name-${i}`" flex="1" minWidth="0">
+                      <MpInput
+                        v-model="col.name"
+                        placeholder="Category name…"
+                        @update:model-value="syncColumnKey(col)"
+                      />
+                    </MpFormControl>
+                    <MpButton variant="ghost" left-icon="delete" aria-label="Remove column" @click="removeColumn(i)" />
+                  </MpFlex>
+
+                  <MpButton size="sm" variant="secondary" left-icon="add" is-full-width @click="addColumn">
+                    Add Label Column
+                  </MpButton>
+                </MpFlex>
+
+                <!-- metric columns -->
+                <MpFlex v-bind="subpanel" direction="column" gap="3" flex="1" minWidth="240px">
+                  <MpFlex direction="column">
+                    <MpText size="label" weight="semiBold">Value / Metric Columns (filled by user)</MpText>
+                    <MpText size="label" color="text.secondary">
+                      One column = a single value. Two or more = category sub-columns.
+                    </MpText>
+                  </MpFlex>
+
+                  <MpText size="label" color="text.secondary">{{ metricHint }}</MpText>
+
+                  <MpText v-if="!form.metrics.length" size="label" color="text.placeholder">
+                    No value columns yet. Add at least one.
+                  </MpText>
+                  <MpFlex
+                    v-for="(metric, i) in form.metrics"
+                    :key="`metric-${i}`"
+                    v-bind="dragRow"
+                    direction="column"
+                    alignItems="stretch"
+                    gap="2"
+                    draggable="true"
+                    @dragstart="onDragStart('metrics', i)"
+                    @dragover.prevent
+                    @drop.prevent="onDrop('metrics', i)"
+                    @dragend="dragging = null"
+                  >
+                    <MpFlex gap="2" alignItems="flex-end">
+                      <MpIcon name="drag" size="sm" :class="css({ cursor: 'grab', color: 'text.placeholder', marginBottom: '10px' })" />
+                      <MpFormControl :id="`metric-name-${i}`" flex="1" minWidth="0">
+                        <MpFormLabel>Header</MpFormLabel>
+                        <MpInput
+                          v-model="metric.name"
+                          placeholder="e.g. Number of Injury"
+                          @update:model-value="syncMetricKey(metric)"
+                        />
+                      </MpFormControl>
+                      <MpButton variant="ghost" left-icon="delete" aria-label="Remove metric" @click="removeMetric(i)" />
+                    </MpFlex>
+                    <MpFlex gap="2" paddingLeft="6">
+                      <MpFormControl :id="`metric-type-${i}`" flex="1" minWidth="0">
+                        <MpFormLabel>Input Type</MpFormLabel>
+                        <MpSelect v-model="metric.input_type" is-full-width>
+                          <option v-for="opt in inputTypeOptions" :key="opt.value" :value="opt.value">
+                            {{ opt.label }}
+                          </option>
+                        </MpSelect>
+                      </MpFormControl>
+                      <MpFormControl :id="`metric-unit-${i}`" flex="1" minWidth="0">
+                        <MpFormLabel>Unit</MpFormLabel>
+                        <MpSelect v-model="metric.unitId" placeholder="No unit" is-full-width>
+                          <option value="">No unit</option>
+                          <option v-for="u in units" :key="u.id" :value="u.id">{{ u.name }}</option>
+                        </MpSelect>
+                      </MpFormControl>
+                    </MpFlex>
+                  </MpFlex>
+
+                  <MpButton size="sm" variant="secondary" left-icon="add" is-full-width @click="addMetric">
+                    Add Value Column
+                  </MpButton>
+                </MpFlex>
+              </MpFlex>
+            </MpFlex>
+
+            <!-- step 2 — rows -->
+            <MpFlex v-bind="panel" direction="column" gap="4">
+              <MpFlex gap="3" alignItems="flex-start">
+                <MpFlex v-bind="stepBadge">2</MpFlex>
+                <MpFlex direction="column" flex="1">
+                  <MpText size="h3" weight="semiBold">Rows</MpText>
+                  <MpText size="label" color="text.secondary">Arrange the data rows of the table.</MpText>
+                </MpFlex>
+                <MpButton
+                  size="sm"
+                  variant="secondary"
+                  left-icon="add"
+                  :is-disabled="!form.columns.length"
+                  @click="addRow"
+                >
+                  Add Row
+                </MpButton>
+              </MpFlex>
+
+              <MpTableContainer>
+                <MpTable>
+                  <MpTableHead>
+                    <MpTableRow>
+                      <MpTableCell scope="col" />
+                      <MpTableCell v-for="(col, ci) in form.columns" :key="`h-${ci}`" scope="col">
+                        {{ col.name || '(Label)' }}
+                      </MpTableCell>
+                      <MpTableCell scope="col" />
+                    </MpTableRow>
+                  </MpTableHead>
+                  <MpTableBody>
+                    <MpTableRow
+                      v-for="(row, i) in form.rows"
+                      :key="`row-${i}`"
+                      draggable="true"
+                      @dragstart="onDragStart('rows', i)"
+                      @dragover.prevent
+                      @drop.prevent="onDrop('rows', i)"
+                      @dragend="dragging = null"
+                    >
+                      <MpTableCell as="td">
+                        <MpIcon name="drag" size="sm" :class="css({ cursor: 'grab', color: 'text.placeholder' })" />
+                      </MpTableCell>
+                      <MpTableCell v-for="(col, ci) in form.columns" :key="`cell-${ci}`" as="td">
+                        <MpInput v-model="row.labels[col.key]" placeholder="—" />
+                      </MpTableCell>
+                      <MpTableCell as="td">
+                        <MpButton variant="ghost" left-icon="delete" aria-label="Remove row" @click="removeRow(i)" />
+                      </MpTableCell>
+                    </MpTableRow>
+                    <MpTableRow v-if="!form.rows.length">
+                      <MpTableCell as="td" :colspan="form.columns.length + 2">
+                        <MpText size="label" color="text.placeholder">
+                          {{ form.columns.length ? 'No rows yet — click "Add Row".' : 'Add at least one label column first.' }}
+                        </MpText>
+                      </MpTableCell>
+                    </MpTableRow>
+                  </MpTableBody>
+                </MpTable>
+              </MpTableContainer>
+            </MpFlex>
+
+            <MpFlex>
+              <MpButton :is-disabled="!canSave" @click="save">{{ isEdit ? 'Update' : 'Create' }}</MpButton>
+            </MpFlex>
+          </MpFlex>
+
+          <!-- live preview -->
+          <MpFlex v-bind="panel" direction="column" gap="4" flex="1" minWidth="380px">
+            <MpFlex gap="3" alignItems="flex-start">
+              <MpFlex v-bind="stepBadge" backgroundColor="background.stage" color="text.secondary">
+                <MpIcon name="show" size="sm" />
+              </MpFlex>
+              <MpFlex direction="column" flex="1">
+                <MpText size="h3" weight="semiBold">Live Preview</MpText>
+                <MpText size="label" color="text.secondary">How the form looks when a subsidiary fills it in.</MpText>
+              </MpFlex>
+              <MpFlex gap="2" alignItems="center">
+                <MpBadge for="tableStatus" type="information">Period {{ previewPeriod }}</MpBadge>
+                <MpButton size="sm" :variant="isClientView ? 'primary' : 'secondary'" @click="isClientView = !isClientView">
+                  Client View
+                </MpButton>
+              </MpFlex>
+            </MpFlex>
+
+            <MpTableContainer>
+              <MpTable>
+                <MpTableHead>
+                  <MpTableRow>
+                    <MpTableCell
+                      v-for="(col, ci) in form.columns"
+                      :key="`p-l-${ci}`"
+                      scope="col"
+                      :rowspan="hasSubColumns ? 2 : 1"
+                    >
+                      {{ col.name || '(Label)' }}
+                    </MpTableCell>
+                    <template v-if="hasSubColumns">
+                      <MpTableCell scope="col" :colspan="form.metrics.length">{{ previewPeriod }}</MpTableCell>
+                    </template>
+                    <template v-else>
+                      <MpTableCell v-for="(metric, mi) in form.metrics" :key="`p-m-${mi}`" scope="col">
+                        {{ metricHeader(metric) }}
+                        <MpText v-if="!isClientView" size="label" color="text.secondary">
+                          {{ inputTypeLabel(metric.input_type) }}
+                        </MpText>
+                      </MpTableCell>
+                    </template>
+                  </MpTableRow>
+                  <MpTableRow v-if="hasSubColumns">
+                    <MpTableCell v-for="(metric, mi) in form.metrics" :key="`p-s-${mi}`" scope="col">
+                      {{ metricHeader(metric) }}
+                      <MpText v-if="!isClientView" size="label" color="text.secondary">
+                        {{ inputTypeLabel(metric.input_type) }}
+                      </MpText>
+                    </MpTableCell>
+                  </MpTableRow>
+                </MpTableHead>
+                <MpTableBody>
+                  <MpTableRow v-for="(row, i) in form.rows" :key="`p-row-${i}`">
+                    <MpTableCell v-for="(col, ci) in form.columns" :key="`p-c-${ci}`" as="td">
+                      {{ row.labels[col.key] || '—' }}
+                    </MpTableCell>
+                    <MpTableCell v-for="(metric, mi) in form.metrics" :key="`p-v-${mi}`" as="td">
+                      <DynamicFieldInput
+                        :input_type="metric.input_type"
+                        :unit="unitName(metric.unitId)"
+                        :model-value="previewValues[`${i}:${mi}`] ?? null"
+                        @update:model-value="previewValues[`${i}:${mi}`] = $event"
+                      />
+                    </MpTableCell>
+                  </MpTableRow>
+                  <MpTableRow v-if="!form.rows.length">
+                    <MpTableCell as="td" :colspan="form.columns.length + form.metrics.length || 1">
+                      <MpText size="label" color="text.placeholder">No data yet.</MpText>
+                    </MpTableCell>
+                  </MpTableRow>
+                </MpTableBody>
+              </MpTable>
+            </MpTableContainer>
+          </MpFlex>
         </MpFlex>
       </template>
     </MpFlex>
@@ -274,13 +349,7 @@ import {
   MpSelect,
   MpFormControl,
   MpFormLabel,
-  MpDivider,
   MpIcon,
-  MpPopover,
-  MpPopoverTrigger,
-  MpPopoverContent,
-  MpPopoverList,
-  MpPopoverListItem,
   MpSkeleton,
   MpTable,
   MpTableHead,
@@ -290,9 +359,9 @@ import {
   MpTableContainer,
   css,
   toast,
-  type IconName,
 } from '@mekari/pixel3'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
+import DynamicFieldInput from '@/components/DynamicFieldInput.vue'
 import {
   useMkiGriQuantitativeDetail,
   useCreateMkiGriQuantitative,
@@ -303,22 +372,61 @@ import { useGetMasterCategory } from '@/services/master-category'
 import { useGetMasterGri } from '@/services/master-gri'
 import { useGetMasterUnit } from '@/services/master-unit'
 
-// pixel3 icon set has no percent glyph — PERCENTAGE renders a "%" label instead of an icon
-const inputTypeOptions: { value: MkiQuantInputType; icon?: IconName; label: string }[] = [
-  { value: 'NUMBER', icon: 'number', label: 'Number' },
-  { value: 'TEXT', icon: 'textarea', label: 'Text' },
-  { value: 'PERCENTAGE', label: 'Percentage' },
-  { value: 'DATE', icon: 'calendar', label: 'Date' },
-  { value: 'YES_NO', icon: 'check', label: 'Yes / No' },
-]
+// Shared chrome for the three step panels — repeated v-bind beats three near-identical wrappers.
+const panel = {
+  backgroundColor: 'background.surface',
+  borderWidth: '1px',
+  borderColor: 'border.default',
+  rounded: 'md',
+  padding: '20px',
+  height: 'fit-content',
+} as const
 
-function inputTypeIcon(type: MkiQuantInputType) {
-  return inputTypeOptions.find((opt) => opt.value === type)?.icon
-}
+// The two column editors inside step 1 — quieter than `panel` so they read as nested.
+const subpanel = {
+  backgroundColor: 'background.stage',
+  borderWidth: '1px',
+  borderColor: 'border.subtle',
+  rounded: 'md',
+  padding: '16px',
+} as const
+
+const stepBadge = {
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  rounded: 'full',
+  backgroundColor: 'background.brand',
+  color: 'text.inverted',
+  flexShrink: '0',
+} as const
+
+const dragRow = {
+  gap: '2',
+  alignItems: 'center',
+  padding: '2',
+  rounded: 'sm',
+  borderWidth: '1px',
+  borderColor: 'border.subtle',
+  backgroundColor: 'background.surface',
+} as const
+
+const inputTypeOptions: { value: MkiQuantInputType; label: string }[] = [
+  { value: 'NUMBER', label: 'Number' },
+  { value: 'PERCENTAGE', label: 'Percentage' },
+  { value: 'TEXT', label: 'Text' },
+  { value: 'DATE', label: 'Date' },
+  { value: 'YES_NO', label: 'Yes / No' },
+]
 
 function inputTypeLabel(type: MkiQuantInputType) {
   return inputTypeOptions.find((opt) => opt.value === type)?.label ?? type
 }
+
+// ponytail: the period belongs to the submission, not to the schema — the builder never sends it.
+// It is shown in the preview only so the header hierarchy reads the way the filled form will.
+const previewPeriod = String(new Date().getFullYear())
 
 const route = useRoute()
 const router = useRouter()
@@ -326,6 +434,7 @@ const router = useRouter()
 const id = route.query.id as string | undefined
 const isEdit = computed(() => Boolean(id))
 const isConfirmingDelete = ref(false)
+const isClientView = ref(false)
 
 const { data: categoryData } = useGetMasterCategory()
 const categories = computed(() => categoryData.value ?? [])
@@ -341,18 +450,42 @@ const isLoading = computed(() => isEdit.value && isFetching.value)
 // no status field on the endpoint yet — see the ponytail note on MkiGriQuantitative.status
 const status = computed(() => detail.value?.status ?? 'Active')
 
+type FormColumn = { key: string; name: string }
+type FormMetric = { key: string; name: string; input_type: MkiQuantInputType; unitId: string }
+type FormRow = { labels: Record<string, string> }
+
 const form = reactive({
   categoryId: '',
   code: '',
   description: '',
-  columns: [] as { key: string; name: string }[],
-  metrics: [] as { key: string; name: string; input_type: MkiQuantInputType; unitId: string }[],
-  rows: [] as { labels: Record<string, string> }[],
+  columns: [] as FormColumn[],
+  metrics: [] as FormMetric[],
+  rows: [] as FormRow[],
 })
+
+// ponytail: preview-only scratch values keyed `rowIndex:metricIndex`, never part of the payload —
+// the schema builder configures the table, the subsidiary submission fills it.
+const previewValues = reactive<Record<string, string | number | boolean | null>>({})
 
 const canSave = computed(() =>
   Boolean(form.categoryId && form.code && form.description && form.columns.length),
 )
+
+const hasSubColumns = computed(() => form.metrics.length >= 2)
+
+const metricHint = computed(() =>
+  hasSubColumns.value
+    ? `${form.metrics.length} value columns → rendered as sub-columns under the ${previewPeriod} period header.`
+    : 'One value column. Add another to create category sub-columns (e.g. Male / Female).',
+)
+
+function metricHeader(metric: FormMetric) {
+  return metric.name || '(Metric)'
+}
+
+function unitName(unitId: string) {
+  return units.value.find((u) => u.id === unitId)?.name ?? null
+}
 
 // ponytail: naive slugify, no collision handling — fine for a schema builder
 function slugify(text: string) {
@@ -363,11 +496,24 @@ function slugify(text: string) {
     .replace(/^_+|_+$/g, '')
 }
 
-function syncColumnKey(col: { key: string; name: string }) {
-  col.key = slugify(col.name)
+// Row labels are keyed by column key, and the key is derived from the (editable) column name — so a
+// rename has to carry the already-typed row values across, or every keystroke silently drops them.
+function syncColumnKey(col: FormColumn) {
+  const previous = col.key
+  const next = slugify(col.name)
+  if (next === previous) return
+  col.key = next
+  form.rows.forEach((row) => {
+    if (previous && previous in row.labels) {
+      row.labels[next] = row.labels[previous]
+      delete row.labels[previous]
+    } else if (!(next in row.labels)) {
+      row.labels[next] = ''
+    }
+  })
 }
 
-function syncMetricKey(metric: { key: string; name: string }) {
+function syncMetricKey(metric: FormMetric) {
   metric.key = slugify(metric.name)
 }
 
@@ -396,6 +542,24 @@ function addRow() {
 
 function removeRow(i: number) {
   form.rows.splice(i, 1)
+}
+
+// Drag-to-reorder for all three lists. Order is positional — `sequence` is stamped from the array
+// index in buildPayload(), so a drop is all it takes to renumber.
+type DragList = 'columns' | 'metrics' | 'rows'
+const dragging = ref<{ list: DragList; index: number } | null>(null)
+
+function onDragStart(list: DragList, index: number) {
+  dragging.value = { list, index }
+}
+
+function onDrop(list: DragList, index: number) {
+  const from = dragging.value
+  dragging.value = null
+  if (!from || from.list !== list || from.index === index) return
+  const arr = form[list] as unknown[]
+  const [moved] = arr.splice(from.index, 1)
+  arr.splice(index, 0, moved)
 }
 
 watch(
