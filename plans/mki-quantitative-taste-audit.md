@@ -67,3 +67,27 @@ product decision.
 - Skeleton loading on both pages — correct, present on both.
 - `ConfirmDeleteModal` on destructive delete — correct per `confirmation.md`.
 - Two background tones on `DetailPage` — correct; `ListPage` gets it half right (see A4).
+
+---
+
+## Resolution
+
+| Findings | Commit | State |
+|---|---|---|
+| A1–A10 | `4ab08ec` | fixed |
+| B3–B12 | `c60e012`, `63e2e01` | fixed |
+| B1, B2 | — | **open, needs design** — conflicts with the reviewed mockup in `c1f6c5c` |
+| List per-row actions / bulk select | — | **open, needs PM** |
+| `previewPeriod` provenance | — | **open, needs PM** |
+
+`pnpm build` (`vue-tsc -b && vite build`) passes at `63e2e01`.
+
+Component existence was checked against the installed packages rather than MCP, since MCP was
+unreachable: `MpBanner` (`@mekari/pixel3-banner@0.1.5`, `BannerVariant = 'info' | 'success' |
+'danger' | 'warning'`) and `MpFormErrorMessage` (`@mekari/pixel3-form-control@0.0.25`) both exist,
+and `ToastVariant = 'success' | 'error' | 'greeting'` covers the `variant: 'error'` failure toasts.
+
+B10 shipped as timestamp-only on purpose. `MkiGriQuantitative.updated_by` is a bare `number`
+(`types.d.ts:40`) and no endpoint returns a name or email for it, so there is no actor to display.
+Rendering the id would reproduce the exact raw-id leak that GROU-649 exists to fix. The "who" half
+of principle 3 needs a BE field (`updated_by_user`) before it can be honoured.
