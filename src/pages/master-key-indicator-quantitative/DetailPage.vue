@@ -169,35 +169,95 @@
           <MpDivider />
 
           <MpFlex direction="column" gap="3">
+            <MpText size="h3" weight="semiBold">Satuan (Unit)</MpText>
+            <MpFormControl id="unit-mode">
+              <MpSelect v-model="form.unitMode" is-full-width>
+                <option value="NONE">Tidak ada</option>
+                <option value="UNIFORM">Seragam</option>
+                <option value="PER_ROW">Per baris</option>
+              </MpSelect>
+            </MpFormControl>
+            <MpFormControl v-if="form.unitMode === 'UNIFORM'" id="unit-uniform">
+              <MpFormLabel>Unit</MpFormLabel>
+              <MpSelect v-model="form.unitId" placeholder="No unit" is-full-width is-clearable>
+                <option value="">No unit</option>
+                <option v-for="u in units" :key="u.id" :value="u.id">{{ u.name }}</option>
+              </MpSelect>
+            </MpFormControl>
+          </MpFlex>
+
+          <MpDivider />
+
+          <MpFlex direction="column" gap="3">
             <MpText size="h3" weight="semiBold">Rows</MpText>
             <MpText v-if="!form.columns.length" size="label" color="text.secondary">Add at least one column first.</MpText>
-            <MpFlex
-              v-for="(row, i) in form.rows"
-              :key="i"
-              gap="3"
-              alignItems="flex-end"
-              paddingBottom="3"
-            >
-              <MpFormControl v-for="col in form.columns" :key="col.key" :id="`row-${i}-${col.key}`" flex="1">
-                <MpFormLabel v-if="i === 0">{{ col.name || col.key }}</MpFormLabel>
-                <MpInput v-model="row.labels[col.key]" :placeholder="col.name" />
-              </MpFormControl>
-              <MpFlex direction="column" gap="1">
-                <MpText v-if="i === 0" size="label" :class="css({ visibility: 'hidden' })">Action</MpText>
-                <MpButton variant="ghost" left-icon="delete" aria-label="Remove row" @click="removeRow(i)" />
+            <template v-for="(entry, i) in form.rows" :key="entry.sequence">
+              <MpFlex v-if="entry.row_type === 'SECTION'" gap="3" alignItems="flex-end" paddingBottom="3">
+                <MpFormControl :id="`section-title-${entry.sequence}`" flex="1">
+                  <MpFormLabel v-if="i === 0">Section title</MpFormLabel>
+                  <MpInput v-model="entry.title" placeholder="e.g. Limbah Non B3" />
+                </MpFormControl>
+                <MpFlex direction="column" gap="1">
+                  <MpText v-if="i === 0" size="label" :class="css({ visibility: 'hidden' })">Action</MpText>
+                  <MpFlex gap="1">
+                    <MpButton variant="ghost" left-icon="add" aria-label="Add row to this section" :is-disabled="!form.columns.length" @click="addRow(entry.sequence)" />
+                    <MpButton variant="ghost" left-icon="arrows-up" aria-label="Move up" :is-disabled="i === 0" @click="moveRow(i, -1)" />
+                    <MpButton variant="ghost" left-icon="arrows-down" aria-label="Move down" :is-disabled="i === form.rows.length - 1" @click="moveRow(i, 1)" />
+                    <MpButton variant="ghost" left-icon="delete" aria-label="Remove section" @click="removeRow(i)" />
+                  </MpFlex>
+                </MpFlex>
               </MpFlex>
+              <MpFlex
+                v-else
+                gap="3"
+                alignItems="flex-end"
+                paddingBottom="3"
+                :paddingLeft="entry.parentSequence != null ? '24px' : undefined"
+              >
+                <MpFormControl v-for="col in form.columns" :key="col.key" :id="`row-${entry.sequence}-${col.key}`" flex="1">
+                  <MpFormLabel v-if="i === 0">{{ col.name || col.key }}</MpFormLabel>
+                  <MpInput v-model="entry.labels[col.key]" :placeholder="col.name" />
+                </MpFormControl>
+                <MpFormControl v-if="form.unitMode === 'PER_ROW'" :id="`row-unit-${entry.sequence}`" flex="1">
+                  <MpFormLabel v-if="i === 0">Unit</MpFormLabel>
+                  <MpSelect v-model="entry.unitId" placeholder="No unit" is-full-width is-clearable>
+                    <option value="">No unit</option>
+                    <option v-for="u in units" :key="u.id" :value="u.id">{{ u.name }}</option>
+                  </MpSelect>
+                </MpFormControl>
+                <MpFlex direction="column" gap="1">
+                  <MpText v-if="i === 0" size="label" :class="css({ visibility: 'hidden' })">Action</MpText>
+                  <MpFlex gap="1">
+                    <MpButton variant="ghost" left-icon="arrows-up" aria-label="Move up" :is-disabled="i === 0" @click="moveRow(i, -1)" />
+                    <MpButton variant="ghost" left-icon="arrows-down" aria-label="Move down" :is-disabled="i === form.rows.length - 1" @click="moveRow(i, 1)" />
+                    <MpButton variant="ghost" left-icon="delete" aria-label="Remove row" @click="removeRow(i)" />
+                  </MpFlex>
+                </MpFlex>
+              </MpFlex>
+            </template>
+            <MpFlex gap="3">
+              <MpButton
+                size="sm"
+                variant="ghost"
+                left-icon="add"
+                is-full-width
+                :is-disabled="!form.columns.length"
+                :class="css({ borderWidth: '1px', borderStyle: 'dashed', borderColor: 'border.default', justifyContent: 'center' })"
+                @click="addRow()"
+              >
+                Tambah Baris
+              </MpButton>
+              <MpButton
+                size="sm"
+                variant="ghost"
+                left-icon="add"
+                is-full-width
+                :class="css({ borderWidth: '1px', borderStyle: 'dashed', borderColor: 'border.default', justifyContent: 'center' })"
+                @click="addSection"
+              >
+                Tambah Section
+              </MpButton>
             </MpFlex>
-            <MpButton
-              size="sm"
-              variant="ghost"
-              left-icon="add"
-              is-full-width
-              :is-disabled="!form.columns.length"
-              :class="css({ borderWidth: '1px', borderStyle: 'dashed', borderColor: 'border.default', justifyContent: 'center' })"
-              @click="addRow"
-            >
-              Add Row
-            </MpButton>
           </MpFlex>
 
           <MpDivider />
@@ -220,34 +280,18 @@
           height="fit-content"
         >
           <MpText size="h3" weight="semiBold">Live Preview</MpText>
-          <MpTableContainer>
-            <MpTable>
-              <MpTableHead>
-                <MpTableRow>
-                  <MpTableCell v-for="col in form.columns" :key="col.key" scope="col">{{ col.name || col.key }}</MpTableCell>
-                  <MpTableCell v-for="metric in form.metrics" :key="metric.key" scope="col">
-                    {{ metric.name || metric.key }}
-                  </MpTableCell>
-                </MpTableRow>
-              </MpTableHead>
-              <MpTableBody>
-                <MpTableRow v-for="(row, i) in form.rows" :key="i">
-                  <MpTableCell v-for="col in form.columns" :key="col.key" as="td" scope="row">
-                    {{ row.labels[col.key] || '—' }}
-                  </MpTableCell>
-                  <MpTableCell v-for="metric in form.metrics" :key="metric.key" as="td" scope="row">
-                    <MpIcon v-if="inputTypeIcon(metric.input_type)" :name="inputTypeIcon(metric.input_type)!" size="sm" />
-                    <MpText v-else size="label" color="text.secondary">%</MpText>
-                  </MpTableCell>
-                </MpTableRow>
-                <MpTableRow v-if="!form.rows.length">
-                  <MpTableCell as="td" :colspan="form.columns.length + form.metrics.length || 1">
-                    <MpText size="label" color="text.secondary">No rows yet</MpText>
-                  </MpTableCell>
-                </MpTableRow>
-              </MpTableBody>
-            </MpTable>
-          </MpTableContainer>
+          <QuantSchemaTable
+            :columns="form.columns"
+            :metrics="previewMetrics"
+            :rows="previewRows"
+            :unit-mode="form.unitMode"
+            :unit="previewUnit"
+          >
+            <template #metric-cell="{ metric }">
+              <MpIcon v-if="inputTypeIcon(metric.input_type)" :name="inputTypeIcon(metric.input_type)!" size="sm" />
+              <MpText v-else size="label" color="text.secondary">%</MpText>
+            </template>
+          </QuantSchemaTable>
         </MpFlex>
       </template>
     </MpFlex>
@@ -282,17 +326,12 @@ import {
   MpPopoverList,
   MpPopoverListItem,
   MpSkeleton,
-  MpTable,
-  MpTableHead,
-  MpTableBody,
-  MpTableRow,
-  MpTableCell,
-  MpTableContainer,
   css,
   toast,
   type IconName,
 } from '@mekari/pixel3'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
+import QuantSchemaTable from '@/components/QuantSchemaTable.vue'
 import {
   useMkiGriQuantitativeDetail,
   useCreateMkiGriQuantitative,
@@ -347,7 +386,21 @@ const form = reactive({
   description: '',
   columns: [] as { key: string; name: string }[],
   metrics: [] as { key: string; name: string; input_type: MkiQuantInputType; unitId: string }[],
-  rows: [] as { labels: Record<string, string> }[],
+  // GROU-651: `sequence` is the storage identity of a saved cell (row_<sequence>) and is carried
+  // through unchanged from `detail` for existing rows — never renumbered. New entries get
+  // Math.max(...)+1, never length+1, so a deleted row's sequence is never reused. `row_type`
+  // distinguishes a SECTION header (title only) from a ROW (labels/unit); parentSequence groups a
+  // ROW under a SECTION, null = top level. See plan.md §"Sequence handling".
+  rows: [] as {
+    sequence: number
+    row_type: 'SECTION' | 'ROW'
+    title: string
+    parentSequence: number | null
+    labels: Record<string, string>
+    unitId: string
+  }[],
+  unitMode: 'NONE' as MkiQuantUnitMode,
+  unitId: '',
 })
 
 const canSave = computed(() =>
@@ -388,14 +441,80 @@ function removeMetric(i: number) {
   form.metrics.splice(i, 1)
 }
 
-function addRow() {
+// Never `length + 1`: deleting a middle row then adding one must not collide with a surviving
+// row's sequence, and must never reuse a deleted row's sequence (which would silently inherit its
+// submitted values on the Evaluate side). See plan.md gotcha 1.
+function nextSequence() {
+  return Math.max(0, ...form.rows.map((r) => r.sequence)) + 1
+}
+
+function addRow(parentSequence: number | null = null) {
   const labels: Record<string, string> = {}
   form.columns.forEach((c) => (labels[c.key] = ''))
-  form.rows.push({ labels })
+  form.rows.push({
+    sequence: nextSequence(),
+    row_type: 'ROW',
+    title: '',
+    parentSequence,
+    labels,
+    unitId: '',
+  })
+}
+
+function addSection() {
+  form.rows.push({
+    sequence: nextSequence(),
+    row_type: 'SECTION',
+    title: '',
+    parentSequence: null,
+    labels: {},
+    unitId: '',
+  })
 }
 
 function removeRow(i: number) {
-  form.rows.splice(i, 1)
+  const [removed] = form.rows.splice(i, 1)
+  // Deleting a section unparents its children — it must not cascade-delete or renumber them
+  // (plan.md gotcha 4).
+  if (removed?.row_type === 'SECTION') {
+    form.rows.forEach((row) => {
+      if (row.parentSequence === removed.sequence) row.parentSequence = null
+    })
+  }
+}
+
+// Move-up/down, not drag-and-drop — no DnD dependency in this repo (plan.md open questions).
+// Moving a section moves its children with it. Operates on top-level blocks: a section plus its
+// contiguous children counts as one block; a bare row (or an orphan) is its own block.
+function moveRow(i: number, direction: -1 | 1) {
+  const entry = form.rows[i]
+  if (!entry) return
+  const blocks: { start: number; end: number }[] = []
+  let idx = 0
+  while (idx < form.rows.length) {
+    const row = form.rows[idx]
+    if (row.row_type === 'SECTION') {
+      let end = idx
+      while (end + 1 < form.rows.length && form.rows[end + 1].parentSequence === row.sequence) end++
+      blocks.push({ start: idx, end })
+      idx = end + 1
+    } else {
+      blocks.push({ start: idx, end: idx })
+      idx++
+    }
+  }
+  const blockIdx = blocks.findIndex((b) => b.start <= i && i <= b.end)
+  const swapIdx = blockIdx + direction
+  if (blockIdx === -1 || swapIdx < 0 || swapIdx >= blocks.length) return
+  const a = blocks[blockIdx]
+  const b = blocks[swapIdx]
+  const first = direction === 1 ? a : b
+  const second = direction === 1 ? b : a
+  const firstRows = form.rows.slice(first.start, first.end + 1)
+  const secondRows = form.rows.slice(second.start, second.end + 1)
+  const before = form.rows.slice(0, first.start)
+  const after = form.rows.slice(second.end + 1)
+  form.rows.splice(0, form.rows.length, ...before, ...secondRows, ...firstRows, ...after)
 }
 
 watch(
@@ -412,7 +531,18 @@ watch(
       input_type: m.input_type,
       unitId: m.unit?.id ?? '',
     }))
-    form.rows = next.rows.map((r) => ({ labels: { ...r.labels } }))
+    // Carry sequence forward unchanged — it is the row_<sequence> storage identity of any
+    // already-saved cell. Legacy rows (no row_type) default to 'ROW' at top level.
+    form.rows = next.rows.map((r) => ({
+      sequence: r.sequence,
+      row_type: r.row_type ?? 'ROW',
+      title: r.title ?? '',
+      parentSequence: r.parent_sequence ?? null,
+      labels: { ...r.labels },
+      unitId: r.unit?.id ?? '',
+    }))
+    form.unitMode = next.unit_mode ?? 'NONE'
+    form.unitId = next.unit?.id ?? ''
   },
   { immediate: true },
 )
@@ -421,8 +551,25 @@ const createMutation = useCreateMkiGriQuantitative()
 const updateMutation = useUpdateMkiGriQuantitative()
 const deleteMutation = useDeleteMkiGriQuantitative()
 
+// Live Preview data, fed straight into <QuantSchemaTable>. previewRows carries display_order so
+// grouping/ordering matches exactly what buildPayload() will send.
+const previewMetrics = computed(() => form.metrics as unknown as MkiQuantMetric[])
+const previewUnit = computed(() => units.value.find((u) => u.id === form.unitId) ?? null)
+const previewRows = computed(() =>
+  form.rows.map((r, i) => ({
+    sequence: r.sequence,
+    labels: r.labels,
+    row_type: r.row_type,
+    title: r.title,
+    parent_sequence: r.parentSequence,
+    unit: units.value.find((u) => u.id === r.unitId) ?? null,
+    display_order: i + 1,
+  })),
+)
+
 function buildPayload(): MkiGriQuantitativePayload {
   const category = categories.value.find((c) => c.id === form.categoryId)
+  const tableUnit = units.value.find((u) => u.id === form.unitId)
   return {
     category_id: { id: form.categoryId, name: category?.name ?? '' },
     code: form.code,
@@ -438,7 +585,22 @@ function buildPayload(): MkiGriQuantitativePayload {
         sequence: i + 1,
       }
     }),
-    rows: form.rows.map((r, i) => ({ sequence: i + 1, labels: { ...r.labels } })),
+    // Preserve `sequence` — never renumber. `display_order` carries visual order separately
+    // (plan.md §"Sequence handling"). Section entries emit no unit and empty labels.
+    rows: form.rows.map((r, i) => {
+      const rowUnit = units.value.find((u) => u.id === r.unitId)
+      return {
+        sequence: r.sequence,
+        labels: r.row_type === 'SECTION' ? {} : { ...r.labels },
+        row_type: r.row_type,
+        title: r.row_type === 'SECTION' ? r.title : undefined,
+        parent_sequence: r.row_type === 'ROW' ? r.parentSequence : undefined,
+        unit: r.row_type === 'ROW' && form.unitMode === 'PER_ROW' && rowUnit ? { id: rowUnit.id, name: rowUnit.name } : null,
+        display_order: i + 1,
+      }
+    }),
+    unit_mode: form.unitMode,
+    unit: form.unitMode === 'UNIFORM' && tableUnit ? { id: tableUnit.id, name: tableUnit.name } : null,
   }
 }
 
