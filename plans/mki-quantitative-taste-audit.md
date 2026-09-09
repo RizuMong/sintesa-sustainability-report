@@ -112,13 +112,26 @@ workflow API** with 16 real records. Observed behaviour, not source inspection.
 | B3 | Edit form footer renders `Cancel` + `Save changes` (create renders `Create indicator`) |
 | B4 | No errors before submit. Empty submit → banner "We couldn't save this indicator. Please review the highlighted fields." plus "Select a category.", "Select a GRI code.", "Enter a description.", "Add at least one label column." |
 | B5 | Save returning 500 → failure surfaced, stays on the form, no false success toast, no redirect |
+| B9 | Detail fetch 500 on an edit URL → "Couldn't load this indicator. Refresh the page to try again."; no empty create-style form |
 | B10 | "Last updated 9 Sept 2026, 14:14" beside the status badge; no raw `updated_by` id rendered |
 | B11 | Dirty edit + Cancel → "Discard unsaved changes?" / "Keep editing" / "Discard changes", stays on form. Restoring the original value makes it clean again and Cancel exits with no prompt |
 
-A7, A2 and B5 need an induced API failure, so those three were driven against a local stub on
-`localhost:5301` speaking the same envelope, via a temporary `VITE_MOCK_API` branch in
-`workflowApiBaseUrl`. That edit was reverted and never committed; `grep -rn "VITE_MOCK_API" src/`
-returns nothing. Every other row above is against the real development API.
+Rows A2, A7, B5 and B9 need the API to fail on demand, which a valid token cannot produce, so those
+four were driven against a local stub on `localhost:5301` speaking the same envelope, via a
+temporary `VITE_MOCK_API` branch in `workflowApiBaseUrl`. That edit was reverted and never
+committed; `grep -rn "VITE_MOCK_API" src/` returns nothing. Every other row is against the real
+development API.
+
+B7, B8, B12, A4 and A5 are CSS/layout properties with no behaviour to drive, so they were confirmed
+by inspecting the **rendered DOM** rather than the source: 9 of 9 form controls carry
+`mp-*__control--size_md` with zero `size_sm`, the breadcrumb is no longer a `<button>`, `560px`
+appears on the identity field wrappers, and the list stage carries its top/left border plus
+`roundedTopLeft` with the table wrapper bordered.
+
+Two apparent defects during this run turned out to be bugs in my own stub, not the app: the first
+version matched `master-key-indicator` instead of the real `/v1/mki/gri-quantitative/index` path,
+and it returned `gri_code` where the API sends `code`. `src/services/master-gri/api.ts` already maps
+`code` to `gri_code` correctly.
 
 ### Bug this found
 
