@@ -91,3 +91,43 @@ B10 shipped as timestamp-only on purpose. `MkiGriQuantitative.updated_by` is a b
 (`types.d.ts:40`) and no endpoint returns a name or email for it, so there is no actor to display.
 Rendering the id would reproduce the exact raw-id leak that GROU-649 exists to fix. The "who" half
 of principle 3 needs a BE field (`updated_by_user`) before it can be honoured.
+
+---
+
+## Live verification
+
+Driven in Firefox against the running dev server on the real acceptance URL
+(`/master-key-indicator-quantitative?token=…&env=development`), against the **development
+workflow API** with 16 real records. Observed behaviour, not source inspection.
+
+| Finding | Observed |
+|---|---|
+| A1 | H1 "Master Key Indicator — Quantitative" renders beside the Create button |
+| A2 | Empty list → "Key indicators will appear here" + "Add your first key indicator from the Create button." + CTA |
+| A3 | Filter `code = zzz-no-such-code` → table header retained, "Key indicator not found", "Recheck the filter you have applied and try filtering again.", no blank-slate illustration, pager hidden |
+| A6 | Dates render `09 Sept 2026`; no ISO strings present |
+| A7 | API 500 → "Couldn't load key indicators" + status text + Retry; blank slate NOT shown |
+| A9 | 16 records → 10 rows, "Showing 1–10 of 16 / Page 1 of 2"; page 2 shows the remaining 6 |
+| A10 | Em dash present for blank description / null category cells |
+| B3 | Edit form footer renders `Cancel` + `Save changes` (create renders `Create indicator`) |
+| B4 | No errors before submit. Empty submit → banner "We couldn't save this indicator. Please review the highlighted fields." plus "Select a category.", "Select a GRI code.", "Enter a description.", "Add at least one label column." |
+| B5 | Save returning 500 → failure surfaced, stays on the form, no false success toast, no redirect |
+| B10 | "Last updated 9 Sept 2026, 14:14" beside the status badge; no raw `updated_by` id rendered |
+| B11 | Dirty edit + Cancel → "Discard unsaved changes?" / "Keep editing" / "Discard changes", stays on form. Restoring the original value makes it clean again and Cancel exits with no prompt |
+
+A7, A2 and B5 need an induced API failure, so those three were driven against a local stub on
+`localhost:5301` speaking the same envelope, via a temporary `VITE_MOCK_API` branch in
+`workflowApiBaseUrl`. That edit was reverted and never committed; `grep -rn "VITE_MOCK_API" src/`
+returns nothing. Every other row above is against the real development API.
+
+### Bug this found
+
+The live run caught a defect that the typecheck and the source review both missed: two fast clicks
+on Next took the pager to "Showing 21–16 of 16 / Page 3 of 2" on an empty table, with Next still
+enabled and no way back except Previous. Fixed in `eac9ffd` by clamping the page cursor on read
+instead of trusting the button's disabled state, and re-verified on the same repro.
+
+### Not verified
+
+The MKI delete path was not exercised — it destroys a real record on the shared development
+environment. `confirmDelete()`'s error handling is therefore reviewed but unproven at runtime.
