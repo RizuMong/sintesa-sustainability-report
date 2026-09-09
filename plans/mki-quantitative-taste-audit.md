@@ -160,3 +160,42 @@ pass them and none take effect. Put layout props on a wrapping `MpFlex` instead.
 
 The MKI delete path was not exercised — it destroys a real record on the shared development
 environment. `confirmDelete()`'s error handling is therefore reviewed but unproven at runtime.
+
+---
+
+## Traceability pass at final HEAD (`64f35f6`)
+
+Every check above ran at whatever commit was current at the time, so no single pass had ever covered
+the finished result — `eac9ffd` (pager) and `6a3caf6` (B8) both landed *after* most of the
+verification. Re-ran the whole mapped set once, in one sitting, against the real development API.
+**19/19 requirements passed**, each with an observed value rather than a boolean:
+
+| # | Requirement | Observed at `64f35f6` |
+|---|---|---|
+| A1 | Page header carries an H1 | `Master Key Indicator — Quantitative` |
+| A3 | Filter-to-empty keeps header, shows filter-not-found, hides pager | "Key indicator not found"; header present; no blank slate; no pager |
+| A4 | Stage has top/left border + top-left radius | one element: `mp-bd-t-w_1px mp-bd-l-w_1px mp-bd-c_border.default mp-bdr-tl_md` |
+| A5 | Table on bare stage carries its own border + radius | wrapper: `mp-bd-w_1px mp-bd-c_border.default mp-bdr_md` |
+| A6 | Abbreviated-month dates, never ISO | `09 Sept 2026`; ISO absent |
+| A9 | Paginates at 10 rows/page | 10 body rows; "Showing 1–10 of 16" |
+| A10 | Blank cells render an em dash | present |
+| PAGER | Cursor never exceeds totalPages under double-fire | "Showing 11–16 of 16" / "Page 2 of 2" (was "21–16 of 16 / Page 3 of 2") |
+| B3a | Create form offers Cancel beside submit | Cancel + "Create indicator" |
+| B3b | Edit footer pairs Cancel with Save changes | both present |
+| B4a | No errors before a submit attempt | none rendered |
+| B4b | Empty submit → banner + per-field errors | banner + 4/4 field messages; stayed on form |
+| B7 | All controls size md, none sm | 27/27 `size_md`, 0 `size_sm` (measured on the **edit** form; the create form only renders 3) |
+| B8 | Description field capped at 560px | nearest ancestor `mp-d_flex mp-max-w_560px` |
+| B10 | Timestamp shown, never a raw actor id | "Last updated 9 Sept 2026, 14:14"; `4021` absent |
+| B11a | Dirty edit form blocks exit with a confirm | "Discard unsaved changes?"; stayed on form |
+| B11b | Restored (clean) form exits with no prompt | landed on the list, no guard |
+| B12 | Breadcrumb is secondary label text | `<p class="mp-text--size_label-small mp-text--weight_regular">`, not a `<button>` |
+| B1/B2 | Reviewed mockup panels + numbered steps intact | 9 surface panels; step headings render |
+
+Two things this pass corrected in its own method. B7 was first measured on the create form, which
+renders only 3 controls and so proved almost nothing; re-measured on the edit form it is 27/27. And
+every element-level check now names the element it inspected, because the earlier page-wide grep for
+`560px` passed while the description field was uncapped.
+
+A2, A7, B5 and B9 are not in this table: they need the API to fail, which the real token cannot do.
+Their evidence stands from the stubbed runs recorded above, at the same code for those files.
