@@ -106,9 +106,9 @@
             Showing {{ rangeStart }}–{{ rangeEnd }} of {{ totalItems }}
           </MpText>
           <MpFlex alignItems="center" gap="3">
-            <MpButton variant="secondary" :is-disabled="page === 1" @click="page -= 1">Previous</MpButton>
+            <MpButton variant="secondary" :is-disabled="page <= 1" @click="goToPage(page - 1)">Previous</MpButton>
             <MpText size="label-small" color="text.secondary">Page {{ page }} of {{ totalPages }}</MpText>
-            <MpButton variant="secondary" :is-disabled="page === totalPages" @click="page += 1">Next</MpButton>
+            <MpButton variant="secondary" :is-disabled="page >= totalPages" @click="goToPage(page + 1)">Next</MpButton>
           </MpFlex>
         </MpFlex>
       </MpFlex>
@@ -206,19 +206,29 @@ const emptyStateKind = computed<'blank-slate' | 'filter-not-found' | null>(() =>
 const showTable = computed(() => emptyStateKind.value !== 'blank-slate')
 
 // The endpoint answers the whole list in one response, so paging happens here rather than per-request.
-const page = ref(1)
 const totalItems = computed(() => filteredItems.value.length)
 const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / PAGE_SIZE)))
+
+// The cursor is clamped on read, not just guarded on write. Two fast clicks on Next both see the
+// pre-update disabled state and each run `page += 1`, so a raw ref overshoots totalPages - and then
+// `page === totalPages` never matches again, leaving Next enabled on a permanently empty table.
+const pageRaw = ref(1)
+const page = computed(() => Math.min(Math.max(1, pageRaw.value), totalPages.value))
+
+function goToPage(next: number) {
+  pageRaw.value = Math.min(Math.max(1, next), totalPages.value)
+}
+
 const rangeStart = computed(() => (page.value - 1) * PAGE_SIZE + 1)
 const rangeEnd = computed(() => Math.min(page.value * PAGE_SIZE, totalItems.value))
 const pagedItems = computed(() => filteredItems.value.slice(rangeStart.value - 1, rangeEnd.value))
 
 // A shorter list (new filter, or a delete elsewhere) can leave the cursor past the end.
 watch(totalPages, (pages) => {
-  if (page.value > pages) page.value = pages
+  if (pageRaw.value > pages) pageRaw.value = pages
 })
 watch(activeFilter, () => {
-  page.value = 1
+  pageRaw.value = 1
 })
 
 // the API answers epoch milliseconds, not an ISO string
