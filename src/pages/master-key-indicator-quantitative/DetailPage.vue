@@ -2,16 +2,24 @@
   <MpFlex direction="column" backgroundColor="background.surface" minHeight="100vh">
     <MpFlex justifyContent="space-between" alignItems="center" paddingX="24px" paddingY="24px">
       <MpFlex direction="row" gap="3">
-        <MpButton variant="ghost" left-icon="arrows-left" aria-label="Back" @click="router.back()" />
-        <MpFlex direction="column" alignItems="flex-start">
-          <MpButton variant="textLink" as="a" href="#/master-key-indicator-quantitative">
+        <MpButton variant="ghost" left-icon="arrows-left" aria-label="Back" @click="leaveTo('back')" />
+        <MpFlex direction="column" alignItems="flex-start" gap="1">
+          <MpText
+            size="label-small"
+            color="text.secondary"
+            :class="css({ cursor: 'pointer' })"
+            @click="leaveTo('list')"
+          >
             Master Key Indicator — Quantitative
-          </MpButton>
+          </MpText>
           <MpFlex alignItems="center" gap="3">
             <MpText as="h1" size="h1">{{ isEdit ? form.description || 'Edit' : 'Create' }}</MpText>
             <MpBadge v-if="isEdit" for="tableStatus" :type="status === 'Active' ? 'completed' : 'announcement'">
               {{ status }}
             </MpBadge>
+            <MpText v-if="isEdit && lastUpdatedLabel" size="label-small" color="text.secondary">
+              {{ lastUpdatedLabel }}
+            </MpText>
           </MpFlex>
         </MpFlex>
       </MpFlex>
@@ -33,33 +41,50 @@
         <MpSkeleton v-for="i in 4" :key="i" height="56px" rounded="md" />
       </MpFlex>
 
+      <MpBanner v-else-if="isLoadError" variant="danger">
+        <MpBannerDescription>
+          Couldn't load this indicator. Refresh the page to try again.
+        </MpBannerDescription>
+      </MpBanner>
+
       <template v-else>
+        <!-- Form-level banner only after a submit attempt — the field errors say which ones. -->
+        <MpBanner v-if="hasErrors" variant="danger">
+          <MpBannerDescription>
+            We couldn't save this indicator. Please review the highlighted fields.
+          </MpBannerDescription>
+        </MpBanner>
+
         <!-- identity -->
         <MpFlex v-bind="panel" direction="column" gap="5">
-          <MpFlex gap="5" flexWrap="wrap">
-            <MpFormControl id="mki-category" is-required flex="1" minWidth="220px">
+          <MpFlex gap="4" flexWrap="wrap" maxWidth="560px">
+            <MpFormControl id="mki-category" is-required flex="1" minWidth="220px" :is-invalid="Boolean(errors.categoryId)">
               <MpFormLabel>Category</MpFormLabel>
-              <MpSelect v-model="form.categoryId" placeholder="Select category" is-full-width>
+              <MpSelect v-model="form.categoryId" size="md" placeholder="Select category" is-full-width>
                 <option value="" disabled>Select category</option>
                 <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
               </MpSelect>
+              <MpFormErrorMessage v-if="errors.categoryId">{{ errors.categoryId }}</MpFormErrorMessage>
             </MpFormControl>
-            <MpFormControl id="mki-code" is-required flex="1" minWidth="220px">
+            <MpFormControl id="mki-code" is-required flex="1" minWidth="220px" :is-invalid="Boolean(errors.code)">
               <MpFormLabel>Code</MpFormLabel>
-              <MpSelect v-model="form.code" placeholder="Select code" is-full-width>
+              <MpSelect v-model="form.code" size="md" placeholder="Select code" is-full-width>
                 <option value="" disabled>Select code</option>
                 <option v-for="g in griCodes" :key="g.id" :value="g.gri_code">
                   {{ g.gri_code }} — {{ g.disclosure_title }}
                 </option>
               </MpSelect>
+              <MpFormErrorMessage v-if="errors.code">{{ errors.code }}</MpFormErrorMessage>
             </MpFormControl>
           </MpFlex>
-          <MpFormControl id="mki-description" is-required>
+          <MpFormControl id="mki-description" is-required maxWidth="560px" :is-invalid="Boolean(errors.description)">
             <MpFormLabel>Description</MpFormLabel>
             <MpInput
               v-model="form.description"
+              size="md"
               placeholder="e.g. report the total number of employees, and a breakdown of this total by gender and by region"
             />
+            <MpFormErrorMessage v-if="errors.description">{{ errors.description }}</MpFormErrorMessage>
           </MpFormControl>
         </MpFlex>
 
@@ -91,6 +116,9 @@
                   <MpText v-if="!form.columns.length" size="label" color="text.placeholder">
                     No label columns yet. Add at least one.
                   </MpText>
+                  <MpText v-if="errors.columns" size="label-small" color="text.danger">
+                    {{ errors.columns }}
+                  </MpText>
                   <MpFlex
                     v-for="(col, i) in form.columns"
                     :key="`col-${i}`"
@@ -105,6 +133,7 @@
                     <MpFormControl :id="`col-name-${i}`" flex="1" minWidth="0">
                       <MpInput
                         v-model="col.name"
+                        size="md"
                         placeholder="Category name…"
                         @update:model-value="syncColumnKey(col)"
                       />
@@ -150,6 +179,7 @@
                         <MpFormLabel>Header</MpFormLabel>
                         <MpInput
                           v-model="metric.name"
+                          size="md"
                           placeholder="e.g. Number of Injury"
                           @update:model-value="syncMetricKey(metric)"
                         />
@@ -159,7 +189,7 @@
                     <MpFlex gap="2" paddingLeft="6">
                       <MpFormControl :id="`metric-type-${i}`" flex="1" minWidth="0">
                         <MpFormLabel>Input Type</MpFormLabel>
-                        <MpSelect v-model="metric.input_type" is-full-width>
+                        <MpSelect v-model="metric.input_type" size="md" is-full-width>
                           <option v-for="opt in inputTypeOptions" :key="opt.value" :value="opt.value">
                             {{ opt.label }}
                           </option>
@@ -167,7 +197,7 @@
                       </MpFormControl>
                       <MpFormControl :id="`metric-unit-${i}`" flex="1" minWidth="0">
                         <MpFormLabel>Unit</MpFormLabel>
-                        <MpSelect v-model="metric.unitId" placeholder="No unit" is-full-width>
+                        <MpSelect v-model="metric.unitId" size="md" placeholder="No unit" is-full-width>
                           <option value="">No unit</option>
                           <option v-for="u in units" :key="u.id" :value="u.id">{{ u.name }}</option>
                         </MpSelect>
@@ -226,7 +256,7 @@
                         <MpIcon name="drag" size="sm" :class="css({ cursor: 'grab', color: 'text.placeholder' })" />
                       </MpTableCell>
                       <MpTableCell v-for="(col, ci) in form.columns" :key="`cell-${ci}`" as="td">
-                        <MpInput v-model="row.labels[col.key]" placeholder="—" />
+                        <MpInput v-model="row.labels[col.key]" size="md" placeholder="—" />
                       </MpTableCell>
                       <MpTableCell as="td">
                         <MpButton variant="ghost" left-icon="delete" aria-label="Remove row" @click="removeRow(i)" />
@@ -244,8 +274,11 @@
               </MpTableContainer>
             </MpFlex>
 
-            <MpFlex>
-              <MpButton :is-disabled="!canSave" @click="save">{{ isEdit ? 'Update' : 'Create' }}</MpButton>
+            <MpFlex justifyContent="flex-end" gap="4">
+              <MpButton variant="ghost" @click="leaveTo('list')">Cancel</MpButton>
+              <MpButton variant="primary" :is-disabled="isSubmitting" @click="save">
+                {{ isEdit ? 'Save changes' : 'Create indicator' }}
+              </MpButton>
             </MpFlex>
           </MpFlex>
 
@@ -261,7 +294,7 @@
               </MpFlex>
               <MpFlex gap="2" alignItems="center">
                 <MpBadge for="tableStatus" type="information">Period {{ previewPeriod }}</MpBadge>
-                <MpButton size="sm" :variant="isClientView ? 'primary' : 'secondary'" @click="isClientView = !isClientView">
+                <MpButton size="sm" :variant="isClientView ? 'secondary' : 'ghost'" @click="isClientView = !isClientView">
                   Client View
                 </MpButton>
               </MpFlex>
@@ -334,6 +367,27 @@
       @close="isConfirmingDelete = false"
       @confirm="confirmDelete"
     />
+
+    <MpModal :is-open="Boolean(pendingLeave)" size="md" @close="pendingLeave = null">
+      <MpModalContent>
+        <MpModalHeader>
+          Discard unsaved changes?
+          <MpModalCloseButton />
+        </MpModalHeader>
+        <MpModalBody>
+          <MpText size="label">
+            You have edits that haven't been saved. Leaving this page discards them.
+          </MpText>
+        </MpModalBody>
+        <MpModalFooter>
+          <MpButtonGroup>
+            <MpButton variant="ghost" @click="pendingLeave = null">Keep editing</MpButton>
+            <MpButton variant="danger" @click="confirmLeave">Discard changes</MpButton>
+          </MpButtonGroup>
+        </MpModalFooter>
+      </MpModalContent>
+      <MpModalOverlay />
+    </MpModal>
   </MpFlex>
 </template>
 
@@ -357,6 +411,17 @@ import {
   MpTableRow,
   MpTableCell,
   MpTableContainer,
+  MpBanner,
+  MpBannerDescription,
+  MpFormErrorMessage,
+  MpButtonGroup,
+  MpModal,
+  MpModalContent,
+  MpModalHeader,
+  MpModalBody,
+  MpModalFooter,
+  MpModalOverlay,
+  MpModalCloseButton,
   css,
   toast,
 } from '@mekari/pixel3'
@@ -445,10 +510,27 @@ const griCodes = computed(() => (griData.value ?? []).filter((g) => g.status ===
 const { data: unitData } = useGetMasterUnit()
 const units = computed(() => unitData.value ?? [])
 
-const { data: detail, isLoading: isFetching } = useMkiGriQuantitativeDetail(id)
+const { data: detail, isLoading: isFetching, isError: isFetchError } = useMkiGriQuantitativeDetail(id)
 const isLoading = computed(() => isEdit.value && isFetching.value)
+const isLoadError = computed(() => isEdit.value && isFetchError.value)
 // no status field on the endpoint yet — see the ponytail note on MkiGriQuantitative.status
 const status = computed(() => detail.value?.status ?? 'Active')
+
+// Accountability line next to the status badge. The Index contract carries updated_by as a bare
+// numeric id with no name/email anywhere in the payload, so there is nothing to resolve it to —
+// only the "when" is shown. Add the "who" once BE ships an updated_by_user object.
+const lastUpdatedLabel = computed(() => {
+  const at = detail.value?.updated_at ?? detail.value?.created_at
+  if (!at) return ''
+  const stamp = new Date(at).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return `Last updated ${stamp}`
+})
 
 type FormColumn = { key: string; name: string }
 type FormMetric = { key: string; name: string; input_type: MkiQuantInputType; unitId: string }
@@ -467,9 +549,56 @@ const form = reactive({
 // the schema builder configures the table, the subsidiary submission fills it.
 const previewValues = reactive<Record<string, string | number | boolean | null>>({})
 
-const canSave = computed(() =>
-  Boolean(form.categoryId && form.code && form.description && form.columns.length),
-)
+// Validation runs on submit only, never per keystroke. `hasSubmitted` is the gate: before the first
+// Save the form shows no red at all, after it the errors recompute live so fixing a field clears it.
+const hasSubmitted = ref(false)
+
+const validationErrors = computed(() => {
+  const found: Record<string, string> = {}
+  if (!form.categoryId) found.categoryId = 'Select a category.'
+  if (!form.code) found.code = 'Select a GRI code.'
+  if (!form.description.trim()) found.description = 'Enter a description.'
+  if (!form.columns.length) found.columns = 'Add at least one label column.'
+  return found
+})
+
+const errors = computed(() => (hasSubmitted.value ? validationErrors.value : {}))
+const hasErrors = computed(() => Object.keys(errors.value).length > 0)
+const isSubmitting = ref(false)
+
+// Unsaved-changes guard, edit form only — a create form starts empty, so "discard" has no meaning
+// there. Comparing a serialized snapshot against the last-loaded one is enough: the form is small
+// plain data, and it correctly reports "clean" when the user undoes their own edit.
+function snapshot() {
+  return JSON.stringify(form)
+}
+
+const pristine = ref(snapshot())
+const isDirty = computed(() => isEdit.value && snapshot() !== pristine.value)
+
+type LeaveTarget = 'back' | 'list'
+const pendingLeave = ref<LeaveTarget | null>(null)
+
+function navigate(target: LeaveTarget) {
+  if (target === 'back') router.back()
+  else router.push('/master-key-indicator-quantitative')
+}
+
+// Every way off this page (back button, breadcrumb, Cancel) routes through here so the guard
+// cannot be walked around by picking a different exit.
+function leaveTo(target: LeaveTarget) {
+  if (isDirty.value) {
+    pendingLeave.value = target
+    return
+  }
+  navigate(target)
+}
+
+function confirmLeave() {
+  const target = pendingLeave.value
+  pendingLeave.value = null
+  if (target) navigate(target)
+}
 
 const hasSubColumns = computed(() => form.metrics.length >= 2)
 
@@ -577,6 +706,7 @@ watch(
       unitId: m.unit?.id ?? '',
     }))
     form.rows = next.rows.map((r) => ({ labels: { ...r.labels } }))
+    pristine.value = snapshot()
   },
   { immediate: true },
 )
@@ -607,21 +737,43 @@ function buildPayload(): MkiGriQuantitativePayload {
 }
 
 async function save() {
-  if (!canSave.value) return
-  if (isEdit.value && id) {
-    await updateMutation.mutateAsync({ ...buildPayload(), id })
-    toast.notify({ id: 'mki-update', variant: 'success', title: 'Indicator updated.' })
-  } else {
-    await createMutation.mutateAsync(buildPayload())
-    toast.notify({ id: 'mki-create', variant: 'success', title: 'Indicator created.' })
+  hasSubmitted.value = true
+  if (Object.keys(validationErrors.value).length) return
+
+  // A rejected mutation used to escape as an unhandled promise: the toast and the redirect were
+  // skipped and the user saw literally nothing happen after clicking Save.
+  isSubmitting.value = true
+  try {
+    if (isEdit.value && id) {
+      await updateMutation.mutateAsync({ ...buildPayload(), id })
+      toast.notify({ id: 'mki-update', variant: 'success', title: 'Indicator updated.' })
+    } else {
+      await createMutation.mutateAsync(buildPayload())
+      toast.notify({ id: 'mki-create', variant: 'success', title: 'Indicator created.' })
+    }
+  } catch {
+    toast.notify({ id: 'mki-save-error', variant: 'error', title: "Couldn't save the indicator. Please try again." })
+    return
+  } finally {
+    isSubmitting.value = false
   }
+
+  // Clear the dirty flag before routing, otherwise a successful save trips the unsaved-changes guard.
+  pristine.value = snapshot()
   router.push('/master-key-indicator-quantitative')
 }
 
 async function confirmDelete() {
   if (!id) return
-  await deleteMutation.mutateAsync(id)
+  try {
+    await deleteMutation.mutateAsync(id)
+  } catch {
+    isConfirmingDelete.value = false
+    toast.notify({ id: 'mki-delete-error', variant: 'error', title: "Couldn't delete the indicator. Please try again." })
+    return
+  }
   isConfirmingDelete.value = false
+  pristine.value = snapshot()
   router.push('/master-key-indicator-quantitative')
 }
 </script>
