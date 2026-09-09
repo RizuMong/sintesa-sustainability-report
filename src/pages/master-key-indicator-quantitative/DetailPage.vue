@@ -80,15 +80,18 @@
               <MpFormErrorMessage v-if="errors.code">{{ errors.code }}</MpFormErrorMessage>
             </MpFormControl>
           </MpFlex>
-          <MpFormControl id="mki-description" is-required maxWidth="560px" :is-invalid="Boolean(errors.description)">
-            <MpFormLabel>Description</MpFormLabel>
-            <MpInput
-              v-model="form.description"
-              size="md"
-              placeholder="e.g. report the total number of employees, and a breakdown of this total by gender and by region"
-            />
-            <MpFormErrorMessage v-if="errors.description">{{ errors.description }}</MpFormErrorMessage>
-          </MpFormControl>
+          <!-- MpFormControl drops layout props, so the 6-column cap has to live on a wrapper. -->
+          <MpFlex maxWidth="560px">
+            <MpFormControl id="mki-description" is-required flex="1" :is-invalid="Boolean(errors.description)">
+              <MpFormLabel>Description</MpFormLabel>
+              <MpInput
+                v-model="form.description"
+                size="md"
+                placeholder="e.g. report the total number of employees, and a breakdown of this total by gender and by region"
+              />
+              <MpFormErrorMessage v-if="errors.description">{{ errors.description }}</MpFormErrorMessage>
+            </MpFormControl>
+          </MpFlex>
         </MpFlex>
 
         <MpFlex direction="row" gap="5" alignItems="flex-start" flexWrap="wrap">
