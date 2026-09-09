@@ -11,6 +11,7 @@ import {
   requestorSummary,
   toSubmissionValue,
 } from './validation.ts'
+import { toDisplayRows } from '../master-key-indicator-quantitative/sections.ts'
 
 const ref = (id: string, name = id): Ref2 => ({ id, name })
 const summary = (overrides: Partial<EvaluateGriQuantitativeSummary>): EvaluateGriQuantitativeSummary => ({
@@ -184,5 +185,55 @@ assert.deepEqual(
     ['Energy', ['i2']],
   ],
 )
+
+// GROU-651 — save() builds values[] off toDisplayRows(kind === 'row') so render and save can never
+// disagree about what counts as a data row.
+
+// legacy item (flat rows, no unit_mode) must produce the exact same values[] as on main: same
+// length, same row_keys, in row order.
+{
+  const legacyRows: EvaluateGriQuantitativeRow[] = [
+    { sequence: 1, labels: { a: 'A1' } },
+    { sequence: 2, labels: { a: 'A2' } },
+  ]
+  const legacyMetrics = [numberMetric]
+  const cells: Record<string, string | number | boolean | null> = { 'row_1:new_hire_count': '5', 'row_2:new_hire_count': '7' }
+  const values = toDisplayRows(legacyRows, {})
+    .filter((r) => r.kind === 'row')
+    .flatMap((row) =>
+      legacyMetrics.map((m) => toSubmissionValue(m, row.sequence, cells[`row_${row.sequence}:${m.key}`])),
+    )
+  assert.equal(values.length, 2, 'legacy item produces one value per (row, metric), same as main')
+  assert.deepEqual(values.map((v) => v.row_key), ['row_1', 'row_2'], 'same row_keys, same order as main')
+}
+
+// an item with two sections produces values[] with no section row_keys, and data rows keep their
+// original sequences.
+{
+  const rows: EvaluateGriQuantitativeRow[] = [
+    { sequence: 1, row_type: 'SECTION', title: 'Section A', labels: {} },
+    { sequence: 2, labels: { a: 'A2' }, parent_sequence: 1 },
+    { sequence: 3, row_type: 'SECTION', title: 'Section B', labels: {} },
+    { sequence: 4, labels: { a: 'A4' }, parent_sequence: 3 },
+  ]
+  const cells: Record<string, string | number | boolean | null> = {}
+  const values = toDisplayRows(rows, {})
+    .filter((r) => r.kind === 'row')
+    .flatMap((row) => [numberMetric].map((m) => toSubmissionValue(m, row.sequence, cells[`row_${row.sequence}:${m.key}`])))
+  assert.equal(values.length, 2, 'only the two data rows produce values, sections produce none')
+  assert.deepEqual(values.map((v) => v.row_key), ['row_2', 'row_4'], 'data rows keep their original sequences, no section row_keys')
+}
+
+// fromSubmissionValues still rehydrates a legacy saved payload after grouping is applied to render
+{
+  const saved = [toSubmissionValue(numberMetric, 1, '12'), toSubmissionValue(numberMetric, 2, '34')]
+  const cells = fromSubmissionValues(saved)
+  const rows: EvaluateGriQuantitativeRow[] = [
+    { sequence: 1, row_type: 'SECTION', title: 'Section A', labels: {} },
+    { sequence: 2, labels: { a: 'A2' }, parent_sequence: 1 },
+  ]
+  const displayRows = toDisplayRows(rows, {}).filter((r) => r.kind === 'row')
+  assert.equal(cells[`row_${displayRows[0].sequence}:new_hire_count`], 34, 'saved cell still resolves after grouping (row 2 is the only data row here)')
+}
 
 console.log('ok')

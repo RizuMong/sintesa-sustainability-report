@@ -136,81 +136,46 @@
                                 itemTitle(item)
                             }}</MpText>
 
-                            <MpTableContainer>
-                                <MpTable>
-                                    <MpTableHead>
-                                        <MpTableRow>
-                                            <MpTableCell
-                                                v-for="col in item.columns"
-                                                :key="col.key"
-                                                scope="col"
-                                                >{{ col.name }}</MpTableCell
-                                            >
-                                            <MpTableCell
-                                                v-for="metric in item.metrics"
-                                                :key="metric.key"
-                                                scope="col"
-                                            >
-                                                {{ metric.name }}
-                                            </MpTableCell>
-                                        </MpTableRow>
-                                    </MpTableHead>
-                                    <MpTableBody>
-                                        <MpTableRow
-                                            v-for="row in item.rows"
-                                            :key="row.sequence"
-                                        >
-                                            <MpTableCell
-                                                v-for="col in item.columns"
-                                                :key="col.key"
-                                                as="td"
-                                                scope="row"
-                                            >
-                                                {{ row.labels[col.key] }}
-                                            </MpTableCell>
-                                            <MpTableCell
-                                                v-for="metric in item.metrics"
-                                                :key="metric.key"
-                                                as="td"
-                                                scope="row"
-                                            >
-                                                <DynamicFieldInput
-                                                    :input_type="
-                                                        metric.input_type
-                                                    "
-                                                    :unit="metric.unit?.name"
-                                                    :model-value="
-                                                        cells[
-                                                            cellId(
-                                                                item.id,
-                                                                row.sequence,
-                                                                metric.key,
-                                                            )
-                                                        ]
-                                                    "
-                                                    :disabled="readOnly"
-                                                    @update:model-value="
-                                                        (
-                                                            v:
-                                                                | string
-                                                                | number
-                                                                | boolean
-                                                                | null,
-                                                        ) =>
-                                                            (cells[
-                                                                cellId(
-                                                                    item.id,
-                                                                    row.sequence,
-                                                                    metric.key,
-                                                                )
-                                                            ] = v)
-                                                    "
-                                                />
-                                            </MpTableCell>
-                                        </MpTableRow>
-                                    </MpTableBody>
-                                </MpTable>
-                            </MpTableContainer>
+                            <QuantSchemaTable
+                                :columns="item.columns"
+                                :metrics="item.metrics"
+                                :rows="item.rows"
+                                :unit-mode="item.unit_mode"
+                                :unit="item.unit"
+                            >
+                                <template #metric-cell="{ row, metric, unit }">
+                                    <DynamicFieldInput
+                                        :input_type="metric.input_type"
+                                        :unit="unit?.name ?? metric.unit?.name"
+                                        :model-value="
+                                            cells[
+                                                cellId(
+                                                    item.id,
+                                                    row.sequence,
+                                                    metric.key,
+                                                )
+                                            ]
+                                        "
+                                        :disabled="readOnly"
+                                        @update:model-value="
+                                            (
+                                                v:
+                                                    | string
+                                                    | number
+                                                    | boolean
+                                                    | null,
+                                            ) =>
+                                                (cells[
+                                                    cellId(
+                                                        item.id,
+                                                        row.sequence,
+                                                        metric.key,
+                                                    )
+                                                ] = v)
+                                        "
+                                    />
+                                </template>
+                            </QuantSchemaTable>
 
                             <MpFormControl
                                 v-if="item.evidence_attachment === 'Required'"
@@ -530,12 +495,6 @@ import {
     MpFormLabel,
     MpFormErrorMessage,
     MpSkeleton,
-    MpTable,
-    MpTableHead,
-    MpTableBody,
-    MpTableRow,
-    MpTableCell,
-    MpTableContainer,
     MpTimeline,
     MpTimelineItem,
     MpTimelineTitle,
@@ -559,6 +518,7 @@ import {
 } from "@mekari/pixel3";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal.vue";
 import DynamicFieldInput from "@/components/DynamicFieldInput.vue";
+import QuantSchemaTable from "@/components/QuantSchemaTable.vue";
 import {
     isAllowedEvidenceFile,
     canSubmit as canSubmitEvidence,
@@ -582,6 +542,7 @@ import {
     cellKey,
     requesterLabel,
 } from "@/services/evaluate-gri-quantitative";
+import { toDisplayRows } from "@/services/master-key-indicator-quantitative";
 import { useGetUserProfile } from "@/services/user-profile";
 import { logger } from "@/lib/logger";
 
@@ -763,15 +724,24 @@ async function save() {
             entity_id: detail.value.entity_id,
             items: items.value.map((item) => ({
                 item_id: item.id,
-                values: item.rows.flatMap((row) =>
-                    item.metrics.map((metric) =>
-                        toSubmissionValue(
-                            metric,
-                            row.sequence,
-                            cells[cellId(item.id, row.sequence, metric.key)],
+                // GROU-651: section rows are never data — filter them out via the same
+                // toDisplayRows() the render side uses so save and render cannot disagree.
+                values: toDisplayRows(item.rows, {
+                    unit_mode: item.unit_mode,
+                    unit: item.unit,
+                })
+                    .filter((r) => r.kind === "row")
+                    .flatMap((row) =>
+                        item.metrics.map((metric) =>
+                            toSubmissionValue(
+                                metric,
+                                row.sequence,
+                                cells[
+                                    cellId(item.id, row.sequence, metric.key)
+                                ],
+                            ),
                         ),
                     ),
-                ),
             })),
         });
         return true;

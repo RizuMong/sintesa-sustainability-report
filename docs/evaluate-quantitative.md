@@ -60,3 +60,22 @@ resolved the count is simply 0 — it never guesses.
 - Evidence upload still has no endpoint — the file is validated and gates Submit client-side only.
 - The item heading falls back `description → name → code → parent_id.name`; the contract's item
   objects carry none of the first three yet.
+
+## 5. As Built — GROU-651 (Section grouping & configurable Unit render)
+
+- The matrix now renders through the shared `<QuantSchemaTable>` component (also used by the MKI
+  builder's Live Preview), fed `item.rows`/`item.unit_mode`/`item.unit`, so grouping/unit-mode
+  rendering cannot drift from the builder.
+- **`row.sequence` stays the cell identity.** Grouping only changes render order — the
+  `#metric-cell` slot still receives the row's original `sequence`, unchanged, for
+  `cellId`/`toSubmissionValue`.
+- **Section rows are never data.** `save()` now builds `values[]` off
+  `toDisplayRows(item.rows, {...}).filter(r => r.kind === 'row')` — the exact same function the
+  render side uses — so a Section header can never leak into `values[]` with a bogus `row_key`.
+- **Unit precedence**: the resolved unit from `toDisplayRows` (table `UNIFORM`/`PER_ROW`) is passed
+  to `DynamicFieldInput`, falling back to `metric.unit?.name` when `unit_mode` is absent/`NONE` —
+  the fallback is what keeps every pre-GROU-651 indicator looking exactly as it did before.
+- `api.check.ts` extended (not replaced) with GROU-651 assertions: a legacy flat-row item produces
+  the identical `values[]` it produced before, a two-section item produces no section `row_key`s
+  while data rows keep their original sequences, and `fromSubmissionValues` still rehydrates a
+  legacy saved payload correctly once grouping is applied to render.
