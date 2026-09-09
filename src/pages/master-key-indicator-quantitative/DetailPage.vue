@@ -7,8 +7,11 @@
           <MpText
             size="label-small"
             color="text.secondary"
+            role="link"
+            tabindex="0"
             :class="css({ cursor: 'pointer' })"
             @click="leaveTo('list')"
+            @keydown.enter="leaveTo('list')"
           >
             Master Key Indicator — Quantitative
           </MpText>
