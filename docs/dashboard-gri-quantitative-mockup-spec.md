@@ -189,14 +189,26 @@ which renders the real page in headless Chrome against the real contract payload
 | R8 | Tab list from payload, not hardcoded | `chart-spec.ts` resolves on `gri_codes`; generic fallback | fallback verified in check |
 | R9 | Tab strip survives filter change | `tab-index.check.ts` | reorder/shrink/vanish/empty + in-range invariant |
 | R10 | Mekari styling, no raw hex | `grep -E '#[0-9a-f]{3,6}'` over the 4 changed files | zero matches |
-| R11 | No new dependency | `git diff` on `package.json` across all 4 commits | untouched |
+| R11 | No new dependency | `git diff` on `package.json` across all commits | untouched |
 | R12 | Follows app patterns | shared `useStrategicInsightFilterState`, reused `SummaryBox`, same header block as `SdgPage` | all 3 dashboards agree |
 | R13 | Stays in original token theme | route has no `meta.nextTheme` | unchanged |
+| R14 | 2-col grid with full-width rows (§1) | Acceptance: measures each card's width vs the grid | 2 × 688px in a 1392px grid; 6 full cards at 1392px |
+| R15 | No duplicated titles / clipped KPI cards | Acceptance: per-tab title dedupe + `scrollHeight > clientHeight` | 0 of each |
 
-The acceptance assertions were mutation-tested: trimming one chart card from
-`chartCardsFor()` failed the run on 5 of 8 tabs by name, so R2 is load-bearing rather than
-vacuously green.
+The acceptance assertions are mutation-tested, so they are load-bearing rather than
+vacuously green:
 
-**Not covered:** pixel-level visual fidelity. The checks assert structure (which charts, of
-what kind, with what data, painting at all), not that the result looks like the mockup
-screenshot. A human should still eyeball it once.
+| Sabotage | Caught as |
+|---|---|
+| trim one card from `chartCardsFor()` | 5 of 8 tabs fail, by chart title |
+| re-add the duplicate unit caption | 5 of 8 tabs fail, with exact clipped counts |
+| delete the `data-span="full"` grid rule | all 6 full cards fail at 49% of the grid |
+
+**Not covered:** pixel-level visual fidelity — colors, spacing, type scale. The checks assert
+structure and geometry (which charts, of what kind, with what data, at what width, painting
+at all), not that it *looks* like the mockup screenshot. Use
+`bash scripts/screenshot-dashboard.sh` and eyeball `.temp/shots/`.
+
+Also note the acceptance run pins the viewport to 1440×2400. The grid is responsive and
+collapses to a single column at narrow widths by design, so the 2-column layout is only
+exercised at or above the `md` breakpoint.
