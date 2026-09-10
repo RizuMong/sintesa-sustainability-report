@@ -31,6 +31,7 @@ function item(over: Partial<StrategicInsightGriItem>): StrategicInsightGriItem {
     value: 0,
     unit: null,
     input_type: 'NUMBER',
+    aggregation: 'SUM',
     ...over,
   }
 }
@@ -131,12 +132,44 @@ assert.equal(aggregateItems([general.items[5]!]), 0, 'TEXT-only selection -> 0, 
 
 // ---- aggregation: PERCENTAGE averages (AC-75 ratio rule) ----
 const ratios = [
-  item({ id: 'r1', input_type: 'PERCENTAGE', value: 100 }),
-  item({ id: 'r2', input_type: 'PERCENTAGE', value: 50 }),
+  item({ id: 'r1', input_type: 'PERCENTAGE', aggregation: 'AVERAGE', value: 100 }),
+  item({ id: 'r2', input_type: 'PERCENTAGE', aggregation: 'AVERAGE', value: 50 }),
 ]
 assert.equal(aggregateItems(ratios), 75)
 // a lone ratio passes through untouched
 assert.equal(aggregateItems([ratios[0]!]), 100)
+
+// ---- REGRESSION: an AVERAGE metric that is a plain NUMBER, not a PERCENTAGE ----
+// Salary ratios and average-training-hours are `input_type: NUMBER`. Inferring the combine rule
+// from input_type summed them: two entities each at 0.94 produced a "1.88 ratio", and training
+// hours across 15 entities read ~450 average hours instead of ~30. The rule must come from
+// `aggregation`, which is why that field exists on items[] at all.
+const salaryRatios = [
+  item({ id: 's1', input_type: 'NUMBER', aggregation: 'AVERAGE', value: 0.95 }),
+  item({ id: 's2', input_type: 'NUMBER', aggregation: 'AVERAGE', value: 0.93 }),
+]
+assert.equal(aggregateItems(salaryRatios), 0.94, 'NUMBER+AVERAGE must average, not sum')
+assert.ok(aggregateItems(salaryRatios) <= 1, 'a salary ratio can never exceed 1 by aggregating')
+
+const trainingHours = [
+  item({ id: 't1', input_type: 'NUMBER', aggregation: 'AVERAGE', value: 36 }),
+  item({ id: 't2', input_type: 'NUMBER', aggregation: 'AVERAGE', value: 30 }),
+  item({ id: 't3', input_type: 'NUMBER', aggregation: 'AVERAGE', value: 24 }),
+]
+assert.equal(aggregateItems(trainingHours), 30, 'average hours stay in per-employee scale')
+
+// a SUM metric with the same values must still sum — proving the switch is the field, not the type
+const summed = trainingHours.map((i) => ({ ...i, aggregation: 'SUM' as const }))
+assert.equal(aggregateItems(summed), 90)
+
+// ---- the PT-comparison chart must respect AVERAGE too ----
+// Otherwise the Training tab's bars show each entity's running total, not its average.
+const perEntityAvg = totalsByEntity([
+  item({ id: 'a1', entity: WS, input_type: 'NUMBER', aggregation: 'AVERAGE', value: 36 }),
+  item({ id: 'a2', entity: WS, input_type: 'NUMBER', aggregation: 'AVERAGE', value: 30 }),
+  item({ id: 'a3', entity: SDS, input_type: 'NUMBER', aggregation: 'AVERAGE', value: 20 }),
+])
+assert.deepEqual(perEntityAvg.map((e) => e.value), [33, 20], 'per-entity averages, not totals')
 
 // ---- series: one per declared member, in declared order, one point per period ----
 const genderSeries = seriesByDimension(general, 'gender')

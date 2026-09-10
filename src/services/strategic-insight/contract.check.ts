@@ -171,6 +171,132 @@ for (const tab of tabs) {
 assert.equal(kpiCount, 32, 'all 32 mockup KPI cards must resolve')
 assert.equal(chartCount, 18, 'all 18 mockup chart dimensions must resolve')
 
+// ---- chart-level traceability: all 27 charts the mockup actually draws ----
+// The 18 dimensions above are the *grouping axes*, not the charts. The mockup draws 27 (26
+// <canvas> + the pt-bars div). Each is listed here with the contract field that feeds it, so a
+// chart with no source cannot hide behind an aggregate count.
+type ChartSource =
+  | { via: 'dimension'; category: string; dimension: string }
+  | { via: 'trend'; category: string; dimension: string } // same dimension, plotted over periods
+  | { via: 'entities'; category: string } // pt-bars / PT comparison
+  | { via: 'derived'; category: string; dimension: string; note: string } // FE computes % from a dimension
+
+const mockupCharts: { id: string; title: string; source: ChartSource }[] = [
+  // General (7)
+  { id: 'c-gender', title: 'Gender per tahun', source: { via: 'dimension', category: 'General', dimension: 'gender' } },
+  { id: 'c-status', title: 'Status karyawan per tahun', source: { via: 'dimension', category: 'General', dimension: 'employment_status' } },
+  { id: 'c-trend', title: 'Tren jumlah karyawan', source: { via: 'trend', category: 'General', dimension: 'gender' } },
+  { id: 'c-donut', title: 'Komposisi gender (%)', source: { via: 'derived', category: 'General', dimension: 'gender', note: 'share of total' } },
+  { id: 'pt-bars', title: 'Perbandingan total karyawan antar PT', source: { via: 'entities', category: 'General' } },
+  { id: 'c-worker', title: 'Tipe pekerja non-karyawan', source: { via: 'dimension', category: 'General', dimension: 'worker_type' } },
+  { id: 'c-pie', title: 'Komposisi status karyawan (%)', source: { via: 'derived', category: 'General', dimension: 'employment_status', note: 'share of total' } },
+  // Energy (3)
+  { id: 'c-energy-bar', title: 'Konsumsi energi per tahun', source: { via: 'dimension', category: 'Energy', dimension: 'renewability' } },
+  { id: 'c-energy-trend', title: 'Tren konsumsi energi', source: { via: 'trend', category: 'Energy', dimension: 'renewability' } },
+  { id: 'c-energy-fuel', title: 'Breakdown jenis bahan bakar', source: { via: 'dimension', category: 'Energy', dimension: 'fuel_type' } },
+  // Waste (3) — divert vs disposal are two slices of one route dimension
+  { id: 'c-waste-divert', title: 'Limbah dialihkan', source: { via: 'dimension', category: 'Waste', dimension: 'waste_route' } },
+  { id: 'c-waste-disposal', title: 'Limbah dibuang', source: { via: 'dimension', category: 'Waste', dimension: 'waste_route' } },
+  { id: 'c-waste-trend', title: 'Tren total limbah', source: { via: 'trend', category: 'Waste', dimension: 'waste_route' } },
+  // Water (3)
+  { id: 'c-water-withdraw', title: 'Penarikan air per sumber', source: { via: 'dimension', category: 'Water', dimension: 'water_source' } },
+  { id: 'c-water-discharge', title: 'Pembuangan air per tujuan', source: { via: 'dimension', category: 'Water', dimension: 'water_source' } },
+  { id: 'c-water-trend', title: 'Tren penggunaan air', source: { via: 'trend', category: 'Water', dimension: 'water_flow' } },
+  // Diversity (3)
+  { id: 'c-div-gov-gender', title: 'Governance per gender', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'gender' } },
+  { id: 'c-div-age', title: 'Distribusi kelompok umur', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'age_band' } },
+  { id: 'c-div-salary', title: 'Rasio gaji per kategori', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'employee_category' } },
+  // Employment (2)
+  { id: 'c-emp-new', title: 'Karyawan baru', source: { via: 'dimension', category: 'Employment', dimension: 'gender' } },
+  { id: 'c-emp-parental', title: 'Cuti orang tua', source: { via: 'dimension', category: 'Employment', dimension: 'parental_stage' } },
+  // OHS (3)
+  { id: 'c-ohs-incident', title: 'Insiden per tahun', source: { via: 'dimension', category: 'OHS', dimension: 'incident_type' } },
+  { id: 'c-ohs-type', title: 'Insiden tetap vs kontrak', source: { via: 'dimension', category: 'OHS', dimension: 'employment_status' } },
+  { id: 'c-ohs-trend', title: 'Tren jam kerja & kecelakaan', source: { via: 'trend', category: 'OHS', dimension: 'incident_type' } },
+  // Training (3)
+  { id: 'c-train-gender', title: 'Jam pelatihan per gender', source: { via: 'dimension', category: 'Training & Education', dimension: 'gender' } },
+  { id: 'c-train-category', title: 'Jam pelatihan per kategori', source: { via: 'dimension', category: 'Training & Education', dimension: 'employee_category' } },
+  { id: 'c-train-trend', title: 'Tren jam pelatihan', source: { via: 'trend', category: 'Training & Education', dimension: 'gender' } },
+]
+
+assert.equal(mockupCharts.length, 27, 'the mockup draws 27 charts (26 canvas + pt-bars)')
+
+const byName = new Map(tabs.map((c) => [c.category_id.name, c]))
+for (const chart of mockupCharts) {
+  const category = byName.get(chart.source.category)
+  assert.ok(category, `${chart.id}: category '${chart.source.category}' missing from payload`)
+
+  if (chart.source.via === 'entities') {
+    assert.ok(
+      totalsByEntity(category.items).length > 0,
+      `${chart.id} (${chart.title}): no entity data to plot`,
+    )
+    continue
+  }
+
+  const series = seriesByDimension(category, chart.source.dimension)
+  assert.ok(
+    series.length > 0,
+    `${chart.id} (${chart.title}): dimension '${chart.source.dimension}' yields no series`,
+  )
+  // a trend chart needs an x-axis of periods; a breakdown needs at least two members to compare
+  if (chart.source.via === 'trend') {
+    assert.ok(periodsOf(category.items).length > 0, `${chart.id}: no periods for a trend x-axis`)
+  } else {
+    assert.ok(series.length >= 2, `${chart.id}: a breakdown needs >=2 members, got ${series.length}`)
+  }
+}
+
+// ---- REGRESSION: AVERAGE metrics must not be summed across entities ----
+// The bug this caught: salary ratios and training hours are `input_type: NUMBER`, so inferring
+// the combine rule from the input type summed them into nonsense (a "1.88" salary ratio).
+for (const name of ['Diversity & Equal Opportunity', 'Training & Education']) {
+  const tab = byName.get(name)!
+  const avgItems = tab.items.filter((i) => i.aggregation === 'AVERAGE')
+  assert.ok(avgItems.length > 0, `${name}: expected AVERAGE items in the contract`)
+
+  // duplicate every AVERAGE item under a second entity, as All-Entities would return
+  const doubled: StrategicInsightGriCategory = {
+    ...tab,
+    items: [
+      ...tab.items,
+      ...avgItems.map((i) => ({
+        ...i,
+        id: `${i.id}-b`,
+        entity: { id: 'second-entity', code: 'SDS', name: 'Sintesa Duta Sejahtera' },
+      })),
+    ],
+  }
+
+  for (const dimension of tab.dimensions) {
+    const before = seriesByDimension(tab, dimension.key)
+    const after = seriesByDimension(doubled, dimension.key)
+    for (let i = 0; i < before.length; i++) {
+      const b = before[i]!
+      const a = after[i]!
+      // only assert on series actually made of AVERAGE items
+      const members = avgItems.filter((it) => it.labels[dimension.key] === b.key)
+      if (members.length === 0) continue
+      assert.deepEqual(
+        a.data,
+        b.data,
+        `${name}/${dimension.key}/${b.key}: adding a second entity changed an AVERAGE series ` +
+          `(${b.data} -> ${a.data}) — ratios were summed instead of averaged`,
+      )
+    }
+  }
+}
+
+// ---- every item declares how it aggregates ----
+for (const tab of tabs) {
+  for (const item of tab.items) {
+    assert.ok(
+      ['SUM', 'PERCENTAGE', 'AVERAGE'].includes(item.aggregation),
+      `${tab.category_id.name}: item ${item.id} has no/invalid aggregation`,
+    )
+  }
+}
+
 // ---- the two-axis case survives a round trip through the real payload ----
 const ohs = tabs.find((c) => c.category_id.name === 'OHS')!
 const recordable = ohs.items.filter((i) => i.labels['incident_type'] === 'RECORDABLE')
@@ -187,4 +313,6 @@ const salarySenior = summaryValue(diversity, 'salary_ratio_senior')!
 assert.equal(salarySenior.aggregation, 'AVERAGE')
 assert.ok(salarySenior.value > 0 && salarySenior.value <= 2, 'a salary ratio, not a sum')
 
-console.log(`ok — 8 tabs, ${kpiCount} KPI cards, ${chartCount} dimension charts`)
+console.log(
+  `ok — 8 tabs, ${kpiCount} KPI cards, ${chartCount} dimensions, ${mockupCharts.length} charts traced`,
+)

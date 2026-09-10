@@ -40,12 +40,21 @@ export function itemsAt(
 
 // AC-75: when a selection spans several entities and/or periods, absolute metrics sum
 // (total tons of waste) and ratio metrics average (% renewable energy, salary ratios).
-// PERCENTAGE items average; NUMBER items sum.
+//
+// Which of the two applies is read from `items[].aggregation`, NOT inferred from `input_type`.
+// Inferring was a real bug: salary ratios and average-training-hours are `input_type: NUMBER`
+// (they are plain numbers, not percentages), so they got summed — two entities each reporting a
+// 0.94 salary ratio produced "1.88", and training hours across 15 entities read ~450 average
+// hours instead of ~30. `input_type` describes how a value is entered and rendered;
+// `aggregation` describes how it combines. They are different questions.
 export function aggregateItems(items: StrategicInsightGriItem[]): number {
   const numeric = items.filter(isNumericItem)
   if (numeric.length === 0) return 0
   const total = numeric.reduce((sum, item) => sum + numericValue(item), 0)
-  const isRatio = numeric.every((i) => i.input_type === 'PERCENTAGE')
+  // A mixed selection should not silently pick one rule; averaging is the safe default because
+  // summing ratios produces a value outside the metric's own range (a "1.88 ratio"), whereas
+  // averaging a set of sums merely under-reports a total that the KPI cards already carry exactly.
+  const isRatio = numeric.some((i) => i.aggregation === 'AVERAGE')
   return isRatio ? total / numeric.length : total
 }
 
@@ -71,23 +80,32 @@ export function seriesByDimension(
 
 // The PT-comparison bar chart: one bar per entity, entities in first-seen order.
 // `code` is the short label the mockup prints under each bar ('WS', 'SDS', ...).
+//
+// Goes through aggregateItems per entity rather than summing directly, so an AVERAGE metric
+// (training hours) shows each entity's average instead of its running total.
 export function totalsByEntity(
   items: StrategicInsightGriItem[],
 ): { id: string; code: string; name: string; value: number }[] {
-  const byEntity = new Map<string, { id: string; code: string; name: string; value: number }>()
+  const order: string[] = []
+  const grouped = new Map<string, StrategicInsightGriItem[]>()
   for (const item of items) {
     if (!isNumericItem(item)) continue
-    const existing = byEntity.get(item.entity.id)
-    if (existing) existing.value += numericValue(item)
-    else
-      byEntity.set(item.entity.id, {
-        id: item.entity.id,
-        code: item.entity.code,
-        name: item.entity.name,
-        value: numericValue(item),
-      })
+    const existing = grouped.get(item.entity.id)
+    if (existing) existing.push(item)
+    else {
+      grouped.set(item.entity.id, [item])
+      order.push(item.entity.id)
+    }
   }
-  return [...byEntity.values()]
+  return order.map((id) => {
+    const group = grouped.get(id)!
+    return {
+      id,
+      code: group[0]!.entity.code,
+      name: group[0]!.entity.name,
+      value: aggregateItems(group),
+    }
+  })
 }
 
 // Tabs, in the order the backend declared. Sorted rather than trusted as-received so a payload

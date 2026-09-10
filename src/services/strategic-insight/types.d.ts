@@ -95,6 +95,10 @@ declare global {
     value: number | string | boolean // narrows by input_type
     unit: Ref2 | null
     input_type: StrategicInsightInputType
+    // How this metric combines across entities/periods (AC-75). Distinct from `input_type`:
+    // salary ratios and average-training-hours are plain NUMBERs that must still AVERAGE, so
+    // this cannot be inferred from the input type — summing them yields a "1.88 ratio".
+    aggregation: StrategicInsightAggregation
   }
 
   // One dashboard tab.

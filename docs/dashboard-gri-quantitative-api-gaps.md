@@ -25,7 +25,9 @@ this cannot silently regress. The SDG types are still an invention — that stay
 
 ## Mockup inventory
 
-8 tabs, 2 global filters (Perusahaan, Tahun), 32 KPI cards, 27 charts.
+8 tabs, 2 global filters (Perusahaan, Tahun), 32 KPI cards, 27 charts (26 `<canvas>` + the
+`pt-bars` div), split across 18 grouping dimensions. Every one is traced individually in
+`src/services/strategic-insight/contract.check.ts` (`mockupCharts`).
 
 | Tab | GRI codes in header | KPI cards | Charts |
 |---|---|---|---|
@@ -62,6 +64,8 @@ The Energy tab's KPI row is fully served. Nothing else is.
 
 Severity: **A** = blocks the mockup, backend change required. **B** = FE can absorb, needs a written
 guarantee. **C** = out of scope of this endpoint.
+
+Five blockers (A1-A5), four absorbable (B1-B4), two out of scope (C1-C2).
 
 ### A1 · Only 2 of 8 categories exist, and `category` is an unaligned free string — blocks
 
@@ -152,6 +156,27 @@ the contract states which one it honours.
 Recommended resolution: **`items[]` is never filtered by `period`; `summary[]` is.** Then the FE
 filters `items[]` itself for the KPI-adjacent widgets and keeps the full set for trends. Whatever
 is chosen has to be written down — this is the difference between a working page and blank charts.
+
+### A5 · Nothing on an item says whether it sums or averages — blocks
+
+`aggregation` existed only on `summary[]`. But the FE has to aggregate `items[]` itself whenever a
+selection spans several entities or periods (AC-75, and unavoidable here because `items[]` is
+returned unfiltered per A4). Three metrics are inherently averages:
+
+| Metric | `input_type` | Correct combine |
+|---|---|---|
+| `salary_ratio_female_to_male` (405-2) | `NUMBER` | AVERAGE |
+| `avg_training_hours` (404-1) | `NUMBER` | AVERAGE |
+| everything else | `NUMBER` | SUM |
+
+They are plain `NUMBER`s, not `PERCENTAGE`s — a salary ratio is `0.95`, not `95%`. So the combine
+rule **cannot be inferred from `input_type`**, and inferring it produced visible nonsense: two
+entities each reporting a 0.94 senior salary ratio rendered **1.88**, and average training hours
+summed across 15 entities read **~450 hours** instead of ~30. Two of eight tabs, wrong.
+
+`input_type` describes how a value is entered and rendered; `aggregation` describes how it
+combines. Resolved by putting `aggregation` on each item as well, so the FE never guesses.
+Regression-tested in both `api.check.ts` and `contract.check.ts`.
 
 ### B1 · `unit_id` holds a unit object, and the units the mockup shows do not exist
 
@@ -268,7 +293,11 @@ GET {{base_url}}/v1/strategic-insight/gri-quantitative
           "description": "Laki-laki",           // UNCHANGED: display only, never a grouping key
           "value": 880,
           "unit": null,                         // RENAMED from unit_id (B1); Ref2 or null
-          "input_type": "NUMBER"                // NUMBER | PERCENTAGE | TEXT | DATE | BOOLEAN (B2)
+          "input_type": "NUMBER",               // NUMBER | PERCENTAGE | TEXT | DATE | BOOLEAN (B2)
+          "aggregation": "SUM"                  // NEW (A5): SUM | AVERAGE — how this metric combines
+                                                // across entities/periods. NOT derivable from
+                                                // input_type: salary ratios and average training
+                                                // hours are NUMBERs that must still AVERAGE.
         }
       ]
     }
@@ -330,11 +359,13 @@ Naming follows the existing `total_non_renewable` / `renewable_ratio` style.
 5. Will GJ, ML, and hours be added to `/v1/master-unit/index`, or are dashboard unit labels
    display-only? (B1)
 6. Is `input_type` `BOOLEAN` here and `YES_NO` in MKI V2 intentional? (B2)
-7. Is there an endpoint planned for the GRI Qualitative dashboard tab? The FE already calls
+7. Is `aggregation` correct per item, and is the AVERAGE set exactly
+   {`salary_ratio_female_to_male`, `avg_training_hours`}? Any other metric that must not sum? (A5)
+8. Is there an endpoint planned for the GRI Qualitative dashboard tab? The FE already calls
    `/v1/strategic-insight/gri-qualitative` and nothing in `api/` defines it. (C1)
-8. When will `/v1/master-entity/index` carry the 15 real PTs? (C2)
+9. When will `/v1/master-entity/index` carry the 15 real PTs? (C2)
 
-Settle 1–8 above. The FE is already aligned with the proposed contract, so answers that confirm it
+Settle 1–9 above. The FE is already aligned with the proposed contract, so answers that confirm it
 need no code change; answers that diverge should be applied to
 `api/Dashboard/GRI - Quantitative.yml` first, then caught by
 `node --experimental-strip-types src/services/strategic-insight/contract.check.ts`, which reads
