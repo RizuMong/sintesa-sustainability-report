@@ -42,6 +42,13 @@ function loadExample(file: string, exampleName: string): unknown {
 }
 
 const griQuantitative = loadExample('Dashboard/GRI - Quantitative.yml', 'Response Dummy')
+// NOT loadExample('Dashboard/SDG.yml', 'Response Dummy'): that committed example predates the live
+// probe and is missing sdg_id.number entirely (see docs/dashboard-sdg-api-gaps.md), which
+// normalizeSdg() requires to group the matrix correctly. Serve the live-verified fixture instead —
+// same file normalize-sdg.check.ts asserts against, so the mock server and the unit check agree.
+const sdg = JSON.parse(
+  readFileSync(fileURLToPath(new URL('../src/services/strategic-insight/fixtures/live-sdg.json', import.meta.url)), 'utf8'),
+)
 
 // master-entity / master-period feed the two filter selects. The entity payload uses the RAW
 // backend shape (uppercase entity_type, nested parent_entity_id) so it exercises the real
@@ -69,6 +76,9 @@ const handler = (req: import('node:http').IncomingMessage, res: import('node:htt
   const path = url.pathname
   if (path.endsWith('/v1/strategic-insight/gri-quantitative')) {
     return res.end(envelope(griQuantitative))
+  }
+  if (path.endsWith('/v1/strategic-insight/sdg')) {
+    return res.end(envelope(sdg))
   }
   if (path.endsWith('/v1/master-entity/index')) return res.end(envelope(entities))
   if (path.endsWith('/v1/master-period/index')) return res.end(envelope(periods))
