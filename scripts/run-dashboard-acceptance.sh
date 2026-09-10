@@ -50,6 +50,7 @@ echo "--- starting headless chrome, remapping the workflow API host to the mock"
   --user-data-dir="$PROFILE" \
   --no-first-run --no-default-browser-check \
   --ignore-certificate-errors \
+  --window-size=1440,2400 \
   --host-resolver-rules="MAP api-officeless-dev.mekari.com 127.0.0.1:$API_PORT, MAP api-officeless.mekari.com 127.0.0.1:$API_PORT" \
   about:blank > /tmp/chrome.log 2>&1 &
 CHROME_PID=$!

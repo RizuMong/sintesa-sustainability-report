@@ -18,7 +18,7 @@ const gridClass = css({
 </script>
 
 <template>
-    <div :class="gridClass">
+    <div :class="gridClass" data-grid="chart">
         <slot />
     </div>
 </template>

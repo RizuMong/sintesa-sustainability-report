@@ -174,7 +174,7 @@ assert.deepEqual(
 )
 
 // ---- 3. click through every tab and verify its KPIs + chart cards ----
-const observed: Record<string, { kpis: number; charts: string[]; painted: number; clipped: number }> = {}
+const observed: Record<string, { kpis: number; charts: string[]; painted: number; clipped: number; cards: { span: string; w: number }[]; gridW: number; gridColumns: number }> = {}
 
 for (let i = 0; i < tabLabels.length; i++) {
   await evaluate(client, `document.querySelectorAll('[role="tab"]')[${i}].click()`)
@@ -201,7 +201,23 @@ for (let i = 0; i < tabLabels.length; i++) {
       // Overflowing KPI cards were a real bug: an extra caption line pushed content past
       // SummaryBox's fixed 89px height and clipped it. Compare content height to box height.
       const clipped = kpiEls.filter(el => el.scrollHeight > el.clientHeight + 1).length;
-      return { titles, canvasCount: canvases.length, painted, kpis, clipped };
+      // Grid layout: measure each chart card's rendered width. data-span="full" relies on a
+      // Panda CSS arbitrary-attribute selector actually being generated at the app's build
+      // time — if it silently is not, full-width cards render at half width and only a
+      // measurement catches it. Cards self-identify via data-card="chart".
+      const cardEls = Array.from(document.querySelectorAll('[data-card="chart"]'));
+      const gridEl = document.querySelector('[data-grid="chart"]');
+      const gridW = gridEl ? Math.round(gridEl.getBoundingClientRect().width) : 0;
+      // The grid is responsive: 1 column on narrow viewports, 2 from the md breakpoint. Read
+      // the resolved template so the width assertions below adapt instead of assuming 2.
+      const gridColumns = gridEl
+        ? getComputedStyle(gridEl).gridTemplateColumns.split(' ').filter(Boolean).length
+        : 0;
+      const cards = cardEls.map(el => ({
+        span: el.getAttribute('data-span') ?? 'half',
+        w: Math.round(el.getBoundingClientRect().width),
+      }));
+      return { titles, canvasCount: canvases.length, painted, kpis, clipped, cards, gridW, gridColumns };
     })()`,
   )
 
@@ -210,6 +226,9 @@ for (let i = 0; i < tabLabels.length; i++) {
     charts: snapshot.titles,
     painted: snapshot.painted,
     clipped: snapshot.clipped,
+    cards: snapshot.cards,
+    gridW: snapshot.gridW,
+    gridColumns: snapshot.gridColumns,
   }
 }
 
@@ -248,6 +267,28 @@ for (const [tab, want] of Object.entries(EXPECTED)) {
   if (got.clipped > 0) {
     failures.push(`${tab}: ${got.clipped} KPI card(s) clipped — content taller than the card`)
   }
+  // data-span="full" depends on a Panda arbitrary-attribute selector being generated at the
+  // app's build time. If it silently is not, "full" cards quietly render at half width and
+  // the layout stops matching the mockup, with nothing else noticing. Measure it.
+  for (const card of got.cards) {
+    const ratio = got.gridW > 0 ? card.w / got.gridW : 0
+    // A full-width card must span the whole grid at every breakpoint.
+    if (card.span === 'full' && ratio < 0.9) {
+      failures.push(
+        `${tab}: a full-width chart card rendered at ${Math.round(ratio * 100)}% of the grid ` +
+          `(data-span="full" is not taking effect)`,
+      )
+    }
+    // A half card is only expected to be half when the grid is actually 2 columns. At the
+    // narrow breakpoint the grid collapses to 1 column and every card is full width by
+    // design, so asserting "half" there would be asserting the responsive rule is broken.
+    if (card.span !== 'full' && got.gridColumns > 1 && ratio > 0.9) {
+      failures.push(
+        `${tab}: a half-width chart card rendered at ${Math.round(ratio * 100)}% of the grid ` +
+          `while the grid has ${got.gridColumns} columns`,
+      )
+    }
+  }
   totalCharts += got.charts.length
   totalPainted += got.painted
 }
@@ -266,7 +307,12 @@ if (failures.length) {
   process.exit(1)
 }
 
+const fullCards = Object.values(observed).reduce(
+  (n, t) => n + t.cards.filter((c) => c.span === 'full').length,
+  0,
+)
 console.log(
   `ok — rendered ${tabLabels.length} tabs, ${totalCharts} chart cards, ` +
-    `${totalPainted} canvases painted, 0 console errors`,
+    `${totalPainted} canvases painted, ${fullCards} full-width cards spanning the grid, ` +
+    `0 console errors`,
 )

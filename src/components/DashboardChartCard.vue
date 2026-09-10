@@ -112,6 +112,7 @@ const seriesLines = computed(() => {
 
 <template>
     <MpFlex
+        data-card="chart"
         direction="column"
         gap="3"
         height="100%"
