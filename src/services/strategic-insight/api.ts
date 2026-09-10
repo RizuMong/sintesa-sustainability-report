@@ -11,6 +11,9 @@ export {
   totalsByEntity,
 } from './aggregate'
 
+export { categoryCaption, chartCardsFor } from './chart-spec'
+export type { ChartCard, ChartCardKind, ChartCardSeries, ChartCardWidth } from './chart-spec'
+
 // gri-quantitative matches the `Contract` example in api/Dashboard/GRI - Quantitative.yml.
 // sdg is confirmed method+URL only (its example contradicts the mockup — docs/dashboard-sdg-api-gaps.md).
 // ponytail: gri-qualitative has no entry in api/Dashboard/ at all — the URL below follows the

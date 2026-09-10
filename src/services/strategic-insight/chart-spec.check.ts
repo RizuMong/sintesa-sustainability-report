@@ -1,0 +1,199 @@
+// run: node --experimental-strip-types src/services/strategic-insight/chart-spec.check.ts
+//
+// Feeds the REAL contract (all 8 categories, from api/Dashboard/GRI - Quantitative.yml) through
+// chart-spec.ts and asserts the returned cards match docs/dashboard-gri-quantitative-mockup-spec.md
+// section 2 (titles, order) and section 4 (grouping rules, AVERAGE not summed, no all-zero cards).
+import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import { orderedCategories } from './aggregate.ts'
+import { categoryCaption, chartCardsFor } from './chart-spec.ts'
+
+// fileURLToPath, not .pathname — the path contains a space, which .pathname percent-encodes.
+const COLLECTION = fileURLToPath(
+  new URL('../../../api/Dashboard/GRI - Quantitative.yml', import.meta.url),
+)
+
+// Same loading approach as contract.check.ts: the collection is a Bruno .yml with JSON embedded
+// in a string field, and this repo has no YAML parser dependency; Python+PyYAML is already
+// required by the repo's tooling.
+function loadContract(): StrategicInsightGriQuantitativeResponse {
+  const out = execFileSync(
+    'python3',
+    [
+      '-c',
+      [
+        'import yaml,json,sys',
+        'd=yaml.safe_load(open(sys.argv[1]))',
+        "ex=[e for e in d['examples'] if e['name']=='Contract'][0]",
+        "sys.stdout.write(json.dumps(json.loads(ex['response']['body']['data'])['data']))",
+      ].join('\n'),
+      COLLECTION,
+    ],
+    { encoding: 'utf8' },
+  )
+  return JSON.parse(out) as StrategicInsightGriQuantitativeResponse
+}
+
+const contract = loadContract()
+const tabs = orderedCategories(contract)
+
+// Expected card titles per tab, in spec §2 order. The PT-comparison card is included only when
+// the contract has more than one entity for that tab (this contract's example has a single
+// entity, 'WS', so it is expected to be absent here — chart-spec.ts still emits it whenever a
+// real multi-entity payload arrives).
+const expectedTitles: Record<string, string[]> = {
+  General: [
+    'Gender per tahun',
+    'Status karyawan per tahun',
+    'Tren jumlah karyawan',
+    'Komposisi gender (%)',
+    'Tipe pekerja non-karyawan',
+    'Komposisi status karyawan (%)',
+  ],
+  Energy: [
+    'Konsumsi energi per tahun (GJ)',
+    'Tren konsumsi energi',
+    'Breakdown jenis bahan bakar non-renewable',
+  ],
+  Waste: [
+    'Limbah dialihkan dari pembuangan (ton)',
+    'Limbah dibuang (ton)',
+    'Tren total limbah per tahun (ton)',
+  ],
+  Water: [
+    'Penarikan air per sumber (ML)',
+    'Pembuangan air per tujuan (ML)',
+    'Tren penggunaan air (ML)',
+  ],
+  'Diversity & Equal Opportunity': [
+    'Komposisi governance bodies berdasarkan gender',
+    'Distribusi kelompok umur karyawan',
+    'Rasio gaji perempuan terhadap laki-laki per kategori',
+  ],
+  Employment: [
+    'Karyawan baru berdasarkan gender & kelompok usia',
+    'Cuti orang tua — berhak, diambil, dan kembali',
+  ],
+  OHS: [
+    'Insiden keselamatan kerja per tahun',
+    'Insiden tetap vs kontrak',
+    'Tren jam kerja & tingkat kecelakaan',
+  ],
+  'Training & Education': [
+    'Rata-rata jam pelatihan per gender',
+    'Rata-rata jam pelatihan per kategori karyawan',
+    'Tren jam pelatihan per tahun',
+  ],
+}
+
+const expectedCaptions: Record<string, string> = {
+  General: 'Total karyawan & pekerja non-karyawan',
+  Energy: 'Konsumsi energi dalam organisasi',
+  Waste: 'Pengelolaan limbah',
+  Water: 'Penarikan & pembuangan air',
+  'Diversity & Equal Opportunity': 'Keragaman & kesetaraan kesempatan',
+  Employment: 'Rekrutmen & cuti orang tua',
+  OHS: 'Keselamatan & kesehatan kerja',
+  'Training & Education': 'Pelatihan & pendidikan karyawan',
+}
+
+let cardCount = 0
+const cardsByTab = new Map<string, ReturnType<typeof chartCardsFor>>()
+
+for (const tab of tabs) {
+  const name = tab.category_id.name
+  const cards = chartCardsFor(tab)
+  cardsByTab.set(name, cards)
+
+  assert.deepEqual(
+    cards.map((c) => c.title),
+    expectedTitles[name] ?? [],
+    `${name}: card titles/order must match the spec`,
+  )
+
+  assert.equal(categoryCaption(tab), expectedCaptions[name] ?? '', `${name}: category caption line`)
+
+  for (const c of cards) {
+    assert.ok(c.datasets.length >= 1, `${name}/${c.title}: needs at least one dataset`)
+    assert.equal(
+      c.labels.length,
+      c.datasets[0]!.data.length,
+      `${name}/${c.title}: labels and first dataset length must match`,
+    )
+    // Not every individual series has to be nonzero (e.g. one dimension member may genuinely be
+    // 0 in a given period) — spec §4 only requires the card as a whole not be all-zero, which
+    // chartCardsFor() already enforces by dropping such cards before they reach here.
+    assert.ok(
+      c.datasets.some((ds) => ds.data.some((v) => v !== 0)),
+      `${name}/${c.title}: card is entirely zero, should have been dropped`,
+    )
+    cardCount++
+  }
+}
+
+// ---- Water withdrawal vs discharge must differ (different metric_key/water_flow filter) ----
+const waterCards = cardsByTab.get('Water')!
+const withdrawalCard = waterCards.find((c) => c.title === 'Penarikan air per sumber (ML)')!
+const dischargeCard = waterCards.find((c) => c.title === 'Pembuangan air per tujuan (ML)')!
+assert.notDeepEqual(
+  withdrawalCard.datasets,
+  dischargeCard.datasets,
+  'Water withdrawal and discharge cards must carry different data',
+)
+
+// ---- salary ratio stays a plausible ratio (AVERAGE honoured, not summed) ----
+const diversity = tabs.find((c) => c.category_id.name === 'Diversity & Equal Opportunity')!
+const salaryCard = cardsByTab
+  .get('Diversity & Equal Opportunity')!
+  .find((c) => c.title === 'Rasio gaji perempuan terhadap laki-laki per kategori')!
+for (const ds of salaryCard.datasets) {
+  for (const v of ds.data) {
+    if (v === 0) continue
+    assert.ok(
+      v >= 0.5 && v <= 1.5,
+      `salary ratio ${v} outside plausible 0.5..1.5 range — looks summed, not averaged`,
+    )
+  }
+}
+void diversity // referenced above only for symmetry with contract.check.ts's style
+
+// ---- unknown category falls back to the generic per-dimension renderer ----
+const unknown: StrategicInsightGriCategory = {
+  category_id: { id: 'x', name: 'Something New' },
+  gri_codes: ['999-9'],
+  sequence: 99,
+  dimensions: [
+    {
+      key: 'foo',
+      name: 'Foo breakdown',
+      members: [
+        { key: 'A', name: 'A' },
+        { key: 'B', name: 'B' },
+      ],
+    },
+  ],
+  summary: [],
+  items: [
+    {
+      id: 'i1',
+      period: 2025,
+      entity: { id: 'e1', code: 'WS', name: 'WS', },
+      gri_code: '999-9a',
+      metric_key: 'foo_metric',
+      metric_name: 'Foo',
+      labels: { foo: 'A' },
+      description: '',
+      value: 10,
+      unit: null,
+      input_type: 'NUMBER',
+      aggregation: 'SUM',
+    },
+  ],
+}
+const genericCards = chartCardsFor(unknown)
+assert.equal(genericCards.length, 1, 'unknown category: one card per declared dimension')
+assert.equal(genericCards[0]!.title, 'Foo breakdown')
+assert.equal(categoryCaption(unknown), '', 'unknown category: no caption line')
+
+console.log(`ok — 8 tabs, ${cardCount} chart cards traced, generic fallback verified`)
