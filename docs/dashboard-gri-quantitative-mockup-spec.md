@@ -169,3 +169,34 @@ Hard rules:
 - `pnpm build` must pass (runs `vue-tsc -b`).
 - `node --experimental-strip-types src/services/strategic-insight/contract.check.ts` must pass.
 - New pure logic gets a co-located `*.check.ts` using `node:assert/strict`.
+- `bash scripts/run-dashboard-acceptance.sh` must pass — the browser acceptance run.
+
+### Requirement → evidence
+
+Every explicit requirement of this rebuild, mapped to the check that proves it and the
+result observed on the last run. "Acceptance" = `scripts/run-dashboard-acceptance.sh`,
+which renders the real page in headless Chrome against the real contract payload.
+
+| # | Requirement | Check | Observed |
+|---|---|---|---|
+| R1 | 8 tabs, mockup order | Acceptance: `[role=tab]` labels vs `EXPECTED` keys | 8 tabs, exact order |
+| R2 | Per-tab chart set matches §2 | Acceptance: `<h2>` titles per tab, after clicking each | all titles present on all 8 tabs |
+| R3 | Charts actually draw | Acceptance: per-canvas non-transparent-pixel scan | 26 canvases painted |
+| R4 | KPI cards per tab | Acceptance: `[data-slot=root]` count; `contract.check.ts` | 32 KPI keys resolve |
+| R5 | Page mounts, console clean | Acceptance: CDP console + exception events | 0 errors, 0 Vue warnings |
+| R6 | Series grouped on `labels`, never `description` | `chart-spec.check.ts` | 26 cards traced from real contract |
+| R7 | AVERAGE metrics not summed | `chart-spec.check.ts` ratio-range assert; rendered values | salary ratios 0.93 / 0.99 |
+| R8 | Tab list from payload, not hardcoded | `chart-spec.ts` resolves on `gri_codes`; generic fallback | fallback verified in check |
+| R9 | Tab strip survives filter change | `tab-index.check.ts` | reorder/shrink/vanish/empty + in-range invariant |
+| R10 | Mekari styling, no raw hex | `grep -E '#[0-9a-f]{3,6}'` over the 4 changed files | zero matches |
+| R11 | No new dependency | `git diff` on `package.json` across all 4 commits | untouched |
+| R12 | Follows app patterns | shared `useStrategicInsightFilterState`, reused `SummaryBox`, same header block as `SdgPage` | all 3 dashboards agree |
+| R13 | Stays in original token theme | route has no `meta.nextTheme` | unchanged |
+
+The acceptance assertions were mutation-tested: trimming one chart card from
+`chartCardsFor()` failed the run on 5 of 8 tabs by name, so R2 is load-bearing rather than
+vacuously green.
+
+**Not covered:** pixel-level visual fidelity. The checks assert structure (which charts, of
+what kind, with what data, painting at all), not that the result looks like the mockup
+screenshot. A human should still eyeball it once.

@@ -120,12 +120,15 @@
                             css({ display: 'flex', gap: '2', flexWrap: 'wrap' })
                         "
                     >
+                        <!-- No `caption`: formatSummary() already appends the unit to the
+                             amount ("372 Metric Ton"), so passing unit.name here too printed
+                             it twice AND pushed the card past SummaryBox's fixed 89px height,
+                             clipping it. Caught by screenshot review. -->
                         <SummaryBox
                             v-for="(kpi, i) in activeCategory.summary"
                             :key="kpi.key"
                             :variant="metricVariants[i % metricVariants.length]"
                             :label="kpi.name"
-                            :caption="kpi.unit?.name ?? ''"
                             :amount="formatSummary(kpi)"
                         />
                     </div>

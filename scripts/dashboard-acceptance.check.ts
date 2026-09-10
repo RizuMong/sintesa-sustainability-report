@@ -174,7 +174,7 @@ assert.deepEqual(
 )
 
 // ---- 3. click through every tab and verify its KPIs + chart cards ----
-const observed: Record<string, { kpis: number; charts: string[]; painted: number }> = {}
+const observed: Record<string, { kpis: number; charts: string[]; painted: number; clipped: number }> = {}
 
 for (let i = 0; i < tabLabels.length; i++) {
   await evaluate(client, `document.querySelectorAll('[role="tab"]')[${i}].click()`)
@@ -196,8 +196,12 @@ for (let i = 0; i < tabLabels.length; i++) {
         } catch { return false; }
       }).length;
       // KPI cards: SummaryBox roots carry data-slot="root"
-      const kpis = document.querySelectorAll('[data-slot="root"]').length;
-      return { titles, canvasCount: canvases.length, painted, kpis };
+      const kpiEls = Array.from(document.querySelectorAll('[data-slot="root"]'));
+      const kpis = kpiEls.length;
+      // Overflowing KPI cards were a real bug: an extra caption line pushed content past
+      // SummaryBox's fixed 89px height and clipped it. Compare content height to box height.
+      const clipped = kpiEls.filter(el => el.scrollHeight > el.clientHeight + 1).length;
+      return { titles, canvasCount: canvases.length, painted, kpis, clipped };
     })()`,
   )
 
@@ -205,6 +209,7 @@ for (let i = 0; i < tabLabels.length; i++) {
     kpis: snapshot.kpis,
     charts: snapshot.titles,
     painted: snapshot.painted,
+    clipped: snapshot.clipped,
   }
 }
 
@@ -231,6 +236,17 @@ for (const [tab, want] of Object.entries(EXPECTED)) {
   }
   if (got.painted === 0 && want.charts.length > 0) {
     failures.push(`${tab}: ${got.charts.length} chart cards but NO canvas painted any pixels`)
+  }
+  // Duplicate titles mean a title is being rendered twice (the card header AND MpChart's own
+  // `title` prop, which is how the first version shipped). The DOM was structurally "correct"
+  // so only a screenshot caught it; this makes it a hard failure instead.
+  const seen = new Set<string>()
+  for (const title of got.charts) {
+    if (seen.has(title)) failures.push(`${tab}: chart title "${title}" rendered more than once`)
+    seen.add(title)
+  }
+  if (got.clipped > 0) {
+    failures.push(`${tab}: ${got.clipped} KPI card(s) clipped — content taller than the card`)
   }
   totalCharts += got.charts.length
   totalPainted += got.painted

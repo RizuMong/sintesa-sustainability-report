@@ -130,9 +130,13 @@ const seriesLines = computed(() => {
             </MpText>
         </MpFlex>
 
+        <!-- MpChart's own `title` is deliberately blank: the card header above already
+             renders the title in the app's type scale, and passing it here too printed
+             every chart title twice. Caught by screenshot review, not by any structural
+             check — the DOM was "correct", it just read wrong. -->
         <MpChart
             :id="props.id"
-            :title="props.title"
+            title=""
             :type="chartType"
             :data="chartData"
             width-container="100%"
