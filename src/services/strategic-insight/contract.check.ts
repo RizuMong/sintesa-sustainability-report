@@ -36,8 +36,10 @@ function loadContract(): StrategicInsightGriQuantitativeResponse {
       [
         'import yaml,json,sys',
         'd=yaml.safe_load(open(sys.argv[1]))',
-        "ex=[e for e in d['examples'] if e['name']=='Contract'][0]",
-        "sys.stdout.write(json.dumps(json.loads(ex['response']['body']['data'])['data']))",
+        "name='Response Dummy'",
+        "ex=[e for e in d['examples'] if e['name']==name]",
+        "assert ex, f'example {name!r} not found in {sys.argv[1]}'",
+        "sys.stdout.write(json.dumps(json.loads(ex[0]['response']['body']['data'])['data']))",
       ].join('\n'),
       COLLECTION,
     ],

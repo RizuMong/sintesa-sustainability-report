@@ -1,4 +1,4 @@
-// GRI Quantitative: transcribed from the `Contract` example in api/Dashboard/GRI - Quantitative.yml
+// GRI Quantitative: transcribed from the `Response Dummy` example in api/Dashboard/GRI - Quantitative.yml
 // — do not change field names. Gap analysis behind that contract:
 // docs/dashboard-gri-quantitative-api-gaps.md.
 //

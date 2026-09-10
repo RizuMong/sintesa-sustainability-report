@@ -1,7 +1,7 @@
 // pure, dependency-free — kept separate from api.ts so api.check.ts can import it via a relative
 // path without Node having to resolve the '@/' tsconfig alias.
 //
-// Shapes come from the `Contract` example in api/Dashboard/GRI - Quantitative.yml. The rule that
+// Shapes come from the `Response Dummy` example in api/Dashboard/GRI - Quantitative.yml. The rule that
 // drives this whole file: chart series are grouped on `items[].labels` (stable dimension member
 // keys), never on `items[].description` (a localized, editable display string) — gap A2 in
 // docs/dashboard-gri-quantitative-api-gaps.md.

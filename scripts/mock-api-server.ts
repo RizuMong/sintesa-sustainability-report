@@ -39,7 +39,7 @@ function loadExample(file: string, exampleName: string): unknown {
   return JSON.parse(out)
 }
 
-const griQuantitative = loadExample('Dashboard/GRI - Quantitative.yml', 'Contract')
+const griQuantitative = loadExample('Dashboard/GRI - Quantitative.yml', 'Response Dummy')
 
 // master-entity / master-period feed the two filter selects. The entity payload uses the RAW
 // backend shape (uppercase entity_type, nested parent_entity_id) so it exercises the real

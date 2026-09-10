@@ -1,6 +1,6 @@
 // run: node --experimental-strip-types src/services/strategic-insight/api.check.ts
 //
-// Fixture is lifted verbatim from the `Contract` example in api/Dashboard/GRI - Quantitative.yml
+// Fixture is lifted verbatim from the `Response Dummy` example in api/Dashboard/GRI - Quantitative.yml
 // (General + OHS categories). Kept in sync by hand: that file lives in a separate repo
 // (~/Projects/vas-api-collection) that isn't importable from here.
 import assert from 'node:assert/strict'
