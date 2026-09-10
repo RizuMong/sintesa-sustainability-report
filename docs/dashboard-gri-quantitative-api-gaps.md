@@ -5,9 +5,9 @@ Scope: `GET /v1/strategic-insight/gri-quantitative`, consumed by
 
 Two sources of truth compared here:
 
-- **Contract**: `api/Dashboard/GRI - Quantitative.yml` — ships `Response Dummy` (the enriched,
-  normative example) + `Legacy Response (pre dimensions/labels)` examples covering two categories
-  (`GENERAL`, `ENERGY`).
+- **Contract**: `api/Dashboard/GRI - Quantitative.yml` — ships `Response Dummy`, the normative
+  example, covering all 8 categories, plus `Legacy Response (pre dimensions/labels)`, the original
+  BE dump covering only `GENERAL` and `ENERGY`.
 - **Mockup**: <https://curious-marigold-7934ec.netlify.app/> — single-file HTML, all fixture data
   inline in its `<script>` block (`RAW`, `ENERGY`, `WASTE`, `WATER`, `DIVERSITY`, `EMPLOYMENT`,
   `OHS`, `TRAINING`), 15 entities × 3 years (2023–2025).

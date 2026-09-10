@@ -28,8 +28,10 @@ function loadExample(file: string, exampleName: string): unknown {
         'd=yaml.safe_load(open(sys.argv[1]))',
         'name=sys.argv[2]',
         "ex=[e for e in d['examples'] if e['name']==name]",
-        "ex=ex[0] if ex else d['examples'][0]",
-        "sys.stdout.write(json.dumps(json.loads(ex['response']['body']['data'])['data']))",
+        // No fallback to examples[0]: silently serving whatever example happens to be first is how
+        // a rename of the referenced example goes unnoticed until the page renders wrong.
+        "assert ex, f'example {name!r} not found in {sys.argv[1]!r}'",
+        "sys.stdout.write(json.dumps(json.loads(ex[0]['response']['body']['data'])['data']))",
       ].join('\n'),
       path,
       exampleName,
