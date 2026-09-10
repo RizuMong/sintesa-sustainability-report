@@ -417,6 +417,9 @@
                                                     size="md"
                                                     placeholder="No unit"
                                                     is-full-width
+                                                    :is-disabled="
+                                                        form.unitMode !== 'NONE'
+                                                    "
                                                 >
                                                     <option value="">
                                                         No unit
@@ -429,6 +432,15 @@
                                                         {{ u.name }}
                                                     </option>
                                                 </MpSelect>
+                                                <MpText
+                                                    v-if="
+                                                        form.unitMode !== 'NONE'
+                                                    "
+                                                    size="label-small"
+                                                    color="text.secondary"
+                                                >
+                                                    Diatur di Satuan (Unit)
+                                                </MpText>
                                             </MpFormControl>
                                         </MpFlex>
                                     </MpFlex>
@@ -463,11 +475,71 @@
                                     size="sm"
                                     variant="secondary"
                                     left-icon="add"
+                                    @click="addSection"
+                                >
+                                    Tambah Section
+                                </MpButton>
+                                <MpButton
+                                    size="sm"
+                                    variant="secondary"
+                                    left-icon="add"
                                     :is-disabled="!form.columns.length"
                                     @click="addRow"
                                 >
                                     Add Row
                                 </MpButton>
+                            </MpFlex>
+
+                            <MpFlex
+                                gap="4"
+                                alignItems="flex-end"
+                                flexWrap="wrap"
+                            >
+                                <MpFormControl
+                                    id="mki-unit-mode"
+                                    minWidth="200px"
+                                >
+                                    <MpFormLabel>Satuan (Unit)</MpFormLabel>
+                                    <MpSelect
+                                        v-model="form.unitMode"
+                                        size="md"
+                                        is-full-width
+                                    >
+                                        <option
+                                            v-for="opt in unitModeOptions"
+                                            :key="opt.value"
+                                            :value="opt.value"
+                                        >
+                                            {{ opt.label }}
+                                        </option>
+                                    </MpSelect>
+                                </MpFormControl>
+                                <MpFormControl
+                                    v-if="form.unitMode === 'UNIFORM'"
+                                    id="mki-unit-uniform"
+                                    minWidth="200px"
+                                    :is-invalid="Boolean(errors.unit)"
+                                >
+                                    <MpFormLabel>Unit</MpFormLabel>
+                                    <MpSelect
+                                        v-model="form.unitId"
+                                        size="md"
+                                        placeholder="No unit"
+                                        is-full-width
+                                    >
+                                        <option value="">No unit</option>
+                                        <option
+                                            v-for="u in units"
+                                            :key="u.id"
+                                            :value="u.id"
+                                        >
+                                            {{ u.name }}
+                                        </option>
+                                    </MpSelect>
+                                    <MpFormErrorMessage v-if="errors.unit">{{
+                                        errors.unit
+                                    }}</MpFormErrorMessage>
+                                </MpFormControl>
                             </MpFlex>
 
                             <MpTableContainer>
@@ -484,6 +556,14 @@
                                             >
                                                 {{ col.name || "(Label)" }}
                                             </MpTableCell>
+                                            <MpTableCell
+                                                v-if="
+                                                    form.unitMode === 'PER_ROW'
+                                                "
+                                                scope="col"
+                                            >
+                                                Unit
+                                            </MpTableCell>
                                             <MpTableCell scope="col" />
                                         </MpTableRow>
                                     </MpTableHead>
@@ -497,7 +577,14 @@
                                             @drop.prevent="onDrop('rows', i)"
                                             @dragend="dragging = null"
                                         >
-                                            <MpTableCell as="td">
+                                            <MpTableCell
+                                                as="td"
+                                                :class="
+                                                    isSection(row)
+                                                        ? sectionRow
+                                                        : ''
+                                                "
+                                            >
                                                 <MpIcon
                                                     name="drag"
                                                     size="sm"
@@ -509,26 +596,83 @@
                                                     "
                                                 />
                                             </MpTableCell>
-                                            <MpTableCell
-                                                v-for="(
-                                                    col, ci
-                                                ) in form.columns"
-                                                :key="`cell-${ci}`"
-                                                as="td"
-                                            >
-                                                <MpInput
-                                                    v-model="
-                                                        row.labels[col.key]
+                                            <template v-if="isSection(row)">
+                                                <MpTableCell
+                                                    as="td"
+                                                    :class="sectionRow"
+                                                    :colspan="
+                                                        form.columns.length +
+                                                        (form.unitMode ===
+                                                        'PER_ROW'
+                                                            ? 1
+                                                            : 0)
                                                     "
-                                                    size="md"
-                                                    placeholder="—"
-                                                />
-                                            </MpTableCell>
-                                            <MpTableCell as="td">
+                                                >
+                                                    <MpInput
+                                                        v-model="row.name"
+                                                        size="md"
+                                                        placeholder="Nama section"
+                                                    />
+                                                </MpTableCell>
+                                            </template>
+                                            <template v-else>
+                                                <MpTableCell
+                                                    v-for="(
+                                                        col, ci
+                                                    ) in form.columns"
+                                                    :key="`cell-${ci}`"
+                                                    as="td"
+                                                >
+                                                    <MpInput
+                                                        v-model="
+                                                            row.labels[col.key]
+                                                        "
+                                                        size="md"
+                                                        placeholder="—"
+                                                    />
+                                                </MpTableCell>
+                                                <MpTableCell
+                                                    v-if="
+                                                        form.unitMode ===
+                                                        'PER_ROW'
+                                                    "
+                                                    as="td"
+                                                >
+                                                    <MpSelect
+                                                        v-model="row.unitId"
+                                                        size="md"
+                                                        placeholder="No unit"
+                                                        is-full-width
+                                                    >
+                                                        <option value="">
+                                                            No unit
+                                                        </option>
+                                                        <option
+                                                            v-for="u in units"
+                                                            :key="u.id"
+                                                            :value="u.id"
+                                                        >
+                                                            {{ u.name }}
+                                                        </option>
+                                                    </MpSelect>
+                                                </MpTableCell>
+                                            </template>
+                                            <MpTableCell
+                                                as="td"
+                                                :class="
+                                                    isSection(row)
+                                                        ? sectionRow
+                                                        : ''
+                                                "
+                                            >
                                                 <MpButton
                                                     variant="ghost"
                                                     left-icon="delete"
-                                                    aria-label="Remove row"
+                                                    :aria-label="
+                                                        isSection(row)
+                                                            ? 'Remove section (rows below stay)'
+                                                            : 'Remove row'
+                                                    "
                                                     @click="removeRow(i)"
                                                 />
                                             </MpTableCell>
@@ -537,7 +681,11 @@
                                             <MpTableCell
                                                 as="td"
                                                 :colspan="
-                                                    form.columns.length + 2
+                                                    form.columns.length +
+                                                    2 +
+                                                    (form.unitMode === 'PER_ROW'
+                                                        ? 1
+                                                        : 0)
                                                 "
                                             >
                                                 <MpText
@@ -681,32 +829,70 @@
                                         :key="`p-row-${i}`"
                                     >
                                         <MpTableCell
-                                            v-for="(col, ci) in form.columns"
-                                            :key="`p-c-${ci}`"
+                                            v-if="isSection(row)"
                                             as="td"
+                                            :class="sectionRow"
+                                            :colspan="
+                                                form.columns.length +
+                                                form.metrics.length
+                                            "
                                         >
-                                            {{ row.labels[col.key] || "—" }}
+                                            <MpText weight="semiBold">{{
+                                                row.name || "(Section)"
+                                            }}</MpText>
                                         </MpTableCell>
-                                        <MpTableCell
-                                            v-for="(metric, mi) in form.metrics"
-                                            :key="`p-v-${mi}`"
-                                            as="td"
-                                        >
-                                            <DynamicFieldInput
-                                                :input_type="metric.input_type"
-                                                :unit="unitName(metric.unitId)"
-                                                :model-value="
-                                                    previewValues[
-                                                        `${i}:${mi}`
-                                                    ] ?? null
-                                                "
-                                                @update:model-value="
-                                                    previewValues[
-                                                        `${i}:${mi}`
-                                                    ] = $event
-                                                "
-                                            />
-                                        </MpTableCell>
+                                        <template v-else>
+                                            <MpTableCell
+                                                v-for="(
+                                                    col, ci
+                                                ) in form.columns"
+                                                :key="`p-c-${ci}`"
+                                                as="td"
+                                            >
+                                                {{ row.labels[col.key] || "—" }}
+                                            </MpTableCell>
+                                            <MpTableCell
+                                                v-for="(
+                                                    metric, mi
+                                                ) in form.metrics"
+                                                :key="`p-v-${mi}`"
+                                                as="td"
+                                            >
+                                                <DynamicFieldInput
+                                                    :input_type="
+                                                        metric.input_type
+                                                    "
+                                                    :unit="
+                                                        resolveUnit(
+                                                            {
+                                                                unit: unitRef(
+                                                                    row.unitId,
+                                                                ),
+                                                            },
+                                                            {
+                                                                unit: unitRef(
+                                                                    metric.unitId,
+                                                                ),
+                                                            },
+                                                            form.unitMode,
+                                                            unitRef(
+                                                                form.unitId,
+                                                            ),
+                                                        )?.name ?? null
+                                                    "
+                                                    :model-value="
+                                                        previewValues[
+                                                            `${i}:${mi}`
+                                                        ] ?? null
+                                                    "
+                                                    @update:model-value="
+                                                        previewValues[
+                                                            `${i}:${mi}`
+                                                        ] = $event
+                                                    "
+                                                />
+                                            </MpTableCell>
+                                        </template>
                                     </MpTableRow>
                                     <MpTableRow v-if="!form.rows.length">
                                         <MpTableCell
@@ -813,6 +999,9 @@ import {
     useCreateMkiGriQuantitative,
     useUpdateMkiGriQuantitative,
     useDeleteMkiGriQuantitative,
+    isSection,
+    resolveUnit,
+    stampSequences,
 } from "@/services/master-key-indicator-quantitative";
 import { useGetMasterCategory } from "@/services/master-category";
 import { useGetMasterGri } from "@/services/master-gri";
@@ -869,6 +1058,12 @@ const dragRow = css({
     borderWidth: "1px",
     borderColor: "border.default",
     backgroundColor: "background.surface",
+});
+
+// Section marker rows get a distinct tint in both the editable table and the live preview, so a
+// section reads as structural rather than another data row.
+const sectionRow = css({
+    backgroundColor: "background.brand",
 });
 
 const inputTypeOptions: { value: MkiQuantInputType; label: string }[] = [
@@ -939,7 +1134,19 @@ type FormMetric = {
     input_type: MkiQuantInputType;
     unitId: string;
 };
-type FormRow = { labels: Record<string, string> };
+type FormRow = {
+    sequence?: number;
+    labels: Record<string, string>;
+    type?: "SECTION";
+    name?: string;
+    unitId: string;
+};
+
+const unitModeOptions: { value: MkiQuantUnitMode; label: string }[] = [
+    { value: "NONE", label: "Tidak ada" },
+    { value: "UNIFORM", label: "Seragam" },
+    { value: "PER_ROW", label: "Per baris" },
+];
 
 const form = reactive({
     categoryId: "",
@@ -948,6 +1155,8 @@ const form = reactive({
     columns: [] as FormColumn[],
     metrics: [] as FormMetric[],
     rows: [] as FormRow[],
+    unitMode: "NONE" as MkiQuantUnitMode,
+    unitId: "",
 });
 
 // ponytail: preview-only scratch values keyed `rowIndex:metricIndex`, never part of the payload —
@@ -966,6 +1175,15 @@ const validationErrors = computed(() => {
     if (!form.code) found.code = "Select a GRI code.";
     if (!form.description.trim()) found.description = "Enter a description.";
     if (!form.columns.length) found.columns = "Add at least one label column.";
+    if (
+        form.unitMode === "PER_ROW" &&
+        form.rows.some((r) => !isSection(r) && !r.unitId)
+    ) {
+        found.unit = "Set a unit for every row.";
+    }
+    if (form.unitMode === "UNIFORM" && !form.unitId) {
+        found.unit = "Select a unit.";
+    }
     return found;
 });
 
@@ -1021,8 +1239,9 @@ function metricHeader(metric: FormMetric) {
     return metric.name || "(Metric)";
 }
 
-function unitName(unitId: string) {
-    return units.value.find((u) => u.id === unitId)?.name ?? null;
+function unitRef(unitId: string): Ref2 | null {
+    const unit = units.value.find((u) => u.id === unitId);
+    return unit ? { id: unit.id, name: unit.name } : null;
 }
 
 // ponytail: naive slugify, no collision handling — fine for a schema builder
@@ -1075,7 +1294,11 @@ function removeMetric(i: number) {
 function addRow() {
     const labels: Record<string, string> = {};
     form.columns.forEach((c) => (labels[c.key] = ""));
-    form.rows.push({ labels });
+    form.rows.push({ labels, unitId: "" });
+}
+
+function addSection() {
+    form.rows.push({ type: "SECTION", name: "", labels: {}, unitId: "" });
 }
 
 function removeRow(i: number) {
@@ -1114,7 +1337,15 @@ watch(
             input_type: m.input_type,
             unitId: m.unit?.id ?? "",
         }));
-        form.rows = next.rows.map((r) => ({ labels: { ...r.labels } }));
+        form.rows = next.rows.map((r) => ({
+            sequence: r.sequence,
+            labels: { ...r.labels },
+            type: r.type,
+            name: r.name,
+            unitId: r.unit?.id ?? "",
+        }));
+        form.unitMode = next.unit_mode ?? "NONE";
+        form.unitId = next.unit?.id ?? "";
         pristine.value = snapshot();
     },
     { immediate: true },
@@ -1145,10 +1376,14 @@ function buildPayload(): MkiGriQuantitativePayload {
                 sequence: i + 1,
             };
         }),
-        rows: form.rows.map((r, i) => ({
-            sequence: i + 1,
+        rows: stampSequences(form.rows).map((r) => ({
+            sequence: r.sequence,
             labels: { ...r.labels },
+            ...(r.type ? { type: r.type, name: r.name ?? "" } : {}),
+            ...(form.unitMode === "PER_ROW" ? { unit: unitRef(r.unitId) } : {}),
         })),
+        unit_mode: form.unitMode,
+        unit: form.unitMode === "UNIFORM" ? unitRef(form.unitId) : null,
     };
 }
 

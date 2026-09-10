@@ -102,6 +102,7 @@ export function toSubmissionValue(
   metric: { key: string; name: string; input_type: MkiQuantInputType; unit: Ref2 | null },
   rowSequence: number,
   raw: string | number | boolean | null | undefined,
+  unit: Ref2 | null = metric.unit,
 ): EvaluateGriQuantitativeValue {
   const empty = raw === '' || raw === null || raw === undefined
   const isNumeric = metric.input_type === 'NUMBER' || metric.input_type === 'PERCENTAGE'
@@ -116,8 +117,8 @@ export function toSubmissionValue(
     value_number: !empty && isNumeric ? Number(raw) : null,
     value_text: empty || isNumeric || isDate ? null : isYesNo ? (raw ? 'YES' : 'NO') : String(raw),
     value_date: !empty && isDate ? new Date(raw as string | number).getTime() : null,
-    // metric with no unit sends `{}`, not null — Update contract's shape
-    unit: metric.unit ? { id: metric.unit.id, name: metric.unit.name } : {},
+    // no unit sends `{}`, not null — Update contract's shape
+    unit: unit ? { id: unit.id, name: unit.name } : {},
   }
 }
 

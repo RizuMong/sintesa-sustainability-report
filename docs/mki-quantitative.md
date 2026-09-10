@@ -71,7 +71,15 @@ so `useMkiGriQuantitativeDetail(id)` picks it out of the list query, mirroring
     unit: { id: string; name: string } | null   // from GET /v1/master-unit/index
     sequence: number
   }[]
-  rows: { sequence: number; labels: Record<string, string> }[]
+  rows: {
+    sequence: number
+    labels: Record<string, string>
+    type?: 'SECTION'                  // marker row — see Section 4.2
+    name?: string                     // section title, SECTION rows only
+    unit?: { id: string; name: string } | null   // PER_ROW mode only
+  }[]
+  unit_mode?: 'NONE' | 'UNIFORM' | 'PER_ROW'   // absent = legacy metric-level unit
+  unit?: { id: string; name: string } | null   // UNIFORM mode only
 }
 ```
 - `columns[].key` / `metrics[].key` are auto-derived from the name via `slugify()`, never typed.
@@ -106,11 +114,26 @@ Quantitative.html`): an identity panel on top, then numbered step panels side-by
 preview. The mockup's own top bar (Cancel / Save Configuration) was **not** adopted — the existing
 back-button + breadcrumb + status + Delete header stays.
 
-The mockup also shows two features that are deliberately **not** built: row **Sections** (grouped /
-nested rows) and a table-level **Unit mode** (none / uniform / per-row). Both were implemented and
-then reverted in `b7c7d52` because no field for them exists in `api/**/*.yml` — `rows[]` is still
-`{sequence, labels}` and `unit` is still per-metric. The work is parked on
-`GROU-651/fe-sections-pending-be`; rebase it once BE confirms the shape rather than rewriting it.
+The mockup's row **Sections** and table-level **Unit mode** (none / uniform / per-row), reverted in
+`b7c7d52` for lack of a contract field, are now built (GROU-649 follow-up). Two deliberate deviations
+from the mockup's implied data model:
+
+- **Sections are flat marker rows** (`type: 'SECTION'`), not a nested `children[]`. One array keeps
+  drag-reorder, `sequence` identity, and both the builder table and the evaluate matrix
+  one-dimensional — the mockup's grouping is a rendering concern, not a data hierarchy. Consequence:
+  deleting a section header deletes the header only; the rows that followed it stay in place and fall
+  under whichever section (if any) now precedes them.
+- **`sequence` is an identity, not a display order.** Array order is the display order. A row keeps
+  the `sequence` it loaded with; a new row/section takes `max(existing) + 1`. This mattered before
+  Sections too — Evaluate's `row_key` (`row_${sequence}`) is how a filled cell finds its row, so
+  restamping `sequence` from array index (the old `buildPayload()` behavior) already orphaned
+  submitted values on any reorder. Inserting a Section shifts every following array index, which
+  would have blanked every cell after it. `stampSequences()` (`master-key-indicator-quantitative/rows.ts`)
+  fixes this: it only assigns a fresh sequence to rows that don't have one yet.
+- **Unit precedence**: `row.unit` (PER_ROW) → top-level `unit` (UNIFORM) → `metric.unit` (legacy,
+  `unit_mode` absent). The legacy term is last on purpose, not migrated away — it is what makes every
+  indicator saved before this change keep rendering its unit exactly as before. One function,
+  `resolveUnit()`, applies this precedence in both the builder's Live Preview and the Evaluate matrix.
 
 - Category dropdown (`master-category`), Code dropdown (`master-gri`, Active only), Description field.
 - Status badge beside the page heading in edit mode (reads `status ?? 'Active'` — see Section 2).
@@ -121,9 +144,13 @@ then reverted in `b7c7d52` because no field for them exists in `api/**/*.yml` �
   - **Value / Metric Columns** — the `metrics[]` of the payload: header, input type, optional unit.
     A live hint states whether the columns render flat or as sub-columns.
 - **Step 2 — Rows** — an editable table (one input per label column) rather than stacked form rows,
-  matching the mockup's row grid.
-- All three lists are **drag-to-reorder**; `sequence` is stamped from array position in
-  `buildPayload()`, so a drop is the whole interaction.
+  matching the mockup's row grid. "Tambah Section" inserts a marker row (name input, spans the label
+  columns); "Add Row" is unaffected by unit mode. A **Satuan (Unit)** select (Tidak ada / Seragam /
+  Per baris) sits above the table; Seragam shows one Master Unit picker for the whole indicator, Per
+  baris adds a per-row unit column. Choosing anything but "Tidak ada" disables (but keeps visible) the
+  per-metric unit picker in Step 1, with a "Diatur di Satuan (Unit)" hint.
+- All three lists are **drag-to-reorder**. Columns/metrics still stamp `sequence` from array position;
+  rows do not — see the `sequence`-as-identity note above.
 - **Live Preview** — mirrors what the subsidiary sees. With 2+ metrics the header becomes two rows:
   the period spanning all metric columns, metrics as sub-columns beneath it; with one metric it stays
   flat. Cells render via the shared `DynamicFieldInput`, so each input type previews as its real

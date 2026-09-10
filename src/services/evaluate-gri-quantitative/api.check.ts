@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import {
   approvalSummary,
+  cellKey,
   fromSubmissionValues,
   groupItemsByCategory,
   hasDuplicateSubmission,
@@ -155,6 +156,26 @@ assert.equal(
   'NO seeds the toggle back as boolean false',
 )
 assert.equal(toSubmissionValue(numberMetric, 1, '').value_number, null, 'blank cell stays null, not 0')
+
+// phase 3 — resolved-unit 4th argument, and section rows never disturb row_key identity
+assert.equal(toSubmissionValue(numberMetric, 3, 5).row_key, 'row_3', 'legacy call path keeps working')
+assert.deepEqual(toSubmissionValue(numberMetric, 3, 5).unit, { id: '1', name: 'Person' }, 'defaults to the metric unit')
+assert.deepEqual(
+  toSubmissionValue(numberMetric, 3, 5, { id: '2', name: 'Row Unit' }).unit,
+  { id: '2', name: 'Row Unit' },
+  'an explicit unit overrides the metric unit',
+)
+assert.deepEqual(toSubmissionValue(numberMetric, 3, 5, null).unit, {}, 'an explicit null unit sends {}')
+
+const rowsWithSectionAhead: { sequence: number; type?: 'SECTION' }[] = [
+  { sequence: 9, type: 'SECTION' },
+  { sequence: 3 },
+]
+assert.equal(
+  Object.keys(fromSubmissionValues([toSubmissionValue(numberMetric, rowsWithSectionAhead[1]!.sequence, 5)]))[0],
+  cellKey(3, numberMetric.key),
+  'a section inserted ahead in the array does not repoint the data row key',
+)
 
 assert.deepEqual(
   fromSubmissionValues([toSubmissionValue(numberMetric, 1, '12'), toSubmissionValue(dateMetric, 2, '2026-01-15')]),

@@ -42,6 +42,9 @@ declare global {
   interface EvaluateGriQuantitativeRow {
     labels: Record<string, string>
     sequence: number
+    type?: 'SECTION'
+    name?: string
+    unit?: Ref2 | null
   }
 
   // one filled cell of the matrix — Update.yml's items[].values[] shape
@@ -83,6 +86,8 @@ declare global {
     // ponytail: unconfirmed — no evidence_attachment on the item in the contract. Assumed
     // denormalized from the MKI behind the disclosure.
     evidence_attachment?: MkiEvidenceAttachment
+    unit_mode?: MkiQuantUnitMode
+    unit?: Ref2 | null
   }
 
   // list-mode shape (Index Requestor / Index Approval) — no `items`, detail-only field

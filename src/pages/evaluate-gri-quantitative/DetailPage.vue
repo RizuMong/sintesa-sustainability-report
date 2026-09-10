@@ -161,52 +161,74 @@
                                             :key="row.sequence"
                                         >
                                             <MpTableCell
-                                                v-for="col in item.columns"
-                                                :key="col.key"
+                                                v-if="isSection(row)"
                                                 as="td"
-                                                scope="row"
+                                                :class="sectionRow"
+                                                :colspan="
+                                                    item.columns.length +
+                                                    item.metrics.length
+                                                "
                                             >
-                                                {{ row.labels[col.key] }}
+                                                <MpText weight="semiBold">{{
+                                                    row.name
+                                                }}</MpText>
                                             </MpTableCell>
-                                            <MpTableCell
-                                                v-for="metric in item.metrics"
-                                                :key="metric.key"
-                                                as="td"
-                                                scope="row"
-                                            >
-                                                <DynamicFieldInput
-                                                    :input_type="
-                                                        metric.input_type
-                                                    "
-                                                    :unit="metric.unit?.name"
-                                                    :model-value="
-                                                        cells[
-                                                            cellId(
-                                                                item.id,
-                                                                row.sequence,
-                                                                metric.key,
-                                                            )
-                                                        ]
-                                                    "
-                                                    :disabled="readOnly"
-                                                    @update:model-value="
-                                                        (
-                                                            v:
-                                                                | string
-                                                                | number
-                                                                | boolean
-                                                                | null,
-                                                        ) =>
-                                                            (cells[
+                                            <template v-else>
+                                                <MpTableCell
+                                                    v-for="col in item.columns"
+                                                    :key="col.key"
+                                                    as="td"
+                                                    scope="row"
+                                                >
+                                                    {{ row.labels[col.key] }}
+                                                </MpTableCell>
+                                                <MpTableCell
+                                                    v-for="metric in item.metrics"
+                                                    :key="metric.key"
+                                                    as="td"
+                                                    scope="row"
+                                                >
+                                                    <DynamicFieldInput
+                                                        :input_type="
+                                                            metric.input_type
+                                                        "
+                                                        :unit="
+                                                            resolveUnit(
+                                                                row,
+                                                                metric,
+                                                                item.unit_mode,
+                                                                item.unit,
+                                                            )?.name
+                                                        "
+                                                        :model-value="
+                                                            cells[
                                                                 cellId(
                                                                     item.id,
                                                                     row.sequence,
                                                                     metric.key,
                                                                 )
-                                                            ] = v)
-                                                    "
-                                                />
-                                            </MpTableCell>
+                                                            ]
+                                                        "
+                                                        :disabled="readOnly"
+                                                        @update:model-value="
+                                                            (
+                                                                v:
+                                                                    | string
+                                                                    | number
+                                                                    | boolean
+                                                                    | null,
+                                                            ) =>
+                                                                (cells[
+                                                                    cellId(
+                                                                        item.id,
+                                                                        row.sequence,
+                                                                        metric.key,
+                                                                    )
+                                                                ] = v)
+                                                        "
+                                                    />
+                                                </MpTableCell>
+                                            </template>
                                         </MpTableRow>
                                     </MpTableBody>
                                 </MpTable>
@@ -582,6 +604,11 @@ import {
     cellKey,
     requesterLabel,
 } from "@/services/evaluate-gri-quantitative";
+import {
+    isSection,
+    resolveUnit,
+    dataRows,
+} from "@/services/master-key-indicator-quantitative";
 import { useGetUserProfile } from "@/services/user-profile";
 import { logger } from "@/lib/logger";
 
@@ -603,6 +630,11 @@ const timelineStatus: Record<
     REJECTED: "rejected",
     CANCEL: "canceled",
 };
+
+// Section marker rows get a distinct tint so they read as structural, not another data row.
+const sectionRow = css({
+    backgroundColor: "background.stage",
+});
 
 const stampFormat = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -763,12 +795,13 @@ async function save() {
             entity_id: detail.value.entity_id,
             items: items.value.map((item) => ({
                 item_id: item.id,
-                values: item.rows.flatMap((row) =>
+                values: dataRows(item.rows).flatMap((row) =>
                     item.metrics.map((metric) =>
                         toSubmissionValue(
                             metric,
                             row.sequence,
                             cells[cellId(item.id, row.sequence, metric.key)],
+                            resolveUnit(row, metric, item.unit_mode, item.unit),
                         ),
                     ),
                 ),

@@ -3,6 +3,7 @@
 // Title-cased union; the quantitative endpoints answer SCREAMING_CASE.
 declare global {
   type MkiQuantInputType = 'NUMBER' | 'TEXT' | 'PERCENTAGE' | 'DATE' | 'YES_NO'
+  type MkiQuantUnitMode = 'NONE' | 'UNIFORM' | 'PER_ROW'
 
   interface MkiQuantColumn {
     key: string
@@ -21,6 +22,12 @@ declare global {
   interface MkiQuantRow {
     sequence: number
     labels: Record<string, string>
+    // section grouping — a marker row, not a container. Rows that follow it belong to it visually
+    // until the next section. Flat so drag-reorder and `sequence` identity stay one-dimensional.
+    type?: 'SECTION'
+    name?: string
+    // per-row unit, only when the indicator's unit_mode is 'PER_ROW'
+    unit?: Ref2 | null
   }
 
   // GET /v1/mki/gri-quantitative/index — one row, already the full record (no separate detail call)
@@ -42,6 +49,11 @@ declare global {
     // field for this module yet (Delete.yml is a hard DELETE). Read-only here, defaults to 'Active'
     // in the UI; drop the fallback once the API grows a real one.
     status?: MasterStatus
+    // ponytail: unit_mode/unit are optional because a record saved before this ticket has neither —
+    // undefined means "legacy", and resolveUnit() falls back to the metric-level unit. Make them
+    // required only after a backfill.
+    unit_mode?: MkiQuantUnitMode
+    unit?: Ref2 | null
   }
 
   // POST create/update body — same shape minus the server-owned audit fields
@@ -53,6 +65,8 @@ declare global {
     columns: MkiQuantColumn[]
     metrics: MkiQuantMetric[]
     rows: MkiQuantRow[]
+    unit_mode?: MkiQuantUnitMode
+    unit?: Ref2 | null
   }
 }
 
