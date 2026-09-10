@@ -5,8 +5,8 @@ Scope: `GET /v1/strategic-insight/sdg`, consumed by `src/pages/dashboard/SdgPage
 
 Two sources of truth compared here:
 
-- **Contract**: `api/Dashboard/SDG.yml` — now ships `Response Dummy` (the enriched, normative
-  example) + `Legacy Response (pre gap analysis)` examples (this supersedes the "no example
+- **Contract**: `api/Dashboard/SDG.yml` — ships a single `Response Dummy` example, the BE-authored
+  one, carrying the full `{code, error, message, data}` envelope (this supersedes the "no example
   response" claim in `docs/sustainability-reporting-portal-open-gaps.md` G2 for the SDG endpoint).
 - **Mockup**: <https://melodic-donut-a45fa9.netlify.app/> — single-file HTML, all fixture data
   inline in its `<script>` block (`baselineData`, `detailedActionPlans`, the `.matrix` table markup).

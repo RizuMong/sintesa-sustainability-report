@@ -48,11 +48,11 @@ nothing, and AC-62 silently does nothing.
 **What.** Plan §2.4 lists the three dashboard endpoints as "confirmed". They are not. The invented
 shapes in `types.d.ts` match neither the mockups nor the contract.
 
-**Update.** `api/Dashboard/SDG.yml` and `GRI - Quantitative.yml` now ship `Response Dummy`
-(the enriched, normative example) + a `Legacy Response` example each, so those two no longer need
-a live call to settle — diff against the examples. `GRI - Qualitative.yml` does not exist at all;
-that endpoint is still pure invention. SDG is broken out in full, with a proposed contract, in
-`docs/dashboard-sdg-api-gaps.md`.
+**Update.** `api/Dashboard/SDG.yml` and `GRI - Quantitative.yml` now ship a `Response Dummy`
+example each — the normative reference — so those two no longer need a live call to settle; diff
+against the examples. GRI additionally keeps the pre-dimensions BE dump as `Legacy Response`.
+`GRI - Qualitative.yml` does not exist at all; that endpoint is still pure invention. SDG is broken
+out in full, with a proposed contract, in `docs/dashboard-sdg-api-gaps.md`.
 
 **Where.**
 - `api/Dashboard/SDG.yml`, `GRI - Quantitative.yml` (examples present); no `GRI - Qualitative.yml`
