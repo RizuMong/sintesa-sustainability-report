@@ -12,6 +12,8 @@ Package manager is pnpm (see `packageManager` in `package.json` — do not use n
 
 No test runner is configured. Tests are plain Node scripts using `node:assert/strict`, named `*.check.ts` and co-located with the module they test (e.g. `src/composables/useOfficelessAuth.check.ts`). Run one directly with `node --experimental-strip-types src/composables/useOfficelessAuth.check.ts` (or whatever TS runner is available) — the file's own header comment states the exact run command. `*.check.ts` files are excluded from the app build (see `tsconfig.app.json`).
 
+`src/services/strategic-insight/contract.check.ts` is the one exception to "checks are self-contained": it parses `api/Dashboard/GRI - Quantitative.yml` (through the `api` symlink, via `python3` + PyYAML) at run time and asserts the dashboard page can render every widget in the mockup from it. So it fails if the separate API-collection repo is missing, and it is the check to run after any change to that contract.
+
 ## Architecture
 
 Vue 3 (`<script setup>`) + TypeScript + Vite SPA, embedded as an iframe inside Mekari's "Officeless" low-code app, using `@mekari/pixel3` (Pixel 3 design system).

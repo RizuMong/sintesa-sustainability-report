@@ -13,11 +13,13 @@ Two sources of truth compared here:
 
 Sibling analysis for the other dashboard tab: `docs/dashboard-sdg-api-gaps.md`.
 
-**`src/services/strategic-insight/types.d.ts` matches neither.** Its
-`StrategicInsightGriQuantitativeResponse` is an independent invention (`metrics[].rows[]`), and
-`GriQuantitativePage.vue` maps tabs by `gri_code` prefix (`'2-7'`) which will never match the
-sub-codes the contract actually sends (`'2-7a'`). Rewriting it is a prerequisite to any of this —
-tracked as G2 in `docs/sustainability-reporting-portal-open-gaps.md`, not repeated here.
+**`src/services/strategic-insight/types.d.ts` now matches the proposed contract below.** Its
+`StrategicInsightGriQuantitativeResponse` was previously an independent invention
+(`metrics[].rows[]`), and `GriQuantitativePage.vue` keyed tabs on a `gri_code` prefix (`'2-7'`)
+which never matches the leaf codes the contract sends (`'2-7a'`) — every tab rendered its empty
+state against a perfectly good payload. Both are fixed; `contract.check.ts` reads the Bruno
+collection at run time and asserts all 8 tabs, 32 KPI cards and 18 dimension charts resolve, so
+this cannot silently regress. The SDG types are still an invention — that stays G2.
 
 ---
 
@@ -332,6 +334,17 @@ Naming follows the existing `total_non_renewable` / `renewable_ratio` style.
    `/v1/strategic-insight/gri-qualitative` and nothing in `api/` defines it. (C1)
 8. When will `/v1/master-entity/index` carry the 15 real PTs? (C2)
 
-Settle 1–8, then rewrite `src/services/strategic-insight/types.d.ts`, fix the `gri_code`-prefix tab
-mapping in `GriQuantitativePage.vue` to key on `category_id.id`, and re-run
-`node --experimental-strip-types src/services/strategic-insight/api.check.ts`.
+Settle 1–8 above. The FE is already aligned with the proposed contract, so answers that confirm it
+need no code change; answers that diverge should be applied to
+`api/Dashboard/GRI - Quantitative.yml` first, then caught by
+`node --experimental-strip-types src/services/strategic-insight/contract.check.ts`, which reads
+that file at run time rather than a copied fixture.
+
+Verify with:
+
+```sh
+node --experimental-strip-types src/services/strategic-insight/api.check.ts       # aggregate.ts unit behaviour
+node --experimental-strip-types src/services/strategic-insight/contract.check.ts  # real contract -> all 32 KPIs, 18 charts
+node_modules/.bin/tsc -p tsconfig.check.json --noEmit
+pnpm build
+```

@@ -61,16 +61,23 @@
         <MpFlex direction="column" paddingX="24px" paddingTop="16px">
             <!-- MpTabs' props aren't verified here (no pixel-hub MCP in this environment) — a manual
            MpButtonGroup toggle reuses components already proven elsewhere in this codebase
-           (e.g. src/pages/evaluate-gri-quantitative/RequestorPage.vue) instead of guessing them. -->
+           (e.g. src/pages/evaluate-gri-quantitative/RequestorPage.vue) instead of guessing them.
+           Tabs come from the payload's categories, ordered by `sequence`, rather than a
+           hardcoded list — the previous version keyed tabs on a `gri_code` prefix ('2-7')
+           which never matched the leaf codes the API actually sends ('2-7a'). -->
             <MpButtonGroup>
                 <MpButton
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    :variant="activeTab === tab.key ? 'primary' : 'secondary'"
+                    v-for="tab in categories"
+                    :key="tab.category_id.id"
+                    :variant="
+                        activeCategoryId === tab.category_id.id
+                            ? 'primary'
+                            : 'secondary'
+                    "
                     size="sm"
-                    @click="activeTab = tab.key"
+                    @click="activeCategoryId = tab.category_id.id"
                 >
-                    {{ tab.label }}
+                    {{ tab.category_id.name }}
                 </MpButton>
             </MpButtonGroup>
         </MpFlex>
@@ -84,30 +91,74 @@
                 >Menampilkan: {{ filterState.activeFilterLabel.value }}</MpText
             >
 
-            <template v-if="activeTabMetrics.length">
-                <div :class="css({ display: 'flex', gap: '2' })">
+            <template v-if="activeCategory">
+                <MpText size="label-small" color="text.secondary">
+                    GRI {{ activeCategory.gri_codes.join(" · ") }}
+                </MpText>
+
+                <div
+                    :class="
+                        css({ display: 'flex', gap: '2', flexWrap: 'wrap' })
+                    "
+                >
                     <SummaryBox
-                        v-for="(metric, i) in activeTabMetrics"
-                        :key="metric.gri_code"
+                        v-for="(kpi, i) in activeCategory.summary"
+                        :key="kpi.key"
                         :variant="metricVariants[i % metricVariants.length]"
-                        :label="`${metric.title} (${metric.gri_code})`"
-                        :caption="metric.gri_code"
-                        :amount="formatMetricValue(metric)"
+                        :label="kpi.name"
+                        :caption="kpi.unit?.name ?? ''"
+                        :amount="formatSummary(kpi)"
                     />
                 </div>
 
+                <!-- One grouped bar chart per declared dimension. Series come from
+                     items[].labels, so a dimension added backend-side shows up here with
+                     no FE change. -->
                 <MpFlex
-                    v-if="activeTab === 'general' && generalComparisonMetric"
+                    v-for="chart in dimensionCharts"
+                    :key="chart.id"
+                    direction="column"
+                    gap="3"
+                >
+                    <MpText as="h2" size="h3" weight="semiBold">{{
+                        chart.title
+                    }}</MpText>
+                    <MpChart
+                        :id="chart.id"
+                        :title="chart.title"
+                        type="bar"
+                        width-container="660px"
+                        width-chart="660px"
+                        :data="chart.data"
+                    />
+                    <!-- print-ready / zero-hover, matching SdgPage: every plotted value is
+                         repeated as text so the numbers read with no mouse and on paper. -->
+                    <MpFlex direction="column" gap="1">
+                        <MpText
+                            v-for="series in chart.data.datasets"
+                            :key="series.label"
+                            size="label-small"
+                            color="text.secondary"
+                        >
+                            {{ series.label }}:
+                            {{ describeSeries(chart.periods, series.data) }}
+                        </MpText>
+                    </MpFlex>
+                </MpFlex>
+
+                <!-- AC-77 — PT comparison. Uses every entity present in items[], which the
+                     contract documents as unfiltered, so it survives an active entity filter. -->
+                <MpFlex
+                    v-if="ptComparison.length > 1"
                     direction="column"
                     gap="3"
                 >
                     <MpText as="h2" size="h3" weight="semiBold"
-                        >Perbandingan antar PT —
-                        {{ generalComparisonMetric.title }}</MpText
+                        >Perbandingan antar PT</MpText
                     >
                     <MpChart
                         id="gri-quant-pt-comparison"
-                        :title="generalComparisonMetric.title"
+                        title="Perbandingan antar PT"
                         type="bar"
                         width-container="660px"
                         width-chart="660px"
@@ -156,66 +207,88 @@ import {
     css,
 } from "@mekari/pixel3";
 import SummaryBox from "@/components/SummaryBox.vue";
-
-const metricVariants = ["blue", "green", "orange", "gray"] as const;
 import {
-    aggregateMetricRows,
+    orderedCategories,
+    periodsOf,
+    seriesByDimension,
+    totalsByEntity,
     useGriQuantitativeInsight,
     useStrategicInsightFilterState,
 } from "@/services/strategic-insight";
 
-type TabKey =
-    | "general"
-    | "energy"
-    | "waste"
-    | "water"
-    | "diversity"
-    | "employment"
-    | "ohs"
-    | "training";
-
-// FSD 2.7 AC-76 — 8 thematic tabs, each scoped to its own fixed set of GRI disclosure codes.
-const tabs: { key: TabKey; label: string; codes: string[] }[] = [
-    { key: "general", label: "General", codes: ["2-7", "2-8"] },
-    { key: "energy", label: "Energy", codes: ["302-1"] },
-    { key: "waste", label: "Waste", codes: ["306-4", "306-5"] },
-    { key: "water", label: "Water", codes: ["303-3", "303-4"] },
-    { key: "diversity", label: "Diversity", codes: ["405-1", "405-2"] },
-    { key: "employment", label: "Employment", codes: ["401-1", "401-3"] },
-    { key: "ohs", label: "OHS", codes: ["403-9"] },
-    { key: "training", label: "Training", codes: ["404-1"] },
-];
-
-const activeTab = ref<TabKey>("general");
+const metricVariants = ["blue", "green", "orange", "gray"] as const;
 
 const filterState = useStrategicInsightFilterState();
 const { data, isLoading } = useGriQuantitativeInsight(filterState.params);
 
-const metrics = computed(() => data.value?.metrics ?? []);
+// FSD 2.7 AC-76 — the 8 thematic tabs. Driven by the response rather than hardcoded, so the
+// tab list, its order, and each tab's GRI code caption all come from the backend.
+const categories = computed(() => orderedCategories(data.value ?? []));
 
-const activeTabMetrics = computed(() => {
-    const codes = tabs.find((t) => t.key === activeTab.value)?.codes ?? [];
-    return metrics.value.filter((m) => codes.includes(m.gri_code));
+const activeCategoryId = ref<string | null>(null);
+const activeCategory = computed(() => {
+    const list = categories.value;
+    if (list.length === 0) return undefined;
+    return (
+        list.find((c) => c.category_id.id === activeCategoryId.value) ?? list[0]
+    );
 });
 
-function formatMetricValue(metric: StrategicInsightGriMetric): string {
-    const value = aggregateMetricRows(metric.rows, metric.is_ratio);
-    const rounded = Math.round(value * 100) / 100;
-    return metric.unit ? `${rounded} ${metric.unit}` : String(rounded);
+function formatSummary(kpi: StrategicInsightGriSummary): string {
+    // Ratios (salary F/M) need 2dp; everything else reads better as a grouped integer.
+    const isRatio = kpi.aggregation === "AVERAGE" && Math.abs(kpi.value) < 10;
+    const value = isRatio
+        ? kpi.value.toFixed(2)
+        : (Math.round(kpi.value * 10) / 10).toLocaleString("id-ID");
+    const suffix = kpi.unit?.name ? ` ${kpi.unit.name}` : "";
+    const denominator = kpi.total === undefined ? "" : ` / ${kpi.total}`;
+    return `${value}${denominator}${suffix}`;
 }
 
-// AC-77 — General tab's PT-comparison bar chart, one bar per entity in the current filter scope.
-const generalComparisonMetric = computed(() => activeTabMetrics.value[0]);
-const ptComparisonData = computed(() => {
-    const rows = generalComparisonMetric.value?.rows ?? [];
-    return {
-        labels: rows.map((r) => r.entity.name),
-        datasets: [
-            {
-                label: generalComparisonMetric.value?.title ?? "",
-                data: rows.map((r) => r.value),
+// One chart per dimension the active category declares.
+const dimensionCharts = computed(() => {
+    const category = activeCategory.value;
+    if (!category) return [];
+    const periods = periodsOf(category.items);
+    return category.dimensions
+        .map((dimension) => ({
+            id: `gri-quant-${category.category_id.id}-${dimension.key}`,
+            title: dimension.name,
+            periods,
+            data: {
+                labels: periods.map(String),
+                datasets: seriesByDimension(category, dimension.key).map(
+                    (series) => ({ label: series.name, data: series.data }),
+                ),
             },
-        ],
-    };
+        }))
+        // a dimension whose members carry no data anywhere would plot a chart of zeros
+        .filter((chart) =>
+            chart.data.datasets.some((d) => d.data.some((v) => v !== 0)),
+        );
 });
+
+const ptComparison = computed(() =>
+    totalsByEntity(activeCategory.value?.items ?? []),
+);
+
+const ptComparisonData = computed(() => ({
+    labels: ptComparison.value.map((e) => e.code),
+    datasets: [
+        {
+            label: activeCategory.value?.category_id.name ?? "",
+            data: ptComparison.value.map((e) => e.value),
+        },
+    ],
+}));
+
+// "2024: 350 · 2025: 330" — the text mirror of one chart series.
+function describeSeries(periods: number[], values: number[]): string {
+    return periods
+        .map(
+            (period, i) =>
+                `${period}: ${(values[i] ?? 0).toLocaleString("id-ID")}`,
+        )
+        .join(" · ");
+}
 </script>

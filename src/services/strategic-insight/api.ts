@@ -1,9 +1,20 @@
 import { http, unwrap } from '@/lib/http'
 
-export { aggregateMetricRows } from './aggregate'
+export {
+  aggregateItems,
+  isNumericItem,
+  itemsAt,
+  orderedCategories,
+  periodsOf,
+  seriesByDimension,
+  summaryValue,
+  totalsByEntity,
+} from './aggregate'
 
-// All three endpoints confirmed in api/Dashboard/*.yml (method + URL only, see types.d.ts ponytail
-// note re: response shape).
+// gri-quantitative matches the `Contract` example in api/Dashboard/GRI - Quantitative.yml.
+// sdg is confirmed method+URL only (its example contradicts the mockup — docs/dashboard-sdg-api-gaps.md).
+// ponytail: gri-qualitative has no entry in api/Dashboard/ at all — the URL below follows the
+// sibling naming convention and is unverified. Confirm before relying on it.
 const strategicInsightApi = {
   async getSdgInsight(params: StrategicInsightFilterParams = {}) {
     return unwrap<StrategicInsightSdgResponse>(http.get('/v1/strategic-insight/sdg', { params }))
