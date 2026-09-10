@@ -13,6 +13,7 @@ export {
 
 export { categoryCaption, chartCardsFor } from './chart-spec'
 export type { ChartCard, ChartCardKind, ChartCardSeries, ChartCardWidth } from './chart-spec'
+export { nextTabIndex } from './tab-index'
 
 // gri-quantitative matches the `Contract` example in api/Dashboard/GRI - Quantitative.yml.
 // sdg is confirmed method+URL only (its example contradicts the mockup — docs/dashboard-sdg-api-gaps.md).

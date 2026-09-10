@@ -11,10 +11,15 @@ overflow/scroll rule could be confirmed from node_modules alone.
 
 - `MpTabs` — root. Props: `modelValue?: number`, `defaultValue: number = 0`, `id?: string`,
   `isManual?: boolean`, `variantColor?: 'blue'|'green'|'orange'|'red'|'gray' = 'blue'`,
-  `isShowBorder: boolean = false`, `hasMarginBottom: boolean = false`.
+  `isShowBorder: boolean = true`, `hasMarginBottom: boolean = true`.
+  (Note: 0.0.24, also present in the pnpm store, defaults both to `false`. The app resolves 0.0.25
+  via `@mekari/pixel3`'s dependency pin — confirm the version before trusting either default.)
   Emits: `change`, `update:modelValue` — **both fire with the tab `index: number`**, not an id/string.
   If `isManual` is true, `selectedTab` becomes `computed(() => props.modelValue)` (fully controlled);
-  otherwise it's internal `ref(defaultValue)` and `v-model` still works via the emits.
+  otherwise it's internal `ref(defaultValue)` and `modelValue` is **ignored on the way in** — the
+  emits still fire, so `v-model` looks like it works, but writing to the bound ref from your own
+  code does NOT move the underline. **Pass `is-manual` whenever the parent ever sets the index
+  itself** (e.g. clamping after a list change), or the indicator desyncs from the panel.
 - `MpTabList` — no props. Filters children to only `MpTab` (warns on anything else, even through
   `<template v-for>` fragments — it does unwrap `v-fgt` fragments though, so `v-for` over `MpTab` is fine).
   Clones each child with `isSelected`, `index`, `aria-selected`, and an injected `onClick` that calls
@@ -25,7 +30,7 @@ overflow/scroll rule could be confirmed from node_modules alone.
   Renders a `<button role="tab">` plus an `MpTabSelectedBorder` div for the underline.
 - `MpTabPanels` — no props, just a wrapper div (`data-pixel-component="MpTabPanels"`).
 - `MpTabPanel` — props: `isSelected?: boolean`, `value?: string` (also unread by logic — panel
-  show/hide is **not automatic**, see below), `isKeepAlive: boolean = false`.
+  show/hide is **not automatic**, see below), `isKeepAlive: boolean = true` (0.0.25; `false` in 0.0.24).
 
 ## 2. Minimal snippet (index-based v-model)
 
@@ -40,19 +45,14 @@ import { MpTabs, MpTabList, MpTab, MpTabPanels, MpTabPanel } from '@mekari/pixel
 const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'targets', label: 'Targets' },
-    { id: 'gri-201', label: 'GRI 201' },
-    { id: 'gri-302', label: 'GRI 302' },
-    { id: 'gri-303', label: 'GRI 303' },
-    { id: 'gri-305', label: 'GRI 305' },
-    { id: 'gri-306', label: 'GRI 306' },
-    { id: 'gri-403', label: 'GRI 403' },
 ]
 
 const activeIndex = ref(0)
 </script>
 
 <template>
-    <MpTabs v-model="activeIndex" variant-color="blue">
+    <!-- is-manual makes modelValue authoritative; without it MpTabs ignores it on input -->
+    <MpTabs v-model="activeIndex" is-manual variant-color="blue">
         <div class="overflow-x-auto">
             <MpTabList>
                 <MpTab v-for="(tab, i) in tabs" :key="tab.id" :id="tab.id">

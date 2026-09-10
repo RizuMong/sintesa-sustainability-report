@@ -69,7 +69,16 @@
                  docs/pixel3-tabs-notes.md; the overflow-x wrapper is required (§3), MpTabList
                  ships no built-in scroll behaviour. -->
             <template v-if="categories.length">
-                <MpTabs v-model="activeIndex" variant-color="blue">
+                <!-- `is-manual` is required, not optional: without it MpTabs' useTabs()
+                     ignores modelValue entirely and tracks its own internal ref, so the
+                     clamp below could move activeIndex while the underline stayed on a
+                     stale (possibly out-of-range) tab. With it, selectedTab is a computed
+                     over modelValue and this component is the single source of truth. -->
+                <MpTabs
+                    v-model="activeIndex"
+                    is-manual
+                    variant-color="blue"
+                >
                     <div :class="tabScrollClass">
                         <MpTabList>
                             <MpTab
@@ -184,6 +193,7 @@ import DashboardChartCard from "@/components/DashboardChartCard.vue";
 import {
     categoryCaption,
     chartCardsFor,
+    nextTabIndex,
     orderedCategories,
     useGriQuantitativeInsight,
     useStrategicInsightFilterState,
@@ -200,15 +210,31 @@ const categories = computed(() => orderedCategories(data.value ?? []));
 
 const activeIndex = ref(0);
 
-// A filter change can shrink/reorder the category list; clamp the index so it never points
-// past the end (and stays at 0 when the list becomes empty).
+// A filter change can shrink or reorder the category list. Resolving the new index is
+// nextTabIndex()'s job (tested in tab-index.check.ts) — it follows the selected category by
+// id so a reorder or a shrink keeps the user on the tab they were reading, instead of
+// silently swapping in a different category that happens to sit at the same slot.
 watch(categories, (list) => {
-    if (activeIndex.value >= list.length) {
-        activeIndex.value = list.length > 0 ? list.length - 1 : 0;
-    }
+    const previous = activeCategoryId.value;
+    activeIndex.value = nextTabIndex(
+        list.map((c) => c.category_id.id),
+        previous,
+        activeIndex.value,
+    );
 });
 
 const activeCategory = computed(() => categories.value[activeIndex.value]);
+
+// Tracked separately from the index because the watcher above needs the id from BEFORE the
+// list changed, and activeCategory is already recomputed against the new list by then.
+const activeCategoryId = ref<string | null>(null);
+watch(
+    activeCategory,
+    (category) => {
+        activeCategoryId.value = category?.category_id.id ?? null;
+    },
+    { immediate: true },
+);
 
 const activeCaption = computed(() =>
     activeCategory.value ? categoryCaption(activeCategory.value) : "",
