@@ -1,0 +1,196 @@
+[
+  {
+    "category": "GENERAL",
+    "items": [
+      {
+        "description": "Laki-laki",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-7a",
+        "id": "123",
+        "input_type": "NUMBER",
+        "metric_name": "Employee Headcount",
+        "period": 2025,
+        "unit_id": null,
+        "value": 880
+      },
+      {
+        "description": "Perempuan",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-7a",
+        "id": "124",
+        "input_type": "NUMBER",
+        "metric_name": "Employee Headcount",
+        "period": 2025,
+        "unit_id": null,
+        "value": 1680
+      },
+      {
+        "description": "Manajerial",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-7b",
+        "id": "125",
+        "input_type": "PERCENTAGE",
+        "metric_name": "Female Manager Ratio",
+        "period": 2025,
+        "unit_id": {
+          "id": "9",
+          "name": "%"
+        },
+        "value": 28.5
+      },
+      {
+        "description": "Cakupan entitas pelaporan",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-2",
+        "id": "126",
+        "input_type": "TEXT",
+        "metric_name": "Reporting Boundary Note",
+        "period": 2025,
+        "unit_id": null,
+        "value": "Mencakup seluruh unit operasional di Jawa dan Sumatera"
+      },
+      {
+        "description": "Tanggal akhir periode pelaporan",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-3",
+        "id": "127",
+        "input_type": "DATE",
+        "metric_name": "Reporting Period End Date",
+        "period": 2025,
+        "unit_id": null,
+        "value": "2025-12-31"
+      },
+      {
+        "description": "Kepemilikan kebijakan keberlanjutan",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-23",
+        "id": "128",
+        "input_type": "BOOLEAN",
+        "metric_name": "Has Sustainability Policy",
+        "period": 2025,
+        "unit_id": null,
+        "value": true
+      }
+    ],
+    "summary": [
+      {
+        "aggregation": "SUM",
+        "key": "total_employee",
+        "name": "Total Karyawan",
+        "unit_id": null,
+        "value": 8614
+      },
+      {
+        "aggregation": "SUM",
+        "key": "male",
+        "name": "Laki-laki",
+        "unit_id": null,
+        "value": 4477
+      },
+      {
+        "aggregation": "SUM",
+        "key": "female",
+        "name": "Perempuan",
+        "unit_id": null,
+        "value": 4137
+      }
+    ]
+  },
+  {
+    "category": "ENERGY",
+    "items": [
+      {
+        "description": "Non-Renewable",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "302-1a",
+        "id": "456",
+        "input_type": "NUMBER",
+        "metric_name": "Energy Consumption",
+        "period": 2025,
+        "unit_id": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "value": 132000
+      },
+      {
+        "description": "Renewable",
+        "entity": {
+          "code": "WS",
+          "id": "Ks6BgE75YiQ1",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "302-1b",
+        "id": "457",
+        "input_type": "NUMBER",
+        "metric_name": "Energy Consumption",
+        "period": 2025,
+        "unit_id": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "value": 14200
+      }
+    ],
+    "summary": [
+      {
+        "aggregation": "SUM",
+        "key": "total_non_renewable",
+        "name": "Total Non-Renewable (GJ)",
+        "unit_id": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "value": 469790
+      },
+      {
+        "aggregation": "SUM",
+        "key": "total_renewable",
+        "name": "Total Renewable (GJ)",
+        "unit_id": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "value": 43950
+      },
+      {
+        "aggregation": "PERCENTAGE",
+        "key": "renewable_ratio",
+        "name": "% Energi Terbarukan",
+        "unit_id": {
+          "id": "9",
+          "name": "%"
+        },
+        "value": 9
+      }
+    ]
+  }
+]

@@ -116,6 +116,45 @@ declare global {
   // The endpoint returns the category array directly as `data`, with no wrapper object.
   type StrategicInsightGriQuantitativeResponse = StrategicInsightGriCategory[]
 
+  // ---- wire shape — what GET /v1/strategic-insight/gri-quantitative actually sends today ----
+  //
+  // Verified live 2026-09-10 against the dev backend (.temp/api-verify/*/gri-unfiltered.json).
+  // A prior analysis called this "pre-migration" because it byte-matches the collection's
+  // `Legacy Response (pre dimensions/labels)` example — that was our own inference, not a BE
+  // statement. BE says this shape IS current. `normalize.ts` is the only place that knows it;
+  // everything else in this module keeps consuming `StrategicInsightGriCategory` above.
+  interface StrategicInsightGriWireSummary {
+    key: string
+    name: string
+    value: number
+    unit_id: Ref2 | null
+    aggregation: StrategicInsightAggregation
+    total?: number
+  }
+
+  interface StrategicInsightGriWireItem {
+    id: string
+    period: number
+    entity: Ref2 & { code: string }
+    gri_code: string
+    metric_name: string
+    description: string
+    value: number | string | boolean
+    unit_id: Ref2 | null
+    input_type: StrategicInsightInputType
+    // absent on the wire — Phase 3 derives it via an explicit allow-list, not inference
+    // (see AVERAGE_METRIC_KEYS in normalize.ts and gap G1)
+  }
+
+  interface StrategicInsightGriWireCategory {
+    category: string // bare uppercase token, e.g. 'GENERAL' — no id, no defined mapping to master-category
+    summary: StrategicInsightGriWireSummary[]
+    items: StrategicInsightGriWireItem[]
+    // no gri_codes[], sequence, dimensions[] — all derivable, see normalize.ts
+  }
+
+  type StrategicInsightGriQuantitativeWireResponse = StrategicInsightGriWireCategory[]
+
   // ---- GRI Qualitative page ----
   interface StrategicInsightGriQualitativeNarrative {
     gri_code: string
