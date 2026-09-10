@@ -68,6 +68,24 @@ guarantee. **C** = out of scope of this endpoint.
 
 Five blockers (A1-A5), four absorbable (B1-B4), two out of scope (C1-C2).
 
+### Live-backend status — verified 2026-09-10
+
+Everything below was written by comparing two *documents*. It has now also been checked against the
+running dev backend with `node --experimental-strip-types scripts/verify-api.ts` (signs in via
+`/v1/tools/auth` encrypt, probes the endpoint, drives the answer through the real page helpers).
+
+Result: **the dev backend still serves the pre-migration shape.** `GET /v1/strategic-insight/gri-quantitative`
+returned a payload byte-identical to this collection's `Legacy Response (pre dimensions/labels)`
+example — 2 categories (`GENERAL`, `ENERGY`), 8 items, `category` as a bare string, no `dimensions[]`,
+no `items[].labels`, no `items[].aggregation`. So A1, A2 and A5 are confirmed unstarted, not merely
+undocumented.
+
+Additionally, and *not* previously recorded anywhere: **all three query parameters are ignored.**
+`period=2025`, `entity_id`, `category_id` and all three combined each returned bytes identical to the
+unfiltered call. The A4 question ("do filters narrow `summary[]` only?") therefore cannot even be
+asked yet — no filter narrows anything. Re-run the harness to re-check; it exits non-zero until this
+changes.
+
 ### A1 · Only 2 of 8 categories exist, and `category` is an unaligned free string — blocks
 
 The example ships `GENERAL` and `ENERGY`. The mockup has eight tabs. `WASTE`, `WATER`,

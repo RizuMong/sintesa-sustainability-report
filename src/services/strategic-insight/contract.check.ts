@@ -9,8 +9,6 @@
 // `gri_code` prefix ('2-7') that never matches the leaf codes the API sends ('2-7a'), so every
 // tab rendered its empty state against a perfectly good payload.
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
 import {
   aggregateItems,
   orderedCategories,
@@ -19,36 +17,12 @@ import {
   summaryValue,
   totalsByEntity,
 } from './aggregate.ts'
+// Loader lives in scripts/lib because scripts/verify-api.ts (live-backend side) needs the same
+// "read the committed example off disk" logic this check uses on the fixture side. Kept as one
+// implementation rather than two subtly-diverging shell-outs to python3+PyYAML.
+import { loadContractExample } from '../../../scripts/lib/gri-contract-diff.ts'
 
-// fileURLToPath, not .pathname — the path contains a space, which .pathname percent-encodes.
-const COLLECTION = fileURLToPath(
-  new URL('../../../api/Dashboard/GRI - Quantitative.yml', import.meta.url),
-)
-
-// The collection is a Bruno .yml with JSON embedded in a string field, and this repo has no YAML
-// parser dependency. Python is already required by the repo's tooling, so shell out rather than
-// add one for a single check.
-function loadContract(): StrategicInsightGriQuantitativeResponse {
-  const out = execFileSync(
-    'python3',
-    [
-      '-c',
-      [
-        'import yaml,json,sys',
-        'd=yaml.safe_load(open(sys.argv[1]))',
-        "name='Response Dummy'",
-        "ex=[e for e in d['examples'] if e['name']==name]",
-        "assert ex, f'example {name!r} not found in {sys.argv[1]}'",
-        "sys.stdout.write(json.dumps(json.loads(ex[0]['response']['body']['data'])['data']))",
-      ].join('\n'),
-      COLLECTION,
-    ],
-    { encoding: 'utf8' },
-  )
-  return JSON.parse(out) as StrategicInsightGriQuantitativeResponse
-}
-
-const contract = loadContract()
+const contract = loadContractExample()
 
 // ---- the 8 mockup tabs, in mockup order ----
 const tabs = orderedCategories(contract)
