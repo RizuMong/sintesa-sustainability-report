@@ -35,7 +35,7 @@ height (200px in General, 220px elsewhere) + a legend row underneath.
 Legend for `Chart type`: `bar` = grouped bars, `bar-stacked` = stacked bars,
 `bar-single` = one dataset, categorical x-axis, `line` = trend, `donut`/`pie`.
 `x` is the axis; `series` are the datasets. `dim:<key>` refers to
-`category.dimensions[].key` in the contract (verified against the Contract example).
+`category.dimensions[].key` in the contract (verified against the `Response Dummy` example).
 
 ### General — GRI 2-7 · 2-8 — "Total karyawan & pekerja non-karyawan"
 

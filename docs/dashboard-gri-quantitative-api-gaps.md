@@ -5,8 +5,9 @@ Scope: `GET /v1/strategic-insight/gri-quantitative`, consumed by
 
 Two sources of truth compared here:
 
-- **Contract**: `api/Dashboard/GRI - Quantitative.yml` — ships `Contract` + `Response Dummy`
-  examples covering two categories (`GENERAL`, `ENERGY`).
+- **Contract**: `api/Dashboard/GRI - Quantitative.yml` — ships `Response Dummy` (the enriched,
+  normative example) + `Legacy Response (pre dimensions/labels)` examples covering two categories
+  (`GENERAL`, `ENERGY`).
 - **Mockup**: <https://curious-marigold-7934ec.netlify.app/> — single-file HTML, all fixture data
   inline in its `<script>` block (`RAW`, `ENERGY`, `WASTE`, `WATER`, `DIVERSITY`, `EMPLOYMENT`,
   `OHS`, `TRAINING`), 15 entities × 3 years (2023–2025).
@@ -205,11 +206,17 @@ nit.
 `GRI - Quantitative.yml` declares no params. The FE already sends `?period=&entity_id=`. See A4 for
 why the semantics matter more than the names here.
 
-### B4 · The two examples disagree on the envelope
+### B4 · The two examples disagreed on the envelope — resolved
 
-`Contract` returns a bare `{"data": ...}`; `Response Dummy` returns the full
-`{code, data, error, message}` envelope that `src/lib/http.ts` and `unwrap<T>()` expect. The
-`Contract` example is the one a reader treats as normative. Align it.
+The example we had labeled "Contract" (our own FE-side label, not a BE naming) returned a bare
+`{"data": ...}`, while `Response Dummy` — the BE-authored example — carried the full
+`{code, data, error, message}` envelope that `src/lib/http.ts` and `unwrap<T>()` expect. Because
+our example was enriched (8 categories, `dimensions[]`, `labels{}`) it read as the more complete
+example, so it was the one a reader treated as normative, even though the envelope it modeled was
+wrong. The deeper issue was the naming: our label had displaced the BE's own reference example as
+the apparent source of truth. Settled by renaming — the enriched, normative example is now
+`Response Dummy` (matching BE naming) and the old 2-category BE dump is
+`Legacy Response (pre dimensions/labels)`. No example named "Contract" remains.
 
 ### C1 · TEXT / DATE / BOOLEAN disclosures have no widget
 

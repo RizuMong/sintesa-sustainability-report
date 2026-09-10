@@ -45,13 +45,19 @@ nothing, and AC-62 silently does nothing.
 
 ## G2 · `strategic-insight` response types are invented — P1
 
-**What.** Plan §2.4 lists the three dashboard endpoints as "confirmed". They are not. The Bruno
-files pin only `method` + `url`, with `body: { data: "{}" }` and **no example response**.
+**What.** Plan §2.4 lists the three dashboard endpoints as "confirmed". They are not. The invented
+shapes in `types.d.ts` match neither the mockups nor the contract.
+
+**Update.** `api/Dashboard/SDG.yml` and `GRI - Quantitative.yml` now ship `Response Dummy`
+(the enriched, normative example) + a `Legacy Response` example each, so those two no longer need
+a live call to settle — diff against the examples. `GRI - Qualitative.yml` does not exist at all;
+that endpoint is still pure invention. SDG is broken out in full, with a proposed contract, in
+`docs/dashboard-sdg-api-gaps.md`.
 
 **Where.**
-- `api/Dashboard/SDG.yml`, `GRI - Quantitative.yml`, `GRI - Qualitative.yml` (22 lines each, no
-  response block)
+- `api/Dashboard/SDG.yml`, `GRI - Quantitative.yml` (examples present); no `GRI - Qualitative.yml`
 - Invented shapes: `src/services/strategic-insight/types.d.ts`
+- False claim that all three are confirmed: `src/services/strategic-insight/api.ts:5`
 - Consumers: `src/pages/dashboard/{SdgPage,GriQuantitativePage,GriQualitativePage}.vue`
 
 **Why it matters.** All three dashboards will render empty or throw on first contact with the real
