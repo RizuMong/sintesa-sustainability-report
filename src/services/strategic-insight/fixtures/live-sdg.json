@@ -1,0 +1,98 @@
+{
+  "matrix": [
+    {
+      "actions": [
+        {
+          "adoption_status": "TAKE",
+          "baseline": "baseline sekarang",
+          "created_at": null,
+          "detail_action_solution": "Berinvestasi pada energi terbarukan",
+          "ids": "123",
+          "impact": "Operations Impact",
+          "indicator_id": {
+            "evidence": "Required",
+            "id": "oP229ralLrzM",
+            "name": "Sustainability Investment"
+          },
+          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "pillar_id": {
+            "id": "qT4ROSu3d1NL",
+            "name": "Operation"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 1",
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": "target nanti",
+          "updated_at": null
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": "baseline sekarang",
+          "created_at": null,
+          "detail_action_solution": "Berinvestasi pada energi terbarukan",
+          "ids": "1234",
+          "impact": "Investment Impact",
+          "indicator_id": {
+            "evidence": "Required",
+            "id": "oP229ralLrzM",
+            "name": "Sustainability Investment"
+          },
+          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "pillar_id": {
+            "id": "qT4ROSu3d1NLdssd",
+            "name": "Investment"
+          },
+          "plan_origin": "INITIATE",
+          "sdg_ambition_esg_alignment": "SDG 1",
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 1",
+            "number": 1
+          },
+          "target": "target nanti",
+          "updated_at": null
+        }
+      ],
+      "adoption_skip_count": 1,
+      "adoption_take_count": 9,
+      "entity_id": {
+        "id": "1",
+        "name": "Sintesa"
+      },
+      "entity_type": "HOLDING",
+      "execution_percentage": 10,
+      "period": 2026
+    }
+  ],
+  "summary": [
+    {
+      "description": "Adopted dari total 17 SDG PBB",
+      "key": "sdg_roadmap",
+      "name": "Holding SDG Roadmap",
+      "total": 17,
+      "value": 9
+    },
+    {
+      "description": "Actions mapped to Holding SDGs",
+      "key": "strategic_alignment",
+      "name": "Strategic Alignment",
+      "value": 82
+    },
+    {
+      "description": "Overall 'Take' ratio on mandates",
+      "key": "execution_rate",
+      "name": "Avg. Execution Rate",
+      "value": 74
+    },
+    {
+      "description": "Actions outside Holding Roadmap",
+      "key": "bottom_up_initiatives",
+      "name": "Bottom-Up Initiatives",
+      "value": 28
+    }
+  ]
+}

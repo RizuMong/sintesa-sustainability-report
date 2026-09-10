@@ -48,6 +48,52 @@ declare global {
     detail: StrategicInsightSdgDetailItem[] // drill-down source, filtered client-side by sdg_id on row click
   }
 
+  // ---- wire shape — what GET /v1/strategic-insight/sdg actually sends today ----
+  //
+  // Verified live 2026-09-10 (.temp/api-verify/sdg-probe/sdg.json, redacted-clean — no tokens or
+  // emails present so redaction was a no-op). `normalize-sdg.ts` is the only place that knows this
+  // shape; everything else keeps consuming StrategicInsightSdgResponse above. See
+  // docs/dashboard-sdg-api-gaps.md for the gap analysis this closes/confirms.
+  interface StrategicInsightSdgWireSummary {
+    key: string // 'sdg_roadmap' | 'strategic_alignment' | 'execution_rate' | 'bottom_up_initiatives'
+    name: string
+    description: string
+    value: number
+    total?: number // present only on sdg_roadmap (denominator, 17)
+  }
+
+  interface StrategicInsightSdgWireAction {
+    ids: string // NOTE: plural field name on the wire, singular id value
+    sdg_id: Ref2 & { number: number } // TRAP: id is duplicated across different SDGs in live dummy data — group on number, never id
+    adoption_status: 'TAKE' | 'SKIP' | string // observed: TAKE; SKIP documented in the contract example
+    plan_origin: 'HOLDING' | 'INITIATE' | 'SUBSIDIARY'
+    impact: string
+    key_business_action: string
+    detail_action_solution: string
+    baseline: string
+    target: string
+    indicator_id: Ref2 & { evidence: string }
+    pillar_id: Ref2
+    sdg_ambition_esg_alignment: string
+    created_at: string | null
+    updated_at: string | null
+  }
+
+  interface StrategicInsightSdgWireMatrixRow {
+    entity_id: Ref2
+    entity_type: 'HOLDING' | 'SUBSIDIARY'
+    period: number
+    execution_percentage: number
+    adoption_take_count: number
+    adoption_skip_count: number
+    actions: StrategicInsightSdgWireAction[]
+  }
+
+  interface StrategicInsightSdgWireResponse {
+    summary: StrategicInsightSdgWireSummary[]
+    matrix: StrategicInsightSdgWireMatrixRow[]
+  }
+
   // ---- GRI Quantitative page (AC-76/77) ----
   // `SUM`/`AVERAGE` describe how the backend derived a summary value; the FE only displays it.
   // Relevant to the FE because AVERAGE values must not be re-summed when rendering.
