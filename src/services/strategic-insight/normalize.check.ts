@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { normalizeGriQuantitative } from './normalize.ts'
 import { categoryCaption, chartCardsFor } from './chart-spec.ts'
-import { seriesByDimension } from './aggregate.ts'
+import { aggregateItems, seriesByDimension } from './aggregate.ts'
 
 const fixturePath = fileURLToPath(new URL('./fixtures/live-gri-quantitative.json', import.meta.url))
 const wire = JSON.parse(readFileSync(fixturePath, 'utf8')) as StrategicInsightGriQuantitativeWireResponse
@@ -137,3 +137,98 @@ for (const s of genderSeries) {
 }
 
 console.log('ok — normalize: Phase 1+2 renames/derivations verified against the live fixture')
+
+// ==== Phase 3: items[].aggregation (G1), stated not guessed ====
+
+// ---- known AVERAGE metric_keys ('avg_training_hours', 'salary_ratio_female_to_male') ----
+{
+  const synthetic: StrategicInsightGriQuantitativeWireResponse = [
+    {
+      category: 'TRAINING',
+      summary: [],
+      items: [
+        {
+          id: 't1',
+          period: 2025,
+          entity: { id: 'e1', code: 'WS', name: 'Waskita Sintesa' },
+          gri_code: '404-1a',
+          metric_name: 'Avg Training Hours',
+          description: 'Pria',
+          value: 36,
+          unit_id: null,
+          input_type: 'NUMBER',
+        },
+      ],
+    },
+  ]
+  const { categories: cats } = normalizeGriQuantitative(synthetic)
+  assert.equal(cats[0]!.items[0]!.metric_key, 'avg_training_hours')
+  assert.equal(cats[0]!.items[0]!.aggregation, 'AVERAGE', 'avg_training_hours must be AVERAGE, not SUM')
+}
+
+// ---- a PERCENTAGE input_type item, two entities, must average not double ----
+{
+  const synthetic: StrategicInsightGriQuantitativeWireResponse = [
+    {
+      category: 'GENERAL',
+      summary: [],
+      items: [
+        {
+          id: 'p1',
+          period: 2025,
+          entity: { id: 'e1', code: 'WS', name: 'Waskita Sintesa' },
+          gri_code: '2-7b',
+          metric_name: 'Female Manager Ratio',
+          description: 'Manajerial',
+          value: 20,
+          unit_id: { id: '9', name: '%' },
+          input_type: 'PERCENTAGE',
+        },
+        {
+          id: 'p2',
+          period: 2025,
+          entity: { id: 'e2', code: 'SDS', name: 'Sintesa Duta Sejahtera' },
+          gri_code: '2-7b',
+          metric_name: 'Female Manager Ratio',
+          description: 'Manajerial',
+          value: 40,
+          unit_id: { id: '9', name: '%' },
+          input_type: 'PERCENTAGE',
+        },
+      ],
+    },
+  ]
+  const { categories: cats } = normalizeGriQuantitative(synthetic)
+  for (const item of cats[0]!.items) {
+    assert.equal(item.aggregation, 'AVERAGE', 'a PERCENTAGE item must be AVERAGE, not SUM')
+  }
+  const combined = aggregateItems(cats[0]!.items)
+  assert.equal(combined, 30, '(20 + 40) / 2, not 20 + 40 = 60 — a PERCENTAGE metric must not double')
+}
+
+// ---- everything else defaults to SUM ----
+{
+  const synthetic: StrategicInsightGriQuantitativeWireResponse = [
+    {
+      category: 'ENERGY',
+      summary: [],
+      items: [
+        {
+          id: 's1',
+          period: 2025,
+          entity: { id: 'e1', code: 'WS', name: 'Waskita Sintesa' },
+          gri_code: '302-1a',
+          metric_name: 'Energy Consumption',
+          description: 'Non-Renewable',
+          value: 100,
+          unit_id: { id: '3', name: 'GJ' },
+          input_type: 'NUMBER',
+        },
+      ],
+    },
+  ]
+  const { categories: cats } = normalizeGriQuantitative(synthetic)
+  assert.equal(cats[0]!.items[0]!.aggregation, 'SUM')
+}
+
+console.log('ok — normalize: Phase 3 aggregation allow-list verified')

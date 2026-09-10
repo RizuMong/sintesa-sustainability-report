@@ -261,6 +261,26 @@ function dimensionsObserved(
   return [...byDimension.entries()].map(([key, { name, members }]) => ({ key, name, members }))
 }
 
+// ---- Phase 3: items[].aggregation (G1), stated not guessed ----
+//
+// ponytail: items[].aggregation is absent from the wire and cannot be inferred from input_type —
+// salary ratios and average training hours are plain NUMBERs that must still AVERAGE (summing them
+// produced the visible "1.88 ratio" and "~450 average hours" bugs, see aggregate.ts's comment on
+// aggregateItems). This allow-list is an FE-side stand-in for a BE field, not a real derivation:
+// delete this table and default-to-SUM fallback the day items[].aggregation arrives on the wire,
+// and read the value straight through instead.
+//
+// Everything not on this list, and not input_type PERCENTAGE, is SUM. A PERCENTAGE item (e.g. the
+// Female Manager Ratio disclosure) is itself already a ratio, so combining several across entities
+// must average them too, same rule as the two NUMBER exceptions below — just reached by input_type
+// instead of by metric_key, per the plan's allow-list definition.
+const AVERAGE_METRIC_KEYS = new Set(['salary_ratio_female_to_male', 'avg_training_hours'])
+
+function aggregationFor(metricKey: string, inputType: StrategicInsightInputType): StrategicInsightAggregation {
+  if (inputType === 'PERCENTAGE' || AVERAGE_METRIC_KEYS.has(metricKey)) return 'AVERAGE'
+  return 'SUM'
+}
+
 export interface NormalizeResult {
   categories: StrategicInsightGriCategory[]
   warnings: string[]
@@ -287,7 +307,7 @@ export function normalizeGriQuantitative(
       value: wireItem.value,
       unit: wireItem.unit_id,
       input_type: wireItem.input_type,
-      aggregation: 'SUM',
+      aggregation: aggregationFor(slug(wireItem.metric_name), wireItem.input_type),
     }))
 
     const summary: StrategicInsightGriSummary[] = wireCategory.summary.map((s) => ({
