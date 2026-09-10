@@ -257,9 +257,13 @@ const labelColor =
                 </div>
             </div>
 
-            <mp-box v-if="hasSlot('top-right-content')">
+            <!-- plain div, not <mp-box>: Pixel 3 exports no Box component (the name is a
+                 Pixel 2 leftover), so Vue logged "Failed to resolve component: mp-box" for
+                 every KPI card that used a top-right slot. It only wraps a slot, so a div is
+                 the whole job. Caught by scripts/dashboard-acceptance.check.ts. -->
+            <div v-if="hasSlot('top-right-content')">
                 <slot name="top-right-content" />
-            </mp-box>
+            </div>
         </div>
 
         <!-- Bottom Content -->

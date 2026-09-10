@@ -14,6 +14,8 @@ No test runner is configured. Tests are plain Node scripts using `node:assert/st
 
 `src/services/strategic-insight/contract.check.ts` is the one exception to "checks are self-contained": it parses `api/Dashboard/GRI - Quantitative.yml` (through the `api` symlink, via `python3` + PyYAML) at run time and asserts the dashboard page can render every widget in the mockup from it. So it fails if the separate API-collection repo is missing, and it is the check to run after any change to that contract.
 
+`bash scripts/run-dashboard-acceptance.sh` is the browser acceptance run for the GRI Quantitative dashboard, and the only check that proves the page actually *renders*. It boots the real app (`vite dev`) plus `scripts/mock-api-server.ts` (which replays the real `api/Dashboard/*.yml` contract examples over HTTPS), starts headless Chrome with `--host-resolver-rules` remapping the workflow API host onto the mock, and drives the page over CDP: it clicks through all 8 tabs and asserts KPI counts, chart titles per tab (against `docs/dashboard-gri-quantitative-mockup-spec.md` §2), that canvases actually painted pixels, and that the console is clean. Vue warnings fail the run — that is deliberate, since "Failed to resolve component" is exactly the class of bug `vue-tsc` cannot see (it is how the `mp-box` leftover in `SummaryBox.vue` was found). Requires Google Chrome; the self-signed cert under `.temp/certs/` is gitignored and regenerated on demand.
+
 ## Architecture
 
 Vue 3 (`<script setup>`) + TypeScript + Vite SPA, embedded as an iframe inside Mekari's "Officeless" low-code app, using `@mekari/pixel3` (Pixel 3 design system).

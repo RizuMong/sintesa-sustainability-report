@@ -32,3 +32,6 @@ dist-ssr
 .CLAUDE
 # Symlink to ~/Projects/vas-api-collection (separate repo)
 api
+
+# local acceptance-harness scratch (self-signed TLS certs for the mock API) — never commit keys
+.temp/
