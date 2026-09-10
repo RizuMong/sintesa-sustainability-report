@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { normalizeGriQuantitative } from './normalize.ts'
 import { categoryCaption, chartCardsFor } from './chart-spec.ts'
+import { seriesByDimension } from './aggregate.ts'
 
 const fixturePath = fileURLToPath(new URL('./fixtures/live-gri-quantitative.json', import.meta.url))
 const wire = JSON.parse(readFileSync(fixturePath, 'utf8')) as StrategicInsightGriQuantitativeWireResponse
@@ -62,4 +63,77 @@ assert.equal(categoryCaption(energy), 'Konsumsi energi dalam organisasi', 'energ
 assert.doesNotThrow(() => chartCardsFor(general))
 assert.doesNotThrow(() => chartCardsFor(energy))
 
-console.log('ok — normalize: Phase 1 renames/derivations verified against the live fixture')
+// ==== Phase 2: description -> labels, via the declared vocabulary ====
+
+const { warnings } = normalizeGriQuantitative(wire)
+
+// ---- Laki-laki -> {gender: MALE}, Perempuan -> {gender: FEMALE} ----
+const laki = general.items.find((i) => i.description === 'Laki-laki')!
+assert.deepEqual(laki.labels, { gender: 'MALE' })
+const perempuan = general.items.find((i) => i.description === 'Perempuan')!
+assert.deepEqual(perempuan.labels, { gender: 'FEMALE' })
+
+// ---- Non-Renewable -> {renewability: NON_RENEWABLE}, Renewable -> {renewability: RENEWABLE} ----
+const nonRenewable = energy.items.find((i) => i.description === 'Non-Renewable')!
+assert.deepEqual(nonRenewable.labels, { renewability: 'NON_RENEWABLE' })
+const renewable = energy.items.find((i) => i.description === 'Renewable')!
+assert.deepEqual(renewable.labels, { renewability: 'RENEWABLE' })
+
+// ---- 'Manajerial' has no vocabulary entry in GENERAL -> unmatched, warning pushed, no labels invented ----
+const manajerial = general.items.find((i) => i.description === 'Manajerial')!
+assert.deepEqual(manajerial.labels, {}, 'unmatched description must not invent a label')
+assert.ok(
+  warnings.some((w) => w.includes('Manajerial')),
+  'an unmatched description must be recorded in warnings, not silently dropped',
+)
+
+// ---- seriesByDimension(general, 'gender') yields two non-empty series from the real fixture ----
+const genderSeries = seriesByDimension(general, 'gender')
+assert.equal(genderSeries.length, 2, 'General must declare exactly the gender members it observed')
+assert.deepEqual(genderSeries.map((s) => s.key).sort(), ['FEMALE', 'MALE'])
+for (const s of genderSeries) {
+  assert.ok(s.data.some((v) => v > 0), `series ${s.key} must carry non-zero data from the live fixture`)
+}
+
+// ---- mutation: flip the 'Laki-laki' alias and confirm the check would catch it ----
+{
+  const mutatedWire = JSON.parse(JSON.stringify(wire)) as StrategicInsightGriQuantitativeWireResponse
+  const item = mutatedWire[0]!.items.find((i) => i.description === 'Laki-laki')!
+  item.description = 'Typo-laki'
+  const { categories: mutated, warnings: mutatedWarnings } = normalizeGriQuantitative(mutatedWire)
+  const mutatedItem = mutated[0]!.items.find((i) => i.id === item.id)!
+  assert.deepEqual(mutatedItem.labels, {}, 'a broken alias must not still match')
+  assert.ok(mutatedWarnings.some((w) => w.includes('Typo-laki')), 'a broken alias must warn')
+}
+
+// ---- mutation: two-token composite description (Energy 'Non-Renewable — Solar') splits both axes ----
+{
+  // The live 2-category fixture doesn't carry a composite description, so exercise the splitter
+  // directly against a synthetic wire item shaped like the Energy tab's fuel breakdown.
+  const synthetic: StrategicInsightGriQuantitativeWireResponse = [
+    {
+      category: 'ENERGY',
+      summary: [],
+      items: [
+        {
+          id: 'synthetic-1',
+          period: 2025,
+          entity: { id: 'e1', code: 'WS', name: 'Waskita Sintesa' },
+          gri_code: '302-1a',
+          metric_name: 'Energy Consumption',
+          description: 'Non-Renewable — Solar',
+          value: 100,
+          unit_id: null,
+          input_type: 'NUMBER',
+        },
+      ],
+    },
+  ]
+  const { categories: syntheticCats } = normalizeGriQuantitative(synthetic)
+  assert.deepEqual(syntheticCats[0]!.items[0]!.labels, {
+    renewability: 'NON_RENEWABLE',
+    fuel_type: 'DIESEL',
+  })
+}
+
+console.log('ok — normalize: Phase 1+2 renames/derivations verified against the live fixture')
