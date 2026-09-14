@@ -54,6 +54,16 @@ function groupByNumber(flat: FlatAction[]): Map<number, FlatAction[]> {
   return groups
 }
 
+// The wire's sdg_id.name is the bare code ("SDG 1"), not a title, and SdgPage.vue renders
+// "SDG {{number}} — {{name}}" — so passing it straight through prints "SDG 1 — SDG 1". Prefer the
+// real UN goal title from ROADMAP_SDGS (which we already carry for the padding), falling back to
+// whatever the wire said for an SDG outside the roadmap. Function, not a const map, because
+// ROADMAP_SDGS is declared further down with the rest of the demo block.
+function sdgName(number: number, wireName: string): string {
+  const meta = ROADMAP_SDGS.find((s) => s.number === number)
+  return meta ? meta.name : wireName
+}
+
 function deriveMatrixRow(
   number: number,
   items: FlatAction[],
@@ -72,7 +82,7 @@ function deriveMatrixRow(
   return {
     // sdg.id keyed on String(number), not the wire id, so matrix rows and detail items can be
     // joined unambiguously on the same key despite the id-duplication trap above.
-    sdg: { id: String(number), number, name: first.name },
+    sdg: { id: String(number), number, name: sdgName(number, first.name) },
     take_rate,
     aligned_count,
     initiated_count,

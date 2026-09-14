@@ -1,0 +1,1151 @@
+[
+  {
+    "category_id": {
+      "id": "gbqp0oQHcJ5",
+      "name": "General"
+    },
+    "gri_codes": [
+      "2-7",
+      "2-8"
+    ],
+    "sequence": 1,
+    "dimensions": [
+      {
+        "key": "gender",
+        "name": "Gender",
+        "members": [
+          {
+            "key": "MALE",
+            "name": "Laki-laki"
+          },
+          {
+            "key": "FEMALE",
+            "name": "Perempuan"
+          }
+        ]
+      },
+      {
+        "key": "employment_status",
+        "name": "Status Karyawan",
+        "members": [
+          {
+            "key": "PERMANENT",
+            "name": "Tetap"
+          },
+          {
+            "key": "CONTRACT",
+            "name": "Kontrak"
+          }
+        ]
+      },
+      {
+        "key": "worker_type",
+        "name": "Tipe Pekerja Non-Karyawan",
+        "members": [
+          {
+            "key": "CONTRACTOR",
+            "name": "Kontraktor"
+          },
+          {
+            "key": "INTERN",
+            "name": "Magang"
+          },
+          {
+            "key": "VOLUNTEER",
+            "name": "Sukarela"
+          },
+          {
+            "key": "OUTSOURCED",
+            "name": "Outsource"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "total_employee",
+        "name": "Total Karyawan",
+        "value": 8614,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "male",
+        "name": "Laki-laki",
+        "value": 4477,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "female",
+        "name": "Perempuan",
+        "value": 4137,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "permanent_employee",
+        "name": "Karyawan Tetap",
+        "value": 7102,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "contract_employee",
+        "name": "Karyawan Kontrak",
+        "value": 1512,
+        "unit": null,
+        "aggregation": "SUM"
+      }
+    ],
+    "items": [
+      {
+        "id": "123",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-7a",
+        "metric_key": "employee_headcount",
+        "aggregation": "SUM",
+        "metric_name": "Employee Headcount",
+        "labels": {
+          "gender": "MALE"
+        },
+        "description": "Laki-laki",
+        "value": 880,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "124",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-7a",
+        "metric_key": "employee_headcount",
+        "aggregation": "SUM",
+        "metric_name": "Employee Headcount",
+        "labels": {
+          "gender": "FEMALE"
+        },
+        "description": "Perempuan",
+        "value": 1680,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "125",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-7b",
+        "metric_key": "employee_headcount_by_status",
+        "aggregation": "SUM",
+        "metric_name": "Employee Headcount by Status",
+        "labels": {
+          "employment_status": "PERMANENT"
+        },
+        "description": "Tetap",
+        "value": 590,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "126",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "2-8a",
+        "metric_key": "non_employee_worker_count",
+        "aggregation": "SUM",
+        "metric_name": "Non-Employee Worker Count",
+        "labels": {
+          "worker_type": "INTERN"
+        },
+        "description": "Magang",
+        "value": 18,
+        "unit": null,
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "QRHwbmCAc4qK",
+      "name": "Energy"
+    },
+    "gri_codes": [
+      "302-1"
+    ],
+    "sequence": 2,
+    "dimensions": [
+      {
+        "key": "renewability",
+        "name": "Sumber Energi",
+        "members": [
+          {
+            "key": "NON_RENEWABLE",
+            "name": "Non-Renewable"
+          },
+          {
+            "key": "RENEWABLE",
+            "name": "Renewable"
+          }
+        ]
+      },
+      {
+        "key": "fuel_type",
+        "name": "Jenis Bahan Bakar",
+        "members": [
+          {
+            "key": "DIESEL",
+            "name": "Solar"
+          },
+          {
+            "key": "BIODIESEL",
+            "name": "Biodiesel"
+          },
+          {
+            "key": "GRID",
+            "name": "Grid/Batubara"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "total_non_renewable",
+        "name": "Total Non-Renewable (GJ)",
+        "value": 469790,
+        "unit": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "total_renewable",
+        "name": "Total Renewable (GJ)",
+        "value": 43950,
+        "unit": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "renewable_ratio",
+        "name": "% Energi Terbarukan",
+        "value": 9,
+        "unit": {
+          "id": "9",
+          "name": "%"
+        },
+        "aggregation": "PERCENTAGE"
+      }
+    ],
+    "items": [
+      {
+        "id": "456",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "302-1a",
+        "metric_key": "energy_consumption",
+        "aggregation": "SUM",
+        "metric_name": "Energy Consumption",
+        "labels": {
+          "renewability": "NON_RENEWABLE",
+          "fuel_type": "DIESEL"
+        },
+        "description": "Non-Renewable — Solar",
+        "value": 132000,
+        "unit": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "457",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "302-1b",
+        "metric_key": "energy_consumption",
+        "aggregation": "SUM",
+        "metric_name": "Energy Consumption",
+        "labels": {
+          "renewability": "RENEWABLE"
+        },
+        "description": "Renewable",
+        "value": 14200,
+        "unit": {
+          "id": "3",
+          "name": "GJ"
+        },
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "PuhrwZ5NYMbZ",
+      "name": "Waste"
+    },
+    "gri_codes": [
+      "306-4",
+      "306-5"
+    ],
+    "sequence": 3,
+    "dimensions": [
+      {
+        "key": "waste_route",
+        "name": "Rute Limbah",
+        "members": [
+          {
+            "key": "RECYCLED",
+            "name": "Recycled"
+          },
+          {
+            "key": "COMPOSTED",
+            "name": "Composted"
+          },
+          {
+            "key": "RECOVERY",
+            "name": "Recovery"
+          },
+          {
+            "key": "LANDFILL",
+            "name": "Landfill"
+          },
+          {
+            "key": "INCINERATION",
+            "name": "Incineration"
+          },
+          {
+            "key": "OTHER",
+            "name": "Other"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "total_divert",
+        "name": "Total Divert (ton)",
+        "value": 372,
+        "unit": {
+          "id": "9L5zQ2AFaqru",
+          "name": "Metric Ton"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "total_disposal",
+        "name": "Total Disposal (ton)",
+        "value": 148,
+        "unit": {
+          "id": "9L5zQ2AFaqru",
+          "name": "Metric Ton"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "total_recycled",
+        "name": "Recycled (ton)",
+        "value": 259,
+        "unit": {
+          "id": "9L5zQ2AFaqru",
+          "name": "Metric Ton"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "total_landfill",
+        "name": "Landfill (ton)",
+        "value": 112,
+        "unit": {
+          "id": "9L5zQ2AFaqru",
+          "name": "Metric Ton"
+        },
+        "aggregation": "SUM"
+      }
+    ],
+    "items": [
+      {
+        "id": "601",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "306-4a",
+        "metric_key": "waste_diverted",
+        "aggregation": "SUM",
+        "metric_name": "Waste Diverted from Disposal",
+        "labels": {
+          "waste_route": "RECYCLED"
+        },
+        "description": "Recycled",
+        "value": 61,
+        "unit": {
+          "id": "9L5zQ2AFaqru",
+          "name": "Metric Ton"
+        },
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "602",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "306-5a",
+        "metric_key": "waste_directed_to_disposal",
+        "aggregation": "SUM",
+        "metric_name": "Waste Directed to Disposal",
+        "labels": {
+          "waste_route": "LANDFILL"
+        },
+        "description": "Landfill",
+        "value": 22,
+        "unit": {
+          "id": "9L5zQ2AFaqru",
+          "name": "Metric Ton"
+        },
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "hfUlk15BIv2H",
+      "name": "Water"
+    },
+    "gri_codes": [
+      "303-3",
+      "303-4"
+    ],
+    "sequence": 4,
+    "dimensions": [
+      {
+        "key": "water_flow",
+        "name": "Aliran Air",
+        "members": [
+          {
+            "key": "WITHDRAWAL",
+            "name": "Penarikan"
+          },
+          {
+            "key": "DISCHARGE",
+            "name": "Pembuangan"
+          }
+        ]
+      },
+      {
+        "key": "water_source",
+        "name": "Sumber Air",
+        "members": [
+          {
+            "key": "SURFACE",
+            "name": "Surface"
+          },
+          {
+            "key": "GROUNDWATER",
+            "name": "Groundwater"
+          },
+          {
+            "key": "SEAWATER",
+            "name": "Seawater"
+          },
+          {
+            "key": "THIRD_PARTY",
+            "name": "Third-party"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "total_withdrawal",
+        "name": "Total Withdrawal (ML)",
+        "value": 1284,
+        "unit": {
+          "id": "12",
+          "name": "ML"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "total_discharge",
+        "name": "Total Discharge (ML)",
+        "value": 812,
+        "unit": {
+          "id": "12",
+          "name": "ML"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "surface_water",
+        "name": "Surface Water (ML)",
+        "value": 561,
+        "unit": {
+          "id": "12",
+          "name": "ML"
+        },
+        "aggregation": "SUM"
+      },
+      {
+        "key": "third_party_water",
+        "name": "Third-party Water (ML)",
+        "value": 398,
+        "unit": {
+          "id": "12",
+          "name": "ML"
+        },
+        "aggregation": "SUM"
+      }
+    ],
+    "items": [
+      {
+        "id": "701",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "303-3a",
+        "metric_key": "water_withdrawal",
+        "aggregation": "SUM",
+        "metric_name": "Water Withdrawal",
+        "labels": {
+          "water_flow": "WITHDRAWAL",
+          "water_source": "SURFACE"
+        },
+        "description": "Penarikan — Surface",
+        "value": 108,
+        "unit": {
+          "id": "12",
+          "name": "ML"
+        },
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "702",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "303-4a",
+        "metric_key": "water_discharge",
+        "aggregation": "SUM",
+        "metric_name": "Water Discharge",
+        "labels": {
+          "water_flow": "DISCHARGE",
+          "water_source": "THIRD_PARTY"
+        },
+        "description": "Pembuangan — Third-party",
+        "value": 25,
+        "unit": {
+          "id": "12",
+          "name": "ML"
+        },
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "gbqp0NVHVJ7U",
+      "name": "Diversity & Equal Opportunity"
+    },
+    "gri_codes": [
+      "405-1",
+      "405-2"
+    ],
+    "sequence": 5,
+    "dimensions": [
+      {
+        "key": "gender",
+        "name": "Gender",
+        "members": [
+          {
+            "key": "MALE",
+            "name": "Pria"
+          },
+          {
+            "key": "FEMALE",
+            "name": "Wanita"
+          }
+        ]
+      },
+      {
+        "key": "age_band",
+        "name": "Kelompok Umur",
+        "members": [
+          {
+            "key": "UNDER_30",
+            "name": "<30 tahun"
+          },
+          {
+            "key": "BETWEEN_30_50",
+            "name": "30-50 tahun"
+          },
+          {
+            "key": "OVER_50",
+            "name": ">50 tahun"
+          }
+        ]
+      },
+      {
+        "key": "employee_category",
+        "name": "Kategori Karyawan",
+        "members": [
+          {
+            "key": "SENIOR",
+            "name": "Senior"
+          },
+          {
+            "key": "MID",
+            "name": "Mid"
+          },
+          {
+            "key": "JUNIOR",
+            "name": "Junior"
+          },
+          {
+            "key": "STAFF",
+            "name": "Staff"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "governance_male_ratio",
+        "name": "Governance — Pria (%)",
+        "value": 71,
+        "unit": {
+          "id": "9",
+          "name": "%"
+        },
+        "aggregation": "PERCENTAGE"
+      },
+      {
+        "key": "governance_female_ratio",
+        "name": "Governance — Wanita (%)",
+        "value": 29,
+        "unit": {
+          "id": "9",
+          "name": "%"
+        },
+        "aggregation": "PERCENTAGE"
+      },
+      {
+        "key": "salary_ratio_senior",
+        "name": "Rasio Gaji F/M (Senior)",
+        "value": 0.93,
+        "unit": null,
+        "aggregation": "AVERAGE"
+      },
+      {
+        "key": "salary_ratio_junior",
+        "name": "Rasio Gaji F/M (Junior)",
+        "value": 0.99,
+        "unit": null,
+        "aggregation": "AVERAGE"
+      }
+    ],
+    "items": [
+      {
+        "id": "801",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "405-1a",
+        "metric_key": "governance_body_composition",
+        "aggregation": "SUM",
+        "metric_name": "Governance Body Composition",
+        "labels": {
+          "gender": "FEMALE"
+        },
+        "description": "Wanita",
+        "value": 3,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "802",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "405-1b",
+        "metric_key": "employee_age_distribution",
+        "aggregation": "SUM",
+        "metric_name": "Employee Age Distribution",
+        "labels": {
+          "age_band": "BETWEEN_30_50"
+        },
+        "description": "30-50 tahun",
+        "value": 425,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "803",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "405-2a",
+        "metric_key": "salary_ratio_female_to_male",
+        "aggregation": "AVERAGE",
+        "metric_name": "Ratio of Basic Salary Female to Male",
+        "labels": {
+          "employee_category": "SENIOR"
+        },
+        "description": "Senior",
+        "value": 0.95,
+        "unit": null,
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "SxD1zsTIOsMX",
+      "name": "Employment"
+    },
+    "gri_codes": [
+      "401-1",
+      "401-3"
+    ],
+    "sequence": 6,
+    "dimensions": [
+      {
+        "key": "gender",
+        "name": "Gender",
+        "members": [
+          {
+            "key": "MALE",
+            "name": "Pria"
+          },
+          {
+            "key": "FEMALE",
+            "name": "Wanita"
+          }
+        ]
+      },
+      {
+        "key": "age_band",
+        "name": "Kelompok Umur",
+        "members": [
+          {
+            "key": "UNDER_30",
+            "name": "<30 tahun"
+          },
+          {
+            "key": "BETWEEN_30_50",
+            "name": "30-50 tahun"
+          },
+          {
+            "key": "OVER_50",
+            "name": ">50 tahun"
+          }
+        ]
+      },
+      {
+        "key": "parental_stage",
+        "name": "Tahap Cuti Orang Tua",
+        "members": [
+          {
+            "key": "ENTITLED",
+            "name": "Berhak"
+          },
+          {
+            "key": "TOOK",
+            "name": "Mengambil"
+          },
+          {
+            "key": "RETURNED",
+            "name": "Kembali"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "new_hire_male",
+        "name": "Karyawan Baru (Pria)",
+        "value": 131,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "new_hire_female",
+        "name": "Karyawan Baru (Wanita)",
+        "value": 168,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "parental_entitled_male",
+        "name": "Hak Cuti Orang Tua (Pria)",
+        "value": 106,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "parental_entitled_female",
+        "name": "Hak Cuti Orang Tua (Wanita)",
+        "value": 89,
+        "unit": null,
+        "aggregation": "SUM"
+      }
+    ],
+    "items": [
+      {
+        "id": "901",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "401-1a",
+        "metric_key": "new_employee_hires",
+        "aggregation": "SUM",
+        "metric_name": "New Employee Hires",
+        "labels": {
+          "gender": "FEMALE",
+          "age_band": "UNDER_30"
+        },
+        "description": "Wanita — <30 tahun",
+        "value": 48,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "902",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "401-3a",
+        "metric_key": "parental_leave",
+        "aggregation": "SUM",
+        "metric_name": "Parental Leave",
+        "labels": {
+          "gender": "MALE",
+          "parental_stage": "ENTITLED"
+        },
+        "description": "Pria — Berhak",
+        "value": 28,
+        "unit": null,
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "6XnLWDcgkx1f",
+      "name": "OHS"
+    },
+    "gri_codes": [
+      "403-9"
+    ],
+    "sequence": 7,
+    "dimensions": [
+      {
+        "key": "incident_type",
+        "name": "Jenis Insiden",
+        "members": [
+          {
+            "key": "FATALITY",
+            "name": "Kematian akibat kerja"
+          },
+          {
+            "key": "HIGH_CONSEQUENCE",
+            "name": "Cedera berat (non-fatal)"
+          },
+          {
+            "key": "RECORDABLE",
+            "name": "Kecelakaan tercatat"
+          },
+          {
+            "key": "HOURS_WORKED",
+            "name": "Total jam kerja"
+          }
+        ]
+      },
+      {
+        "key": "employment_status",
+        "name": "Status Karyawan",
+        "members": [
+          {
+            "key": "PERMANENT",
+            "name": "Karyawan Tetap"
+          },
+          {
+            "key": "CONTRACT",
+            "name": "Karyawan Kontrak"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "work_related_fatalities",
+        "name": "Kematian akibat kerja",
+        "value": 0,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "high_consequence_injuries",
+        "name": "Cedera berat (non-fatal)",
+        "value": 1,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "recordable_injuries",
+        "name": "Kecelakaan tercatat",
+        "value": 11,
+        "unit": null,
+        "aggregation": "SUM"
+      },
+      {
+        "key": "total_hours_worked",
+        "name": "Total jam kerja",
+        "value": 1590000,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "aggregation": "SUM"
+      }
+    ],
+    "items": [
+      {
+        "id": "1001",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "403-9a",
+        "metric_key": "work_related_injuries",
+        "aggregation": "SUM",
+        "metric_name": "Work-related Injuries",
+        "labels": {
+          "incident_type": "RECORDABLE",
+          "employment_status": "PERMANENT"
+        },
+        "description": "Kecelakaan tercatat — Karyawan Tetap",
+        "value": 8,
+        "unit": null,
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "1002",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "403-9a",
+        "metric_key": "work_related_injuries",
+        "aggregation": "SUM",
+        "metric_name": "Work-related Injuries",
+        "labels": {
+          "incident_type": "HOURS_WORKED",
+          "employment_status": "PERMANENT"
+        },
+        "description": "Total jam kerja — Karyawan Tetap",
+        "value": 1340000,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "input_type": "NUMBER"
+      }
+    ]
+  },
+  {
+    "category_id": {
+      "id": "miz42eKxO36s",
+      "name": "Training & Education"
+    },
+    "gri_codes": [
+      "404-1"
+    ],
+    "sequence": 8,
+    "dimensions": [
+      {
+        "key": "gender",
+        "name": "Gender",
+        "members": [
+          {
+            "key": "MALE",
+            "name": "Pria"
+          },
+          {
+            "key": "FEMALE",
+            "name": "Wanita"
+          }
+        ]
+      },
+      {
+        "key": "employee_category",
+        "name": "Kategori Karyawan",
+        "members": [
+          {
+            "key": "SENIOR",
+            "name": "Senior"
+          },
+          {
+            "key": "MID",
+            "name": "Mid"
+          },
+          {
+            "key": "JUNIOR",
+            "name": "Junior"
+          },
+          {
+            "key": "STAFF",
+            "name": "Staff"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "key": "avg_training_hours_male",
+        "name": "Rata-rata jam pelatihan (Pria)",
+        "value": 29.4,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "aggregation": "AVERAGE"
+      },
+      {
+        "key": "avg_training_hours_female",
+        "name": "Rata-rata jam pelatihan (Wanita)",
+        "value": 26.3,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "aggregation": "AVERAGE"
+      },
+      {
+        "key": "avg_training_hours_senior",
+        "name": "Jam pelatihan (Senior)",
+        "value": 44.6,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "aggregation": "AVERAGE"
+      },
+      {
+        "key": "avg_training_hours_junior",
+        "name": "Jam pelatihan (Junior)",
+        "value": 22.9,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "aggregation": "AVERAGE"
+      }
+    ],
+    "items": [
+      {
+        "id": "1101",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "404-1a",
+        "metric_key": "avg_training_hours",
+        "aggregation": "AVERAGE",
+        "metric_name": "Average Training Hours per Employee",
+        "labels": {
+          "gender": "MALE"
+        },
+        "description": "Pria",
+        "value": 36,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "input_type": "NUMBER"
+      },
+      {
+        "id": "1102",
+        "period": 2025,
+        "entity": {
+          "id": "Ks6BgE75YiQ1",
+          "code": "WS",
+          "name": "Waskita Sintesa"
+        },
+        "gri_code": "404-1a",
+        "metric_key": "avg_training_hours",
+        "aggregation": "AVERAGE",
+        "metric_name": "Average Training Hours per Employee",
+        "labels": {
+          "employee_category": "SENIOR"
+        },
+        "description": "Senior",
+        "value": 55,
+        "unit": {
+          "id": "14",
+          "name": "Hours"
+        },
+        "input_type": "NUMBER"
+      }
+    ]
+  }
+]

@@ -168,31 +168,22 @@
             </MpFlex>
 
             <MpFlex direction="column" gap="3">
-                <MpText as="h2" size="h3" weight="semiBold"
-                    >Aligned vs Initiated per SDG</MpText
-                >
-                <MpChart
+                <!-- DashboardChartCard, not a raw MpChart: the hand-rolled MpChart here rendered
+                     every bar crammed into the first category slot while the x-axis labels spread
+                     across the full width, because it passed no chart height (MpChart's default
+                     collapses the plot area) and none of the legend/stacking props. The GRI page's
+                     card wrapper already solves all of that, and carries the print-ready text
+                     mirror this page was duplicating by hand. Caught by screenshot review — the
+                     canvas HAD painted pixels, so the acceptance check passed it. -->
+                <DashboardChartCard
                     id="sdg-aligned-vs-initiated"
-                    title="Aligned vs Initiated"
-                    type="bar"
-                    width-container="100%"
-                    width-chart="100%"
-                    :data="alignedVsInitiatedData"
+                    title="Aligned vs Initiated per SDG"
+                    caption="Holding-mandated actions vs bottom-up initiatives"
+                    kind="bar"
+                    height="320px"
+                    :labels="alignedVsInitiatedData.labels"
+                    :datasets="alignedVsInitiatedData.datasets"
                 />
-                <!-- print-ready / zero-hover (AC-70..73): every value the chart plots is repeated here as
-             plain text, so the numbers are still readable with no mouse and on a printed page. -->
-                <MpFlex direction="column" gap="1" class="sdg-chart-labels">
-                    <MpText
-                        v-for="row in matrix"
-                        :key="row.sdg.id"
-                        size="label-small"
-                        color="text.secondary"
-                    >
-                        SDG {{ row.sdg.number }} — {{ row.sdg.name }}: Aligned
-                        {{ row.aligned_count }} / Initiated
-                        {{ row.initiated_count }}
-                    </MpText>
-                </MpFlex>
             </MpFlex>
 
             <MpFlex v-if="selectedSdgId" direction="column" gap="3">
@@ -285,7 +276,6 @@ import { computed, ref } from "vue";
 import {
     MpFlex,
     MpText,
-    MpChart,
     MpSelect,
     MpFormControl,
     MpFormLabel,
@@ -301,6 +291,7 @@ import {
     css,
 } from "@mekari/pixel3";
 import SummaryBox from "@/components/SummaryBox.vue";
+import DashboardChartCard from "@/components/DashboardChartCard.vue";
 import {
     useSdgInsight,
     useStrategicInsightFilterState,

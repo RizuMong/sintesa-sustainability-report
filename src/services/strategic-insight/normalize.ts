@@ -286,12 +286,29 @@ export interface NormalizeResult {
   warnings: string[]
 }
 
+// A category that already carries `category_id`/`dimensions[]` is CANONICAL, not wire — it has
+// nothing left to derive. Two callers depend on this: scripts/mock-api-server.ts serves the
+// canonical demo fixture through the same api.ts path the browser uses, and the day the backend
+// migrates it will start sending this shape for real. Passing it through untouched (rather than
+// crashing in titleCase on an undefined `category`) is what makes the adapter idempotent, so the
+// migration becomes a no-op here instead of a rewrite.
+function isCanonical(category: unknown): category is StrategicInsightGriCategory {
+  return (
+    typeof category === 'object' &&
+    category !== null &&
+    'category_id' in category &&
+    typeof (category as StrategicInsightGriCategory).category_id?.id === 'string'
+  )
+}
+
 export function normalizeGriQuantitative(
-  wire: StrategicInsightGriQuantitativeWireResponse,
+  wire: StrategicInsightGriQuantitativeWireResponse | StrategicInsightGriQuantitativeResponse,
 ): NormalizeResult {
   const warnings: string[] = []
 
-  const categories: StrategicInsightGriCategory[] = wire.map((wireCategory, index) => {
+  const categories: StrategicInsightGriCategory[] = wire.map((rawCategory, index) => {
+    if (isCanonical(rawCategory)) return rawCategory
+    const wireCategory = rawCategory as StrategicInsightGriWireCategory
     const category_id = resolveCategoryId(wireCategory.category)
     const gri_codes = griCodesOf(wireCategory.items)
 

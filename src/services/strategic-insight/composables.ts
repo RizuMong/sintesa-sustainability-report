@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, reactive, toValue, type MaybeRefOrGetter } from 'vue'
 import { useGetMasterEntity } from '@/services/master-entity'
 import { useGetMasterPeriod } from '@/services/master-period'
-import { strategicInsightApi } from './api'
+import { strategicInsightApi, USE_DEMO_GRI_DATA } from './api'
+import { demoEntities, demoPeriods } from './demo-data'
 
 export function useSdgInsight(filters: MaybeRefOrGetter<StrategicInsightFilterParams>) {
   return useQuery({
@@ -31,11 +32,25 @@ export function useGriQualitativeInsight(filters: MaybeRefOrGetter<StrategicInsi
 export function useStrategicInsightFilterState() {
   const state = reactive<{ period: string; entityId: string }>({ period: '', entityId: '' })
 
+  // ponytail: the two selects fall back to the demo vocabulary for the same reason the dashboard
+  // itself does — GET /v1/master-period returns a single active year, and /v1/master-entity returns
+  // 7 rows with duplicate codes (gap C2). A dropdown with one option cannot demonstrate a filter.
+  // Remove this fallback together with demo-data.ts.
   const { data: periodData } = useGetMasterPeriod()
-  const periods = computed(() => (periodData.value ?? []).filter((p) => p.status === 'Active'))
+  const livePeriods = computed(() => (periodData.value ?? []).filter((p) => p.status === 'Active'))
+  const periods = computed(() =>
+    USE_DEMO_GRI_DATA && livePeriods.value.length < 2
+      ? demoPeriods.map((year) => ({ id: `demo-period-${year}`, year, status: 'Active' }) as MasterPeriod)
+      : livePeriods.value,
+  )
 
   const { data: entityData } = useGetMasterEntity()
-  const entities = computed(() => (entityData.value ?? []).filter((e) => e.status === 'Active'))
+  const liveEntities = computed(() => (entityData.value ?? []).filter((e) => e.status === 'Active'))
+  const entities = computed(() =>
+    USE_DEMO_GRI_DATA && liveEntities.value.length < 2
+      ? demoEntities.map((e) => ({ ...e, status: 'Active' }) as unknown as MasterEntity)
+      : liveEntities.value,
+  )
 
   const params = computed<StrategicInsightFilterParams>(() => ({
     period: state.period || undefined,

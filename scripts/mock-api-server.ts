@@ -9,6 +9,7 @@
 //
 // Serves HTTPS when .temp/certs/{cert,key}.pem exist, so the browser can reach it at the app's
 // real https://api-officeless-dev.mekari.com origin via a --host-resolver-rules remap.
+import { demoGriQuantitative } from '../src/services/strategic-insight/demo-data.ts'
 import { createServer as createHttpServer } from 'node:http'
 import { createServer as createHttpsServer } from 'node:https'
 import { execFileSync } from 'node:child_process'
@@ -41,7 +42,12 @@ function loadExample(file: string, exampleName: string): unknown {
   return JSON.parse(out)
 }
 
-const griQuantitative = loadExample('Dashboard/GRI - Quantitative.yml', 'Response Dummy')
+// The committed example carries 1 entity and 1 period, so serving it verbatim renders one-point
+// trend lines and suppresses the PT-comparison card. Serve the expanded DEMO fixture instead, so
+// the acceptance run exercises the same populated page a demo audience sees. Same module the app
+// falls back to (src/services/strategic-insight/demo-data.ts) — the mock server and the browser
+// therefore agree, and this file does not grow its own second copy of the fixture logic.
+const griQuantitative = demoGriQuantitative()
 // NOT loadExample('Dashboard/SDG.yml', 'Response Dummy'): that committed example predates the live
 // probe and is missing sdg_id.number entirely (see docs/dashboard-sdg-api-gaps.md), which
 // normalizeSdg() requires to group the matrix correctly. Serve the live-verified fixture instead —
