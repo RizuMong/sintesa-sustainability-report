@@ -163,19 +163,36 @@
                     >
                         <MpFormControl id="mki-status" is-required>
                             <MpFormLabel>Status</MpFormLabel>
-                            <MpSelect
-                                v-model="form.status"
-                                size="md"
-                                is-full-width
-                            >
-                                <option
-                                    v-for="opt in statusOptions"
-                                    :key="opt.value"
-                                    :value="opt.value"
-                                >
-                                    {{ opt.label }}
-                                </option>
-                            </MpSelect>
+                            <MpPopover id="mki-status-popover">
+                                <MpPopoverTrigger>
+                                    <MpFlex :class="statusTrigger">
+                                        <MpBadge
+                                            for="additionalInformation"
+                                            :type="statusBadgeType(form.status)"
+                                        >
+                                            {{ form.status }}
+                                        </MpBadge>
+                                    </MpFlex>
+                                </MpPopoverTrigger>
+                                <MpPopoverContent :class="statusPopoverContent">
+                                    <MpPopoverList>
+                                        <MpPopoverListItem
+                                            v-for="opt in statusOptions"
+                                            :key="opt.value"
+                                            @click="form.status = opt.value"
+                                        >
+                                            <MpBadge
+                                                for="additionalInformation"
+                                                :type="
+                                                    statusBadgeType(opt.value)
+                                                "
+                                            >
+                                                {{ opt.label }}
+                                            </MpBadge>
+                                        </MpPopoverListItem>
+                                    </MpPopoverList>
+                                </MpPopoverContent>
+                            </MpPopover>
                         </MpFormControl>
 
                         <MpFormControl
@@ -749,7 +766,9 @@
                                 >
                             </MpFlex>
                             <MpFlex gap="2" alignItems="center">
-                                <MpBadge for="tableStatus" type="information"
+                                <MpBadge
+                                    for="additionalInformation"
+                                    type="information"
                                     >Period {{ previewPeriod }}</MpBadge
                                 >
                                 <MpButton
@@ -996,6 +1015,11 @@ import {
     MpModalFooter,
     MpModalOverlay,
     MpModalCloseButton,
+    MpPopover,
+    MpPopoverTrigger,
+    MpPopoverContent,
+    MpPopoverList,
+    MpPopoverListItem,
     css,
     toast,
 } from "@mekari/pixel3";
@@ -1160,6 +1184,30 @@ const statusOptions: { value: MasterStatus; label: string }[] = [
     { value: "Active", label: "Active" },
     { value: "Inactive", label: "Inactive" },
 ];
+
+function statusBadgeType(status: MasterStatus) {
+    return status === "Active" ? "completed" : "critical";
+}
+
+// Popover trigger styled to read as a select box — the picker itself is a popover so the
+// selected value can render as a badge, which MpSelect's native <option> list can't do.
+const statusTrigger = css({
+    alignItems: "center",
+    width: "100%",
+    minHeight: "40px",
+    padding: "2",
+    rounded: "md",
+    borderWidth: "1px",
+    borderColor: "border.default",
+    backgroundColor: "white",
+    cursor: "pointer",
+});
+
+const statusPopoverContent = css({
+    display: "flex",
+    flexDirection: "column",
+    width: "200px",
+});
 
 const form = reactive({
     categoryId: "",
