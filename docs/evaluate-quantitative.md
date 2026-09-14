@@ -4,6 +4,9 @@ Covers `src/services/evaluate-gri-quantitative/` and the three screens in
 `src/pages/evaluate-gri-quantitative/` (Requestor list, submission Detail, Review & Approval).
 Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
 
+> **2026-09-14 update (GROU-659).** The Detail screen gained a **Revise Submission** action: the
+> requestor can pull a submission back out of approval, which returns it to `draft` for editing.
+
 ## 1. Screens
 
 ### Requestor (`RequestorPage.vue`)
@@ -27,6 +30,21 @@ Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
 - **Submit / Update sit below the form**, not in the page header — matching the Officeless
   submission screen. Delete (draft only) stays in the header.
 - Read-only whenever `isReadOnly(flow_status)` (anything but `draft`/`rejected`).
+- **Revise Submission** (GROU-659) — a secondary button below the form, the requestor's only action
+  once a submission is in flight (the Submit/Update row is hidden by `readOnly`). Confirms through
+  `ConfirmDeleteModal` (its `confirm-label`/`confirm-variant` props exist for exactly this
+  non-destructive reuse), POSTs `/v1/evaluate-gri-quantitative/cancel` with `{ id }`, then routes
+  back to the requestor list — BE-confirmed on the ticket, the user does not stay on the detail page.
+  - Visibility is `canRevise(flow_status, fromApproval)` in `src/lib/review-approval-validation.ts`,
+    defined as *not settled* (`draft`/`approved`/`rejected`/`cancelled`) **and** not the approver
+    context. It deliberately does not exact-match `'submitted'`, because the live API answers
+    `'sent'` for the same state (§4, G1) — the same hedge `selectableApprovalIds()` makes.
+  - `Cancel.yml`'s 200 example returns `flow_status: "draft"`, `submitted_at: null`,
+    `submitted_by: ""`, `approval_logs: []` — a full reset, not a flag. Since the user is redirected,
+    the detail page never re-renders that state, so the approval line needs no handling for it.
+  - Errors need no page-level code: the `src/lib/http.ts` response interceptor already toasts the
+    envelope message on any non-GET failure. The empty `catch` in `confirmRevise()` leaves the modal
+    open for a retry, matching `confirmReject()`.
 
 ### Review & Approval (`ApprovalPage.vue`)
 - **GRI Quantitative only.** The Qualitative and Action Plan Realization tabs were removed; those

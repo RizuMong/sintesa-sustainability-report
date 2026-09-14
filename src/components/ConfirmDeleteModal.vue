@@ -11,7 +11,9 @@
       <MpModalFooter>
         <MpButtonGroup>
           <MpButton variant="ghost" @click="emit('close')">Cancel</MpButton>
-          <MpButton variant="danger" @click="emit('confirm')">Delete</MpButton>
+          <MpButton :variant="confirmVariant" @click="emit('confirm')">{{
+            confirmLabel
+          }}</MpButton>
         </MpButtonGroup>
       </MpModalFooter>
     </MpModalContent>
@@ -33,6 +35,17 @@ import {
   MpModalCloseButton,
 } from '@mekari/pixel3'
 
-defineProps<{ isOpen: boolean; title: string; message: string }>()
+withDefaults(
+  defineProps<{
+    isOpen: boolean
+    title: string
+    message: string
+    // GROU-659 — the same dialog confirms a non-destructive "Revise Submission"; the defaults keep
+    // every existing delete call site byte-identical.
+    confirmLabel?: string
+    confirmVariant?: 'primary' | 'secondary' | 'danger'
+  }>(),
+  { confirmLabel: 'Delete', confirmVariant: 'danger' },
+)
 const emit = defineEmits<{ confirm: []; close: [] }>()
 </script>

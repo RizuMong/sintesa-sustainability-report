@@ -285,6 +285,22 @@
                         >
                     </MpFlex>
 
+                    <!-- GROU-659 — sent submissions are read-only, so this is the requestor's only
+                         action: pull it back out of approval and return it to draft -->
+                    <MpFlex
+                        v-if="canReviseSubmission"
+                        gap="3"
+                        paddingTop="2"
+                    >
+                        <MpButton
+                            variant="secondary"
+                            :is-disabled="isRevising"
+                            :is-loading="isRevising"
+                            @click="isConfirmingRevise = true"
+                            >Revise Submission</MpButton
+                        >
+                    </MpFlex>
+
                     <!-- approver-facing actions — only on rows opened from the Review & Approval queue -->
                     <MpFlex v-if="canAct" gap="3" paddingTop="2">
                         <MpButton
@@ -501,6 +517,16 @@
             @confirm="confirmDelete"
         />
 
+        <ConfirmDeleteModal
+            :is-open="isConfirmingRevise"
+            title="Revise this submission?"
+            message="This pulls the submission back out of approval and returns it to draft so you can edit it. Approvers will no longer see it in their queue."
+            confirm-label="Revise Submission"
+            confirm-variant="primary"
+            @close="isConfirmingRevise = false"
+            @confirm="confirmRevise"
+        />
+
         <MpModal :is-open="isRejecting" size="md" @close="closeReject">
             <MpModalContent>
                 <MpModalHeader>
@@ -587,12 +613,14 @@ import {
 } from "@/lib/dynamic-validation";
 import {
     canReject,
+    canRevise,
     selectableApprovalIds,
 } from "@/lib/review-approval-validation";
 import {
     useGetEvaluateGriQuantitativeDetail,
     useUpdateEvaluateGriQuantitative,
     useSubmitEvaluateGriQuantitative,
+    useCancelEvaluateGriQuantitative,
     useDeleteEvaluateGriQuantitative,
     useApproveEvaluateGriQuantitative,
     useRejectEvaluateGriQuantitative,
@@ -785,6 +813,16 @@ const isSaving = computed(() => updateMutation.isPending.value);
 const isSubmitting = computed(() => submitMutation.isPending.value);
 const isConfirmingDelete = ref(false);
 
+// GROU-659 — the requestor pulls a sent submission back to draft to revise it
+const cancelMutation = useCancelEvaluateGriQuantitative();
+const isRevising = computed(() => cancelMutation.isPending.value);
+const isConfirmingRevise = ref(false);
+const canReviseSubmission = computed(
+    () =>
+        Boolean(detail.value) &&
+        canRevise(detail.value!.flow_status, fromApproval.value),
+);
+
 async function save() {
     if (!detail.value) return false;
     try {
@@ -847,6 +885,18 @@ async function confirmDelete() {
             ? "/evaluate-gri-quantitative/approval"
             : "/evaluate-gri-quantitative/requestor",
     );
+}
+
+async function confirmRevise() {
+    if (!detail.value) return;
+    try {
+        await cancelMutation.mutateAsync(detail.value.id);
+    } catch {
+        // http.ts already toasted the envelope error — leave the modal open so the user can retry
+        return;
+    }
+    isConfirmingRevise.value = false;
+    router.push("/evaluate-gri-quantitative/requestor");
 }
 
 // approver actions — only reachable from the Review & Approval queue, same actionable-status rule
