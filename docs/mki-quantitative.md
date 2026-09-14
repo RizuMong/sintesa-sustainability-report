@@ -4,6 +4,12 @@
 > `api/Master Key Indicator/GRI - Quantitative/`. Sections 2 and 3 below have been rewritten to
 > match; Section 4's UI notes still hold except where they say "mock".
 
+> **2026-09-14 update (GROU-662).** Create/Edit screen adjustments: the per-metric Unit picker in
+> Step 1 is gone (value still persisted for legacy records), Status is now an editable `MpSelect`
+> sent on create (and update, as a placeholder), Status + Last Updated moved from the header into
+> the identity panel (Last Updated as a disabled `MpInput`), panel descriptions moved from inline
+> text to tooltips, all control copy is English, and the header Delete button is icon-only.
+
 ## 1. Goal & Scope
 
 The MKI GRI-Quantitative schema builder (Platform Administrator side only), wired against the real
@@ -29,10 +35,13 @@ Stack: Vue 3 (`<script setup>`) + `@mekari/pixel3` design system + `vue-router`,
   — an earlier revision of this doc dropped the lookup; it is back.
 - **`name` → `description`**: the endpoints call the human-readable title `description`. The form
   label, the list column and the page heading all say "Description".
-- **No `status` field.** The endpoints have no status/soft-delete concept — `Delete.yml` is a hard
-  `DELETE`. The list and detail screens still render a Status badge (per product request) reading
-  `status ?? 'Active'`; see the `ponytail:` note on `MkiGriQuantitative.status`. Remove the fallback
-  once the backend grows a real field.
+- **`status` is only half-contracted.** `Delete.yml` is a hard `DELETE`, no soft-delete concept.
+  `V1/Create.yml` and `V2/Create.yml` request bodies do carry `"status"`, so the Create/Edit screen's
+  Status pill sends it on create — and on update too, as a sibling-convention placeholder, though
+  neither `Update.yml` body documents the field. `Index.yml`'s response never returns `status` at
+  all, so a saved value is not readable back: reloading a record always falls back to `Active` (see
+  the `ponytail:` note on `MkiGriQuantitative.status`). Remove the fallback and stop treating update
+  as a placeholder once the backend grows a real, round-trippable field.
 - **`master-gri` field name mismatch**: `GET /v1/master-gri/index` answers the code under `code`
   while the app's `MasterGri` type calls it `gri_code`. `src/services/master-gri/api.ts` maps between
   the two on the way in and out.
@@ -135,20 +144,26 @@ from the mockup's implied data model:
   indicator saved before this change keep rendering its unit exactly as before. One function,
   `resolveUnit()`, applies this precedence in both the builder's Live Preview and the Evaluate matrix.
 
-- Category dropdown (`master-category`), Code dropdown (`master-gri`, Active only), Description field.
-- Status badge beside the page heading in edit mode (reads `status ?? 'Active'` — see Section 2).
+- Category dropdown (`master-category`), Code dropdown (`master-gri`, Active only), Description
+  field, and a **Status** `MpSelect` (Active/Inactive). Status and a disabled Last Updated `MpInput`
+  (edit mode) live in this identity panel, not beside the page heading — see §2 on `status` not
+  round-tripping through Update.
+- Panel and column-group headings (Table Structure, Label Columns, Value / Metric Columns, Rows)
+  carry their explanatory copy in an `MpTooltip` next to the heading, not as inline `text.secondary`
+  body text below it.
 - **Step 1 — Table Structure**, two subpanels side by side:
   - **Label Columns** (row identity) — the `columns[]` of the payload. The derived `key` is no longer
     shown; it is still slugified from the name behind the scenes. Renaming a column migrates the
     already-typed `rows[].labels` across to the new key instead of dropping them.
-  - **Value / Metric Columns** — the `metrics[]` of the payload: header, input type, optional unit.
-    A live hint states whether the columns render flat or as sub-columns.
+  - **Value / Metric Columns** — the `metrics[]` of the payload: header and input type only. The
+    per-metric Unit picker was removed from the UI (GROU-662); `metric.unit` still round-trips
+    through load/save unedited so a legacy record's metric-level unit keeps rendering exactly as
+    before via `resolveUnit()`'s legacy fallback — see the `ponytail:` note on `FormMetric.unitId`.
 - **Step 2 — Rows** — an editable table (one input per label column) rather than stacked form rows,
-  matching the mockup's row grid. "Tambah Section" inserts a marker row (name input, spans the label
-  columns); "Add Row" is unaffected by unit mode. A **Satuan (Unit)** select (Tidak ada / Seragam /
-  Per baris) sits above the table; Seragam shows one Master Unit picker for the whole indicator, Per
-  baris adds a per-row unit column. Choosing anything but "Tidak ada" disables (but keeps visible) the
-  per-metric unit picker in Step 1, with a "Diatur di Satuan (Unit)" hint.
+  matching the mockup's row grid. "Add Section" inserts a marker row (name input, spans the label
+  columns); "Add Row" is unaffected by unit mode. A **Unit** select (None / Uniform / Per row) sits
+  above the table; Uniform shows one Master Unit picker for the whole indicator, Per row adds a
+  per-row unit column.
 - All three lists are **drag-to-reorder**. Columns/metrics still stamp `sequence` from array position;
   rows do not — see the `sequence`-as-identity note above.
 - **Live Preview** — mirrors what the subsidiary sees. With 2+ metrics the header becomes two rows:
@@ -157,7 +172,8 @@ from the mockup's implied data model:
   control. The period shown is the current year and is **preview-only** — the schema has no period
   field, the submission owns it. "Client View" hides the input-type captions.
 - Save → `create()`/`update()`, redirect to List. The payload shape is unchanged by the restyle.
-- Delete (edit mode only) → confirm modal → hard delete → redirect to List.
+- Delete (edit mode only, header, icon-only with a tooltip) → confirm modal → hard delete → redirect
+  to List.
 
 
 ---
@@ -173,3 +189,6 @@ from the mockup's implied data model:
 - [x] Implement Live Preview panel driven by current form state.
 - [x] Confirm Delete action (hard `DELETE`) invalidates and refreshes the List.
 - [x] UI taste pass (layered frame/stage, quiet color, dashed add affordances, equal-width metric columns, aligned delete icons) applied to both screens.
+- [x] GROU-662: removed per-metric Unit picker, added Status pill control, unified copy to English,
+      moved panel descriptions to tooltips, moved Status/Last Updated into the identity panel,
+      icon-only header Delete.

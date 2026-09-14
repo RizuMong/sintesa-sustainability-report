@@ -62,6 +62,9 @@ declare global {
     category_id: Ref2
     code: string
     description: string
+    // GROU-662: present in V1/Create.yml + V2/Create.yml bodies, absent from both Update bodies and
+    // from the Index response — sent on update too as a sibling-convention placeholder (CLAUDE.md).
+    status?: MasterStatus
     columns: MkiQuantColumn[]
     metrics: MkiQuantMetric[]
     rows: MkiQuantRow[]

@@ -74,11 +74,7 @@
                      clamp below could move activeIndex while the underline stayed on a
                      stale (possibly out-of-range) tab. With it, selectedTab is a computed
                      over modelValue and this component is the single source of truth. -->
-                <MpTabs
-                    v-model="activeIndex"
-                    is-manual
-                    variant-color="blue"
-                >
+                <MpTabs v-model="activeIndex" is-manual variant-color="blue">
                     <div :class="tabScrollClass">
                         <MpTabList>
                             <MpTab

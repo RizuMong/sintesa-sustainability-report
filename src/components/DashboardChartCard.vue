@@ -3,12 +3,7 @@ import { computed } from "vue";
 import { MpFlex, MpText, MpChart } from "@mekari/pixel3";
 
 type ChartKind =
-    | "bar"
-    | "bar-stacked"
-    | "bar-horizontal"
-    | "line"
-    | "doughnut"
-    | "pie";
+    "bar" | "bar-stacked" | "bar-horizontal" | "line" | "doughnut" | "pie";
 
 interface ChartDataset {
     label: string;
@@ -118,15 +113,25 @@ const seriesLines = computed(() => {
         height="100%"
         backgroundColor="background.surface"
         borderWidth="1px"
-        borderColor="border.default"
+        borderColor="gray.100"
         rounded="md"
         padding="20px"
     >
-        <MpFlex direction="column" gap="1">
+        <MpFlex
+            direction="column"
+            gap="1"
+            backgroundColor="gray.25"
+            rounded="sm"
+            padding="12px"
+        >
             <MpText as="h2" size="h3" weight="semiBold">{{
                 props.title
             }}</MpText>
-            <MpText v-if="props.caption" size="label-small" color="text.secondary">
+            <MpText
+                v-if="props.caption"
+                size="label-small"
+                color="text.secondary"
+            >
                 {{ props.caption }}
             </MpText>
         </MpFlex>

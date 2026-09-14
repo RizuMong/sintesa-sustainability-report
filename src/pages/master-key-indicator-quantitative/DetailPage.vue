@@ -29,38 +29,19 @@
                     >
                         Master Key Indicator — Quantitative
                     </MpText>
-                    <MpFlex alignItems="center" gap="3">
-                        <MpText as="h1" size="h1">{{
-                            isEdit ? form.description || "Edit" : "Create"
-                        }}</MpText>
-                        <MpBadge
-                            v-if="isEdit"
-                            for="tableStatus"
-                            :type="
-                                status === 'Active'
-                                    ? 'completed'
-                                    : 'announcement'
-                            "
-                        >
-                            {{ status }}
-                        </MpBadge>
-                        <MpText
-                            v-if="isEdit && lastUpdatedLabel"
-                            size="label-small"
-                            color="text.secondary"
-                        >
-                            {{ lastUpdatedLabel }}
-                        </MpText>
-                    </MpFlex>
+                    <MpText as="h1" size="h1">{{
+                        isEdit ? form.description || "Edit" : "Create"
+                    }}</MpText>
                 </MpFlex>
             </MpFlex>
-            <MpButton
-                v-if="isEdit"
-                variant="ghost"
-                left-icon="delete"
-                @click="isConfirmingDelete = true"
-                >Delete</MpButton
-            >
+            <MpTooltip v-if="isEdit" label="Delete">
+                <MpButton
+                    variant="ghost"
+                    left-icon="delete"
+                    aria-label="Delete"
+                    @click="isConfirmingDelete = true"
+                />
+            </MpTooltip>
         </MpFlex>
 
         <MpFlex
@@ -174,6 +155,43 @@
                             errors.description
                         }}</MpFormErrorMessage>
                     </MpFormControl>
+
+                    <MpFlex
+                        display="grid"
+                        gridTemplateColumns="repeat(2, 1fr)"
+                        gap="4"
+                    >
+                        <MpFormControl id="mki-status" is-required>
+                            <MpFormLabel>Status</MpFormLabel>
+                            <MpSelect
+                                v-model="form.status"
+                                size="md"
+                                is-full-width
+                            >
+                                <option
+                                    v-for="opt in statusOptions"
+                                    :key="opt.value"
+                                    :value="opt.value"
+                                >
+                                    {{ opt.label }}
+                                </option>
+                            </MpSelect>
+                        </MpFormControl>
+
+                        <MpFormControl
+                            v-if="isEdit"
+                            id="mki-last-updated"
+                            is-disabled
+                            flex="1"
+                        >
+                            <MpFormLabel>Last Updated</MpFormLabel>
+                            <MpInput
+                                isFullWidth
+                                :model-value="lastUpdatedLabel"
+                                is-disabled
+                            />
+                        </MpFormControl>
+                    </MpFlex>
                 </MpFlex>
 
                 <MpFlex
@@ -192,16 +210,21 @@
                         <MpFlex :class="panel" direction="column" gap="4">
                             <MpFlex gap="3" alignItems="flex-start">
                                 <MpFlex :class="stepBadge">1</MpFlex>
-                                <MpFlex direction="column">
+                                <MpFlex alignItems="center" gap="2">
                                     <MpText size="h3" weight="semiBold"
                                         >Table Structure</MpText
                                     >
-                                    <MpText size="label" color="text.secondary">
-                                        Define the label columns that identify
-                                        each row and the value columns the
-                                        subsidiary fills in. The period is not
-                                        configured here.
-                                    </MpText>
+                                    <MpTooltip
+                                        label="Define the label columns that identify each row and the value columns the subsidiary fills in. The period is not configured here."
+                                    >
+                                        <MpIcon
+                                            name="help-centre"
+                                            size="sm"
+                                            :class="
+                                                css({ color: 'text.secondary' })
+                                            "
+                                        />
+                                    </MpTooltip>
                                 </MpFlex>
                             </MpFlex>
 
@@ -218,18 +241,24 @@
                                     flex="1"
                                     minWidth="240px"
                                 >
-                                    <MpFlex direction="column">
+                                    <MpFlex alignItems="center" gap="2">
                                         <MpText size="label" weight="semiBold"
                                             >Label Columns (row
                                             identity)</MpText
                                         >
-                                        <MpText
-                                            size="label"
-                                            color="text.secondary"
+                                        <MpTooltip
+                                            label="Categories that identify each row (e.g. Type, Area)."
                                         >
-                                            Categories that identify each row
-                                            (e.g. Type, Area).
-                                        </MpText>
+                                            <MpIcon
+                                                name="help-centre"
+                                                size="sm"
+                                                :class="
+                                                    css({
+                                                        color: 'text.secondary',
+                                                    })
+                                                "
+                                            />
+                                        </MpTooltip>
                                     </MpFlex>
 
                                     <MpText
@@ -307,18 +336,24 @@
                                     flex="1"
                                     minWidth="240px"
                                 >
-                                    <MpFlex direction="column">
+                                    <MpFlex alignItems="center" gap="2">
                                         <MpText size="label" weight="semiBold"
                                             >Value / Metric Columns (filled by
                                             user)</MpText
                                         >
-                                        <MpText
-                                            size="label"
-                                            color="text.secondary"
+                                        <MpTooltip
+                                            label="One column = a single value. Two or more = category sub-columns."
                                         >
-                                            One column = a single value. Two or
-                                            more = category sub-columns.
-                                        </MpText>
+                                            <MpIcon
+                                                name="help-centre"
+                                                size="sm"
+                                                :class="
+                                                    css({
+                                                        color: 'text.secondary',
+                                                    })
+                                                "
+                                            />
+                                        </MpTooltip>
                                     </MpFlex>
 
                                     <MpText
@@ -406,42 +441,6 @@
                                                     </option>
                                                 </MpSelect>
                                             </MpFormControl>
-                                            <MpFormControl
-                                                :id="`metric-unit-${i}`"
-                                                flex="1"
-                                                minWidth="0"
-                                            >
-                                                <MpFormLabel>Unit</MpFormLabel>
-                                                <MpSelect
-                                                    v-model="metric.unitId"
-                                                    size="md"
-                                                    placeholder="No unit"
-                                                    is-full-width
-                                                    :is-disabled="
-                                                        form.unitMode !== 'NONE'
-                                                    "
-                                                >
-                                                    <option value="">
-                                                        No unit
-                                                    </option>
-                                                    <option
-                                                        v-for="u in units"
-                                                        :key="u.id"
-                                                        :value="u.id"
-                                                    >
-                                                        {{ u.name }}
-                                                    </option>
-                                                </MpSelect>
-                                                <MpText
-                                                    v-if="
-                                                        form.unitMode !== 'NONE'
-                                                    "
-                                                    size="label-small"
-                                                    color="text.secondary"
-                                                >
-                                                    Diatur di Satuan (Unit)
-                                                </MpText>
-                                            </MpFormControl>
                                         </MpFlex>
                                     </MpFlex>
 
@@ -462,14 +461,21 @@
                         <MpFlex :class="panel" direction="column" gap="4">
                             <MpFlex gap="3" alignItems="flex-start">
                                 <MpFlex :class="stepBadge">2</MpFlex>
-                                <MpFlex direction="column" flex="1">
+                                <MpFlex alignItems="center" gap="2" flex="1">
                                     <MpText size="h3" weight="semiBold"
                                         >Rows</MpText
                                     >
-                                    <MpText size="label" color="text.secondary"
-                                        >Arrange the data rows of the
-                                        table.</MpText
+                                    <MpTooltip
+                                        label="Arrange the data rows of the table."
                                     >
+                                        <MpIcon
+                                            name="help-centre"
+                                            size="sm"
+                                            :class="
+                                                css({ color: 'text.secondary' })
+                                            "
+                                        />
+                                    </MpTooltip>
                                 </MpFlex>
                                 <MpButton
                                     size="sm"
@@ -477,7 +483,7 @@
                                     left-icon="add"
                                     @click="addSection"
                                 >
-                                    Tambah Section
+                                    Add Section
                                 </MpButton>
                                 <MpButton
                                     size="sm"
@@ -499,7 +505,7 @@
                                     id="mki-unit-mode"
                                     minWidth="200px"
                                 >
-                                    <MpFormLabel>Satuan (Unit)</MpFormLabel>
+                                    <MpFormLabel>Unit</MpFormLabel>
                                     <MpSelect
                                         v-model="form.unitMode"
                                         size="md"
@@ -611,7 +617,7 @@
                                                     <MpInput
                                                         v-model="row.name"
                                                         size="md"
-                                                        placeholder="Nama section"
+                                                        placeholder="Section name"
                                                     />
                                                 </MpTableCell>
                                             </template>
@@ -965,6 +971,7 @@ import {
     MpText,
     MpButton,
     MpBadge,
+    MpTooltip,
     MpInput,
     MpTextarea,
     MpSelect,
@@ -1108,10 +1115,8 @@ const {
 } = useMkiGriQuantitativeDetail(id);
 const isLoading = computed(() => isEdit.value && isFetching.value);
 const isLoadError = computed(() => isEdit.value && isFetchError.value);
-// no status field on the endpoint yet — see the ponytail note on MkiGriQuantitative.status
-const status = computed(() => detail.value?.status ?? "Active");
 
-// Accountability line next to the status badge. The Index contract carries updated_by as a bare
+// Accountability line next to the status pill. The Index contract carries updated_by as a bare
 // numeric id with no name/email anywhere in the payload, so there is nothing to resolve it to —
 // only the "when" is shown. Add the "who" once BE ships an updated_by_user object.
 const lastUpdatedLabel = computed(() => {
@@ -1124,7 +1129,7 @@ const lastUpdatedLabel = computed(() => {
         hour: "2-digit",
         minute: "2-digit",
     });
-    return `Last updated ${stamp}`;
+    return `${stamp}`;
 });
 
 type FormColumn = { key: string; name: string };
@@ -1132,6 +1137,9 @@ type FormMetric = {
     key: string;
     name: string;
     input_type: MkiQuantInputType;
+    // ponytail: the per-metric unit picker was removed from the UI (GROU-662), but the value still
+    // round-trips through load/save so a legacy record's metric-level unit keeps rendering exactly
+    // as before — see resolveUnit()'s legacy fallback.
     unitId: string;
 };
 type FormRow = {
@@ -1143,15 +1151,21 @@ type FormRow = {
 };
 
 const unitModeOptions: { value: MkiQuantUnitMode; label: string }[] = [
-    { value: "NONE", label: "Tidak ada" },
-    { value: "UNIFORM", label: "Seragam" },
-    { value: "PER_ROW", label: "Per baris" },
+    { value: "NONE", label: "None" },
+    { value: "UNIFORM", label: "Uniform" },
+    { value: "PER_ROW", label: "Per row" },
+];
+
+const statusOptions: { value: MasterStatus; label: string }[] = [
+    { value: "Active", label: "Active" },
+    { value: "Inactive", label: "Inactive" },
 ];
 
 const form = reactive({
     categoryId: "",
     code: "",
     description: "",
+    status: "Active" as MasterStatus,
     columns: [] as FormColumn[],
     metrics: [] as FormMetric[],
     rows: [] as FormRow[],
@@ -1330,6 +1344,8 @@ watch(
         form.categoryId = next.category_id?.id ?? "";
         form.code = next.code;
         form.description = next.description;
+        // no status field on the endpoint yet — see the ponytail note on MkiGriQuantitative.status
+        form.status = next.status ?? "Active";
         form.columns = next.columns.map((c) => ({ key: c.key, name: c.name }));
         form.metrics = next.metrics.map((m) => ({
             key: m.key,
@@ -1361,6 +1377,7 @@ function buildPayload(): MkiGriQuantitativePayload {
         category_id: { id: form.categoryId, name: category?.name ?? "" },
         code: form.code,
         description: form.description,
+        status: form.status,
         columns: form.columns.map((c, i) => ({
             key: c.key,
             name: c.name,
