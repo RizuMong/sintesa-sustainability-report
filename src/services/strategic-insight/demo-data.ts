@@ -486,7 +486,7 @@ export function demoGriQuantitative(
 
 // ---- client-side filtering ----
 //
-// The backend accepts period/entity_id/category_id and ignores all three (4/4 probes returned
+// The backend accepts period/entity_id/category and ignores all three (4/4 probes returned
 // byte-identical payloads, gap G3), so the two dropdowns on the page would do nothing. Filter here
 // instead, following the scope rule the page already assumes (gap A4):
 //   - summary[] is recomputed under the filter, because KPI cards show the current selection;
@@ -500,10 +500,12 @@ export function applyDemoFilters(
 ): StrategicInsightGriQuantitativeResponse {
   const period = params.period ? Number(params.period) : null
   const entityId = params.entity_id || null
-  const categoryId = params.category_id || null
+  // BE-confirmed 2026-09-15: filter is `category` (bare name), not `category_id` — BE stores
+  // GRI Quantitative categories without an id.
+  const categoryName = params.category || null
 
-  const scoped = categoryId
-    ? categories.filter((c) => c.category_id.id === categoryId)
+  const scoped = categoryName
+    ? categories.filter((c) => c.category_id.name === categoryName)
     : categories
 
   if (!period && !entityId) return scoped

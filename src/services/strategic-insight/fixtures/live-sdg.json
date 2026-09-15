@@ -20,6 +20,7 @@
             "name": "Operation"
           },
           "plan_origin": "HOLDING",
+          "period": 2026,
           "sdg_ambition_esg_alignment": "SDG 1",
           "sdg_id": {
             "id": "s6X9n1U8Bjl0",
@@ -47,6 +48,7 @@
             "name": "Investment"
           },
           "plan_origin": "INITIATE",
+          "period": 2026,
           "sdg_ambition_esg_alignment": "SDG 1",
           "sdg_id": {
             "id": "s6X9n1U8Bjl0",
@@ -64,8 +66,7 @@
         "name": "Sintesa"
       },
       "entity_type": "HOLDING",
-      "execution_percentage": 10,
-      "period": 2026
+      "execution_percentage": 10
     }
   ],
   "summary": [

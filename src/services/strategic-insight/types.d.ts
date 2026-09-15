@@ -12,7 +12,10 @@ declare global {
   interface StrategicInsightFilterParams {
     period?: string // MasterPeriod.year as a string; omitted = All Periods
     entity_id?: string // MasterEntity id; omitted = All Entities
-    category_id?: string // MasterCategory id; omitted = all categories (GRI Quantitative only)
+    // BE-confirmed 2026-09-15: the wire param is `category`, a bare category NAME (e.g. "General"),
+    // not `category_id`. BE stores GRI Quantitative categories without an id, so there is no id to
+    // filter on — see api/Dashboard/GRI - Quantitative.yml's disabled `category` param.
+    category?: string
   }
 
   // ---- SDG page (AC-70..73) ----
@@ -65,24 +68,26 @@ declare global {
   interface StrategicInsightSdgWireAction {
     ids: string // NOTE: plural field name on the wire, singular id value
     sdg_id: Ref2 & { number: number } // TRAP: id is duplicated across different SDGs in live dummy data — group on number, never id
-    adoption_status: 'TAKE' | 'SKIP' | string // observed: TAKE; SKIP documented in the contract example
+    adoption_status: 'TAKE' | 'SKIP' | 'PENDING' | string // observed live: TAKE, PENDING; SKIP documented in the contract example
     plan_origin: 'HOLDING' | 'INITIATE' | 'SUBSIDIARY'
     impact: string
     key_business_action: string
     detail_action_solution: string
-    baseline: string
-    target: string
-    indicator_id: Ref2 & { evidence: string }
+    baseline: string | null
+    target: string | null
+    // BE-confirmed 2026-09-15: period lives here now, not on the parent matrix row — BE took the
+    // row-level period out because it isn't needed there; each action carries its own.
+    period: number
+    indicator_id: (Ref2 & { evidence: string }) | null
     pillar_id: Ref2
-    sdg_ambition_esg_alignment: string
-    created_at: string | null
-    updated_at: string | null
+    sdg_ambition_esg_alignment: string | null
+    created_at: number | null
+    updated_at: number | null
   }
 
   interface StrategicInsightSdgWireMatrixRow {
     entity_id: Ref2
     entity_type: 'HOLDING' | 'SUBSIDIARY'
-    period: number
     execution_percentage: number
     adoption_take_count: number
     adoption_skip_count: number

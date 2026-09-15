@@ -149,9 +149,9 @@ assert.equal(
     'entity filter must lower the KPI card',
   )
 
-  // category_id selects a single tab.
-  const byCategory = applyDemoFilters(all, { category_id: general.category_id.id })
-  assert.equal(byCategory.length, 1, 'category_id filter must select one category')
+  // category (bare name, BE-confirmed 2026-09-15 — no category_id exists) selects a single tab.
+  const byCategory = applyDemoFilters(all, { category: general.category_id.name })
+  assert.equal(byCategory.length, 1, 'category filter must select one category')
 }
 
 // ---- plausibility: the bugs this fixture actually produced, pinned ----

@@ -16,6 +16,7 @@ import {
   summaryValue,
 } from '../../src/services/strategic-insight/aggregate.ts'
 import { chartCardsFor, categoryCaption } from '../../src/services/strategic-insight/chart-spec.ts'
+import { normalizeGriQuantitative } from '../../src/services/strategic-insight/normalize.ts'
 import { nextTabIndex } from '../../src/services/strategic-insight/tab-index.ts'
 
 // ---- contract loader (shared with src/services/strategic-insight/contract.check.ts) ----
@@ -31,6 +32,11 @@ const COLLECTION = fileURLToPath(
 // add one for a single check. Extracted here (rather than left duplicated inside
 // contract.check.ts) so there is exactly one place that knows how to read the normative example —
 // contract.check.ts now imports this instead of carrying its own copy.
+//
+// As of 2026-09-15 both committed examples (`Response Dummy`, `200`) ship the WIRE shape (bare
+// `category` string, no `dimensions[]`/`labels{}`) — the same shape the live backend sends — so
+// this loader always runs the raw example through normalizeGriQuantitative() before returning it.
+// Every caller keeps seeing the canonical StrategicInsightGriQuantitativeResponse.
 export function loadContractExample(
   exampleName = 'Response Dummy',
 ): StrategicInsightGriQuantitativeResponse {
@@ -51,7 +57,10 @@ export function loadContractExample(
     ],
     { encoding: 'utf8' },
   )
-  return JSON.parse(out) as StrategicInsightGriQuantitativeResponse
+  const wire = JSON.parse(out) as
+    | StrategicInsightGriQuantitativeWireResponse
+    | StrategicInsightGriQuantitativeResponse
+  return normalizeGriQuantitative(wire).categories
 }
 
 // ---- report shapes ----
@@ -373,7 +382,7 @@ function checkContractCoverage(
 export function diffFilterScope(
   unfiltered: unknown,
   filtered: unknown,
-  filter: { period?: string | number; entity_id?: string; category_id?: string },
+  filter: { period?: string | number; entity_id?: string; category?: string },
 ): DiffReport {
   const findings: Finding[] = []
   const base = diffGriQuantitative(unfiltered)
@@ -482,7 +491,7 @@ export function diffGriQuantitative(
   live: unknown,
   opts?: {
     contract?: StrategicInsightGriQuantitativeResponse
-    filter?: { period?: string | number; entity_id?: string; category_id?: string }
+    filter?: { period?: string | number; entity_id?: string; category?: string }
   },
 ): DiffReport {
   const findings: Finding[] = []

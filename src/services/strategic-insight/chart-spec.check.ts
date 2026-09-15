@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { orderedCategories } from './aggregate.ts'
 import { categoryCaption, chartCardsFor } from './chart-spec.ts'
+import { normalizeGriQuantitative } from './normalize.ts'
 
 // fileURLToPath, not .pathname — the path contains a space, which .pathname percent-encodes.
 const COLLECTION = fileURLToPath(
@@ -17,6 +18,11 @@ const COLLECTION = fileURLToPath(
 // Same loading approach as contract.check.ts: the collection is a Bruno .yml with JSON embedded
 // in a string field, and this repo has no YAML parser dependency; Python+PyYAML is already
 // required by the repo's tooling.
+//
+// The committed example is wire-shape (bare `category` string, no `dimensions[]`/`labels{}`) —
+// it now matches what the live backend actually sends (verified 2026-09-15), so it must go
+// through normalizeGriQuantitative() the same way api.ts does before anything downstream reads
+// `category_id`/`dimensions`/`labels`.
 function loadContract(): StrategicInsightGriQuantitativeResponse {
   const out = execFileSync(
     'python3',
@@ -34,7 +40,8 @@ function loadContract(): StrategicInsightGriQuantitativeResponse {
     ],
     { encoding: 'utf8' },
   )
-  return JSON.parse(out) as StrategicInsightGriQuantitativeResponse
+  const wire = JSON.parse(out) as StrategicInsightGriQuantitativeWireResponse
+  return normalizeGriQuantitative(wire).categories
 }
 
 const contract = loadContract()

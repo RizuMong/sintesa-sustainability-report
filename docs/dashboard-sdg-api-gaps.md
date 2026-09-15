@@ -222,3 +222,22 @@ Filters are applied **server-side**, and `summary[]` is recomputed under them (B
 
 Settle 1–6, then rewrite `src/services/strategic-insight/types.d.ts` and re-run
 `node --experimental-strip-types src/services/strategic-insight/api.check.ts`.
+
+## Backend answer (2026-09-15)
+
+Not one of the six above, but a confirmed wire-shape change: **`period` moved off the matrix row
+onto each action.** `entity_id`/`entity_type`/`execution_percentage`/`adoption_take_count`/
+`adoption_skip_count` still live on the row; `period` does not — it now lives only on
+`actions[].period`. BE's reasoning: the row-level copy "isn't needed", since every action already
+carries its own. Live-verified against `GET /v1/strategic-insight/sdg` — the matrix row has no
+`period` key, every action does.
+
+`StrategicInsightSdgWireMatrixRow` in `types.d.ts` had `period: number`; removed. Added `period:
+number` to `StrategicInsightSdgWireAction` (it also picked up the live payload's other nullable
+fields — `baseline`, `target`, `indicator_id`, `sdg_ambition_esg_alignment` are all `string | null`
+/ `Ref2 | null` on the wire, and `adoption_status` observed a third value, `PENDING`, alongside
+`TAKE`/`SKIP`). `normalize-sdg.ts`'s `flattenActions()` now reads `action.period` instead of
+`row.period`; the padded-demo generator (`paddedActionsFor`) sets both the `FlatAction.period` and
+the cloned action's own `.period` so the two stay in sync. `fixtures/live-sdg.json` updated to
+match (period moved from the row onto both example actions).
+

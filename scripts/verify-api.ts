@@ -36,7 +36,7 @@ interface Flags {
   verbose: boolean
   period: string
   entityId: string
-  categoryId: string
+  category: string
 }
 
 function parseFlags(argv: string[]): Flags {
@@ -51,7 +51,9 @@ function parseFlags(argv: string[]): Flags {
     // filter probes exercise values the backend team themselves nominated as realistic.
     period: '2025',
     entityId: 'Ks6BgE75YiQ1',
-    categoryId: 'gbqp0oQHcJ5',
+    // BE-confirmed 2026-09-15: the filter is `category`, a bare category NAME — BE stores GRI
+    // Quantitative categories without an id, so there is no category_id to filter on.
+    category: 'General',
   }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]!
@@ -69,7 +71,7 @@ function parseFlags(argv: string[]): Flags {
     else if (arg === '--verbose' || arg === '-v') flags.verbose = true
     else if (arg === '--period') flags.period = next()
     else if (arg === '--entity') flags.entityId = next()
-    else if (arg === '--category') flags.categoryId = next()
+    else if (arg === '--category') flags.category = next()
     else throw new Error(`unknown flag ${arg}`)
   }
   return flags
@@ -89,11 +91,11 @@ function probeSpecs(flags: Flags): ProbeSpec[] {
     { name: 'unfiltered', path: '/v1/strategic-insight/gri-quantitative', params: {} },
     { name: `period=${flags.period}`, path: '/v1/strategic-insight/gri-quantitative', params: { period: flags.period } },
     { name: 'entity_id', path: '/v1/strategic-insight/gri-quantitative', params: { entity_id: flags.entityId } },
-    { name: 'category_id', path: '/v1/strategic-insight/gri-quantitative', params: { category_id: flags.categoryId } },
+    { name: 'category', path: '/v1/strategic-insight/gri-quantitative', params: { category: flags.category } },
     {
       name: 'all three',
       path: '/v1/strategic-insight/gri-quantitative',
-      params: { period: flags.period, entity_id: flags.entityId, category_id: flags.categoryId },
+      params: { period: flags.period, entity_id: flags.entityId, category: flags.category },
     },
   ]
 }
@@ -102,10 +104,14 @@ function line(char = '─'): string {
   return char.repeat(78)
 }
 
-// The collection ships two examples: `Response Dummy` (normative, dimensions/labels) and
-// `Legacy Response (pre dimensions/labels)` (the original BE dump). If the live answer still
-// matches the legacy one, "8 shape errors" is a misleading way to say "this endpoint has not been
-// migrated yet" — one sentence beats eight findings, so name it explicitly.
+// The collection ships two examples: `Response Dummy` and `200`. As of 2026-09-15 BOTH are
+// wire-shape (bare `category` string, no `dimensions[]`/`labels{}`) — `Response Dummy` was
+// previously the enriched/normative example (dimensions, labels, full envelope) but has been
+// reverted to match what the live backend actually sends. There is no enriched example left in
+// the collection at all; the proposed contract in docs/dashboard-gri-quantitative-api-gaps.md is
+// now aspirational only, not modeled by any committed example. If the live answer matches this
+// wire shape, "8 shape errors" is a misleading way to say "this endpoint has not been migrated to
+// dimensions/labels yet" — one sentence beats eight findings, so name it explicitly.
 function legacyShapeVerdict(live: unknown): string | null {
   const categories = Array.isArray(live) ? (live as Record<string, unknown>[]) : []
   if (categories.length === 0) return null
@@ -114,13 +120,13 @@ function legacyShapeVerdict(live: unknown): string | null {
   )
   if (!looksLegacy) return null
   try {
-    const legacy = loadContractExample('Legacy Response (pre dimensions/labels)')
+    const legacy = loadContractExample('200')
     const identical = JSON.stringify(legacy) === JSON.stringify(live)
     return identical
-      ? 'live payload is BYTE-IDENTICAL to the collection\'s `Legacy Response (pre dimensions/labels)` example'
-      : 'live payload is the legacy shape (no `dimensions[]`/`labels{}`), though not identical to the legacy example'
+      ? 'live payload is BYTE-IDENTICAL to the collection\'s `200` example'
+      : 'live payload is the legacy/wire shape (no `dimensions[]`/`labels{}`), though not identical to the `200` example'
   } catch {
-    return 'live payload is the legacy shape (no `dimensions[]`/`labels{}`)'
+    return 'live payload is the legacy/wire shape (no `dimensions[]`/`labels{}`) — both committed examples now ship this shape'
   }
 }
 

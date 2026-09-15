@@ -390,11 +390,46 @@ Naming follows the existing `total_non_renewable` / `renewable_ratio` style.
    `/v1/strategic-insight/gri-qualitative` and nothing in `api/` defines it. (C1)
 9. When will `/v1/master-entity/index` carry the 15 real PTs? (C2)
 
-Settle 1–9 above. The FE is already aligned with the proposed contract, so answers that confirm it
-need no code change; answers that diverge should be applied to
-`api/Dashboard/GRI - Quantitative.yml` first, then caught by
-`node --experimental-strip-types src/services/strategic-insight/contract.check.ts`, which reads
-that file at run time rather than a copied fixture.
+## Backend answers (2026-09-15)
+
+Confirmed directly by BE, superseding the corresponding open question above:
+
+- **Q2 (`category_id`) — answered, and it's the opposite of the ask.** The filter param is
+  `category`, a bare category **name** (e.g. `"General"`), not an id. BE does not store an id for
+  GRI Quantitative categories at all, so there is nothing to resolve a `category_id` against.
+  `StrategicInsightFilterParams.category_id` is renamed to `category: string` in `types.d.ts`; every
+  caller (`demo-data.ts`'s `applyDemoFilters`, `scripts/verify-api.ts`'s probes,
+  `scripts/lib/gri-contract-diff.ts`'s filter-scope typing) updated to match. **Live-verified**:
+  `?category=General` now actually narrows the response (1 category, 14 items back) — this filter
+  is no longer one of the ignored params B2/A4 describe; re-run
+  `node --experimental-strip-types scripts/verify-api.ts` to see it applied. The `category_id: Ref2`
+  *response field* proposed for `StrategicInsightGriCategory` is unaffected by this — that's a
+  separate ask (resolving the bare `category` string against `/v1/master-category/index` for
+  *display*, A1) and remains an FE-side lookup table (`CATEGORY_SLUGS` in `normalize.ts`) until BE
+  adds it.
+
+- **New, unprompted regression: the committed contract examples reverted to wire shape.** Both
+  `Response Dummy` and the renamed `200` example (formerly `Legacy Response (pre
+  dimensions/labels)`) in `api/Dashboard/GRI - Quantitative.yml` now ship the bare `category`
+  string with no `dimensions[]`/`labels{}` — the enriched, normative example that
+  `chart-spec.check.ts`/`contract.check.ts` were built against no longer exists in the collection.
+  `scripts/lib/gri-contract-diff.ts`'s `loadContractExample()` now runs every example through
+  `normalizeGriQuantitative()` before returning it, so downstream consumers keep working, but the
+  8-tab/32-KPI/18-dimension assertions in `contract.check.ts` and `chart-spec.check.ts` fail again
+  as of this change, because the committed example itself is now too sparse to satisfy them (same
+  failure mode as the live backend, not a bug introduced here — confirmed by running
+  `git stash` and reproducing the identical failure on `main`). Needs the enriched example restored
+  or the proposed contract in this doc applied for real; those two check files' assertions are
+  otherwise correct and don't need to change.
+
+Confirmed for the sibling SDG endpoint (see docs/dashboard-sdg-api-gaps.md for the full analysis):
+
+- **`period` moved off the matrix row onto each action.** `StrategicInsightSdgWireMatrixRow` no
+  longer carries `period`; `StrategicInsightSdgWireAction` does now. BE says the row-level field
+  "isn't needed" — it only ever existed per-action. Live-verified against
+  `GET /v1/strategic-insight/sdg`: the row has no `period` key, every action does.
+  `normalize-sdg.ts`'s `flattenActions()` reads `action.period` instead of `row.period`;
+  `fixtures/live-sdg.json` updated to match (period moved from the row onto both actions).
 
 Verify with:
 

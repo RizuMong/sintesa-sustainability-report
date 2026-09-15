@@ -21,10 +21,12 @@ function deriveKpi(summary: StrategicInsightSdgWireSummary[]): StrategicInsightS
   }
 }
 
-// `period` isn't part of StrategicInsightSdgWireAction (it lives on the parent matrix row) nor of
-// the canonical StrategicInsightSdgDetailItem — it's carried here purely as an internal filtering
-// key so DEMO_PAD's client-side period filter (rule 4) has something real to filter on, for both
-// real and padded actions alike.
+// `period` isn't part of the canonical StrategicInsightSdgDetailItem — it's carried here purely as
+// an internal filtering key so DEMO_PAD's client-side period filter (rule 4) has something real to
+// filter on, for both real and padded actions alike.
+//
+// BE-confirmed 2026-09-15: period now lives on each action, not on the parent matrix row (the row
+// no longer carries it at all — BE removed it because it wasn't needed there).
 interface FlatAction {
   entity: Ref2
   action: StrategicInsightSdgWireAction
@@ -35,7 +37,7 @@ function flattenActions(matrix: StrategicInsightSdgWireMatrixRow[]): FlatAction[
   const out: FlatAction[] = []
   for (const row of matrix) {
     for (const action of row.actions) {
-      out.push({ entity: row.entity_id, action, period: row.period })
+      out.push({ entity: row.entity_id, action, period: action.period })
     }
   }
   return out
@@ -191,6 +193,7 @@ function paddedActionsFor(
         sdg_id: { id: sdgId, name: `SDG ${meta.number}`, number: meta.number },
         adoption_status: adoptionStatus,
         plan_origin: planOrigin,
+        period, // keep the action's own period in sync with FlatAction.period (BE moved it here)
       },
     })
   }
