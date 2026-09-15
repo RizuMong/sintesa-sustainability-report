@@ -9,6 +9,7 @@ export {
   hasDuplicateSubmission,
   isDetailReadOnly,
   isReadOnly,
+  latestApproverNote,
   latestRejectionNote,
   requestorSummary,
   rowKey,
@@ -47,6 +48,15 @@ const evaluateGriQuantitativeApi = {
   async reject(id: string, remarks: string, silentToast = false) {
     return unwrap<Record<string, never>>(
       http.post('/v1/evaluate-gri-quantitative/reject', { id, remarks }, { meta: { silentToast } }),
+    )
+  },
+  // GROU-657 — third approver decision: hand the submission back for revision. Per
+  // api/…/Request Revision.yml both fields are mandatory, and the 200 answers data: {}.
+  // Index Requestor.yml's 'Data Request Revision' example shows the result: flow_status returns
+  // to 'draft' with action/status REQUEST_REVISION recorded on the approval log.
+  async requestRevision(id: string, remarks: string, silentToast = false) {
+    return unwrap<Record<string, never>>(
+      http.post('/v1/evaluate-gri-quantitative/request-revision', { id, remarks }, { meta: { silentToast } }),
     )
   },
   async remove(id: string) {

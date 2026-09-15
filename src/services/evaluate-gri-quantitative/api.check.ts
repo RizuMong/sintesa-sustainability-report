@@ -8,6 +8,7 @@ import {
   hasDuplicateSubmission,
   isDetailReadOnly,
   isReadOnly,
+  latestApproverNote,
   latestRejectionNote,
   requestorSummary,
   toSubmissionValue,
@@ -87,6 +88,34 @@ const approvalLogs: ApprovalLog[] = [
 ]
 assert.equal(latestRejectionNote(approvalLogs), 'latest note')
 assert.equal(latestRejectionNote([]), null)
+
+// GROU-657 — latestApproverNote() carries the action alongside the note, and defends against
+// Index Requestor.yml's 'Data Request Revision' example rendering approval_logs as a bare object.
+assert.deepEqual(latestApproverNote(approvalLogs), { note: 'latest note', action: 'REJECTED' })
+assert.equal(latestApproverNote([]), null)
+assert.equal(latestApproverNote(null), null)
+// the object form Index Requestor.yml's revision example emits must not throw
+assert.deepEqual(latestApproverNote(approvalLogs[1]), { note: 'latest note', action: 'REJECTED' })
+
+const revisionLogs: ApprovalLog[] = [
+  {
+    approval_type: 'By PIC',
+    approvers: [
+      {
+        acted_at: 400,
+        action: 'REQUEST_REVISION',
+        notes: 'please fix the units',
+        position: ref('POS4'),
+        user: { id: 'U4', name: 'D', email: 'd@x.com' },
+      },
+    ],
+    minimum_action: 1,
+    request_id: 'R3',
+    stage_order: 1,
+    status: 'REQUEST_REVISION',
+  },
+]
+assert.deepEqual(latestApproverNote(revisionLogs), { note: 'please fix the units', action: 'REQUEST_REVISION' })
 
 // summary blocks — requestor counts by flow_status, approval also counts what I personally approved
 const board: EvaluateGriQuantitativeSummary[] = [

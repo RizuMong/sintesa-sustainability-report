@@ -7,8 +7,17 @@ declare global {
   type MkiEvidenceAttachment = 'Optional' | 'Required'
   type SubmissionFlowStatus = 'draft' | 'submitted' | 'approved' | 'rejected' | 'cancelled'
   // one union for both the stage status and an approver's action — the API emits the same
-  // enum in both slots, so keep them aliased rather than drifting into two half-lists
-  type ApprovalStatus = 'WAITING_APPROVAL' | 'PENDING' | 'APPROVE' | 'APPROVED' | 'REJECTED' | 'CANCEL'
+  // enum in both slots, so keep them aliased rather than drifting into two half-lists.
+  // REQUEST_REVISION added for GROU-657, per Index Requestor.yml's 'Data Request Revision'
+  // example, which emits it in both the approver-action slot (:217) and the stage-status slot (:239).
+  type ApprovalStatus =
+    | 'WAITING_APPROVAL'
+    | 'PENDING'
+    | 'APPROVE'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'CANCEL'
+    | 'REQUEST_REVISION'
   type ApprovalAction = ApprovalStatus
   type ApprovalStageStatus = ApprovalStatus
   interface Ref2 {

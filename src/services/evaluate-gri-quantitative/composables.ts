@@ -95,6 +95,15 @@ export function useRejectEvaluateGriQuantitative() {
   })
 }
 
+export function useRequestRevisionEvaluateGriQuantitative() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: { id: string; remarks: string; silentToast?: boolean }) =>
+      evaluateGriQuantitativeApi.requestRevision(payload.id, payload.remarks, payload.silentToast),
+    onSuccess: () => invalidateLists(queryClient),
+  })
+}
+
 // ponytail: Stream A owns src/services/master-template-quantitative/ but hasn't merged yet — this
 // is a minimal duplicate of its confirmed Index endpoint (api/Master Template - Quantitative/Index.yml)
 // just to unblock the template picker on the requestor create form. Swap to the real module's

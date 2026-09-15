@@ -23,6 +23,14 @@
                 >
                     Bulk Reject
                 </MpButton>
+                <MpButton
+                    v-if="requestRevisionMutation"
+                    variant="secondary"
+                    :is-disabled="isBulkApproving || isBulkRejecting || isBulkRequestingRevision"
+                    @click="openBulkRequestRevision"
+                >
+                    Bulk Request Revision
+                </MpButton>
             </MpButtonGroup>
         </MpFlex>
 
@@ -132,6 +140,46 @@
             </MpModalContent>
             <MpModalOverlay />
         </MpModal>
+
+        <MpModal
+            :is-open="revisionTargetIds.length > 0"
+            size="md"
+            @close="closeRequestRevision"
+        >
+            <MpModalContent>
+                <MpModalHeader>
+                    Request revision
+                    <MpModalCloseButton />
+                </MpModalHeader>
+                <MpModalBody>
+                    <MpFormControl id="revision-notes" is-required>
+                        <MpFormLabel>Revision Notes</MpFormLabel>
+                        <MpTextarea
+                            v-model="revisionNotes"
+                            placeholder="Explain what needs to be revised"
+                        />
+                    </MpFormControl>
+                </MpModalBody>
+                <MpModalFooter>
+                    <MpButtonGroup>
+                        <MpButton variant="ghost" @click="closeRequestRevision"
+                            >Cancel</MpButton
+                        >
+                        <MpButton
+                            variant="primary"
+                            :is-disabled="
+                                !canReject(revisionNotes) || isBulkRequestingRevision
+                            "
+                            :is-loading="isBulkRequestingRevision"
+                            @click="confirmRequestRevision"
+                        >
+                            Request Revision
+                        </MpButton>
+                    </MpButtonGroup>
+                </MpModalFooter>
+            </MpModalContent>
+            <MpModalOverlay />
+        </MpModal>
     </MpFlex>
 </template>
 
@@ -212,6 +260,16 @@ const props = defineProps<{
         }) => Promise<unknown>;
         isPending: { value: boolean };
     };
+    // GROU-657 — optional so existing/other queues that pass only approve/reject keep compiling.
+    // The bulk Request Revision button only renders when a caller wires this in.
+    requestRevisionMutation?: {
+        mutateAsync: (payload: {
+            id: string;
+            remarks: string;
+            silentToast?: boolean;
+        }) => Promise<unknown>;
+        isPending: { value: boolean };
+    };
 }>();
 
 const emit = defineEmits<{ rowClick: [row: TRow] }>();
@@ -221,6 +279,9 @@ const rejectTargetIds = ref<string[]>([]);
 const rejectNotes = ref("");
 const isBulkApproving = ref(false);
 const isBulkRejecting = ref(false);
+const revisionTargetIds = ref<string[]>([]);
+const revisionNotes = ref("");
+const isBulkRequestingRevision = ref(false);
 
 const selectableIds = computed(() => selectableApprovalIds(props.items));
 const allSelectableSelected = computed(
@@ -325,6 +386,50 @@ async function confirmReject() {
         });
     } finally {
         isBulkRejecting.value = false;
+    }
+}
+
+function openBulkRequestRevision() {
+    revisionTargetIds.value = Array.from(selected.value);
+    revisionNotes.value = "";
+}
+
+function closeRequestRevision() {
+    revisionTargetIds.value = [];
+    revisionNotes.value = "";
+}
+
+async function confirmRequestRevision() {
+    const ids = revisionTargetIds.value;
+    if (!ids.length || !canReject(revisionNotes.value) || !props.requestRevisionMutation)
+        return;
+    isBulkRequestingRevision.value = true;
+    let done = 0;
+    try {
+        const remarks = revisionNotes.value.trim();
+        for (const id of ids) {
+            await props.requestRevisionMutation.mutateAsync({
+                id,
+                remarks,
+                silentToast: true,
+            });
+            done += 1;
+        }
+        toast.notify({
+            id: "bulk-request-revision",
+            variant: "success",
+            title: `Requested revision on ${ids.length} submission(s).`,
+        });
+        selected.value = new Set();
+        closeRequestRevision();
+    } catch (error) {
+        toast.notify({
+            id: "bulk-request-revision",
+            variant: "error",
+            title: bulkErrorTitle(error, done, ids.length),
+        });
+    } finally {
+        isBulkRequestingRevision.value = false;
     }
 }
 </script>

@@ -37,16 +37,27 @@ export function isDetailReadOnly(flowStatus: SubmissionFlowStatus | string, from
   return fromApproval || isReadOnly(flowStatus)
 }
 
+// GROU-657 — a rejection and a revision request both hand the submission back with a note; the
+// banner needs to know which. Kept separate from latestRejectionNote() so existing callers are
+// untouched. The Array.isArray guard is for Index Requestor.yml's 'Data Request Revision'
+// example, which renders approval_logs as a bare object rather than the documented array.
+export function latestApproverNote(
+  approvalLogs: ApprovalLog[] | ApprovalLog | null | undefined,
+): { note: string; action: ApprovalAction } | null {
+  const logs = Array.isArray(approvalLogs) ? approvalLogs : approvalLogs ? [approvalLogs] : []
+  const acted = logs
+    .flatMap((log) => log.approvers ?? [])
+    .filter((a): a is ApprovalApprover & { acted_at: number; notes: string } =>
+      Boolean(a.notes && a.acted_at),
+    )
+    .sort((a, b) => b.acted_at - a.acted_at)
+  return acted[0] ? { note: acted[0].notes, action: acted[0].action } : null
+}
+
 // latest reviewer note shown when a rejected submission reopens (AC-85) — most recent approver
 // action with a note, across every approval stage.
 export function latestRejectionNote(approvalLogs: ApprovalLog[]): string | null {
-  const notes = approvalLogs
-    .flatMap((log) => log.approvers)
-    .filter((approver): approver is ApprovalApprover & { acted_at: number; notes: string } =>
-      Boolean(approver.notes && approver.acted_at),
-    )
-    .sort((a, b) => b.acted_at - a.acted_at)
-  return notes[0]?.notes ?? null
+  return latestApproverNote(approvalLogs)?.note ?? null
 }
 
 // "In flight" is anything that is not one of the four terminal-ish statuses, rather than an exact

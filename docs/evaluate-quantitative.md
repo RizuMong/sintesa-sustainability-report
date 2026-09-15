@@ -7,6 +7,12 @@ Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
 > **2026-09-14 update (GROU-659).** The Detail screen gained a **Revise Submission** action: the
 > requestor can pull a submission back out of approval, which returns it to `draft` for editing.
 
+> **2026-09-15 update (GROU-657).** The approver can now hand a submission back for revision from
+> the Detail screen (and, if wired, the Review & Approval queue's bulk lane); this also returns the
+> submission to `draft`. The ticket's own dependency note claimed the endpoint was still blocked on
+> the backend — it was not: the contract landed in `vas-api-collection@239045e` on 2026-09-10, before
+> this ticket was picked up.
+
 ## 1. Screens
 
 ### Requestor (`RequestorPage.vue`)
@@ -29,7 +35,25 @@ Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
   all render the right unit through one function.
 - **Submit / Update sit below the form**, not in the page header — matching the Officeless
   submission screen. Delete (draft only) stays in the header.
-- Read-only whenever `isReadOnly(flow_status)` (anything but `draft`/`rejected`).
+- Read-only whenever `isReadOnly(flow_status)` (anything but `draft`/`rejected`). This is also why
+  Request Revision (below) needed no edit/resubmit or duplicate-guard changes: the contract returns
+  a revision-requested submission to `flow_status: 'draft'`, which `isReadOnly()` and
+  `BLOCKING_STATUSES` (`hasDuplicateSubmission()`) already handle correctly for `draft`.
+- **Request Revision** (GROU-657) — a third approver decision, alongside Approve and Reject, gated
+  by the same `canAct` (approver context, `selectableApprovalIds` non-empty). Collects mandatory
+  remarks through the shared `canReject()` non-blank guard (no separate `canRequestRevision()`),
+  POSTs `/v1/evaluate-gri-quantitative/request-revision` with `{ id, remarks }`, then redirects to
+  the approval queue like Approve/Reject. Per `Index Requestor.yml`'s `Data Request Revision`
+  example, the result is `flow_status: 'draft'`, `submitted_at: null`, `submitted_by: ""`, and an
+  approval-log entry with `action: "REQUEST_REVISION"` / `status: "REQUEST_REVISION"` carrying the
+  remarks and `acted_at`/`decided_at`. `actionVerb` in the approval-line renderer maps it to
+  "Revision requested by", so the history shows who and when for free.
+  - **Banner change.** The reviewer-note banner used to gate on `detail.flow_status === 'rejected'`,
+    which would never fire for a revision request (status is `draft`, not `rejected`). It is now
+    driven by `latestApproverNote()` — action-aware, returns `{ note, action }` — and shown whenever
+    a note exists and the submission is back with the requestor (`!fromApproval && !readOnly`).
+    Badge/heading read "Revision requested" (warning) vs "Reviewer note" / "rejected" (critical)
+    based on the note's action, so a genuine rejection still renders as before.
 - **Revise Submission** (GROU-659) — a secondary button below the form, the requestor's only action
   once a submission is in flight (the Submit/Update row is hidden by `readOnly`). Confirms through
   `ConfirmDeleteModal` (its `confirm-label`/`confirm-variant` props exist for exactly this
@@ -51,6 +75,11 @@ Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
   queues get their own portals. `ApprovalReviewTable` is still the shared table component.
 - Four summary blocks: **Awaiting Approval**, **Approved by Me**, **Approved**, **Rejected**
   (`approvalSummary()`).
+- **Bulk Request Revision** (GROU-657) — `ApprovalReviewTable.vue` takes an optional
+  `requestRevisionMutation` prop; the button only renders when a caller passes it, so the component
+  stays source-compatible with any other queue that only wires approve/reject. `ApprovalPage.vue`
+  passes `useRequestRevisionEvaluateGriQuantitative()` in, giving the queue a third bulk action next
+  to Bulk Approve/Bulk Reject, with the same silent-per-call/one-summary-toast pattern as bulk reject.
 
 ## 2. Cell values ↔ the Update contract
 
@@ -89,6 +118,15 @@ resolved the count is simply 0 — it never guesses.
 - `flow_status: 'sent'` (open-gaps G1) — both summary helpers treat *anything* that is not
   `draft`/`approved`/`rejected`/`cancelled` as awaiting approval rather than exact-matching
   `'submitted'`, so `'sent'` lands in the right block.
+- **`REQUEST_REVISION`** (GROU-657) — a contract-emitted `ApprovalStatus`/`ApprovalAction` value the
+  original `SubmissionFlowStatus`/`ApprovalStatus` split did not anticipate. It never appears as a
+  `SubmissionFlowStatus`; the resulting submission state is `flow_status: 'draft'`, not a distinct
+  status of its own — see `Index Requestor.yml`'s `Data Request Revision` example.
+- **`approval_logs` as an object, not an array** — that same `Data Request Revision` example renders
+  `approval_logs` as a bare object (`{ … }`) instead of the documented array, unlike `Detail.yml`,
+  the other Index example, and the `ApprovalLog[]` type. Almost certainly a seeding artifact in that
+  one fixture, but `latestApproverNote()` defends against it with an `Array.isArray` normalisation
+  rather than trusting the type and crashing the detail page.
 - Evidence upload still has no endpoint — the file is validated and gates Submit client-side only.
 - The item heading falls back `description → name → code → parent_id.name`; the contract's item
   objects carry none of the first three yet.

@@ -67,6 +67,7 @@
                 :columns="columns"
                 :approve-mutation="approveMutation"
                 :reject-mutation="rejectMutation"
+                :request-revision-mutation="requestRevisionMutation"
                 @row-click="onRowClick"
             />
         </MpFlex>
@@ -86,6 +87,7 @@ import {
     useGetApprovalList,
     useApproveEvaluateGriQuantitative,
     useRejectEvaluateGriQuantitative,
+    useRequestRevisionEvaluateGriQuantitative,
     approvalSummary,
 } from "@/services/evaluate-gri-quantitative";
 
@@ -131,6 +133,7 @@ const summary = computed(() => approvalSummary(items.value, myEmail.value));
 
 const approveMutation = useApproveEvaluateGriQuantitative();
 const rejectMutation = useRejectEvaluateGriQuantitative();
+const requestRevisionMutation = useRequestRevisionEvaluateGriQuantitative();
 
 const columns = [
     {

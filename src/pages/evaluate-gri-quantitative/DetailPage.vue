@@ -65,9 +65,7 @@
             <MpFlex v-else-if="detail" gap="6" alignItems="flex-start">
                 <MpFlex direction="column" gap="6" flex="2" minWidth="0">
                     <MpFlex
-                        v-if="
-                            detail.flow_status === 'rejected' && rejectionNote
-                        "
+                        v-if="approverNote && !fromApproval && !readOnly"
                         direction="column"
                         gap="1"
                         padding="16px"
@@ -77,14 +75,22 @@
                         rounded="md"
                     >
                         <MpFlex alignItems="center" gap="2">
-                            <MpBadge for="tableStatus" type="critical"
-                                >rejected</MpBadge
+                            <MpBadge
+                                for="tableStatus"
+                                :type="noteIsRevision ? 'warning' : 'critical'"
+                                >{{
+                                    noteIsRevision
+                                        ? "revision requested"
+                                        : "rejected"
+                                }}</MpBadge
                             >
-                            <MpText size="label" weight="semiBold"
-                                >Reviewer note</MpText
-                            >
+                            <MpText size="label" weight="semiBold">{{
+                                noteIsRevision
+                                    ? "Revision requested"
+                                    : "Reviewer note"
+                            }}</MpText>
                         </MpFlex>
-                        <MpText size="label">{{ rejectionNote }}</MpText>
+                        <MpText size="label">{{ approverNote.note }}</MpText>
                     </MpFlex>
 
                     <MpFlex gap="6">
@@ -304,14 +310,20 @@
                     <!-- approver-facing actions — only on rows opened from the Review & Approval queue -->
                     <MpFlex v-if="canAct" gap="3" paddingTop="2">
                         <MpButton
-                            :is-disabled="isApproving"
+                            :is-disabled="isApproving || isRequestingRevision"
                             :is-loading="isApproving"
                             @click="approve"
                             >Approve</MpButton
                         >
                         <MpButton
+                            variant="secondary"
+                            :is-disabled="isApproving || isRequestingRevision"
+                            @click="openRequestRevision"
+                            >Request Revision</MpButton
+                        >
+                        <MpButton
                             variant="danger"
-                            :is-disabled="isApproving"
+                            :is-disabled="isApproving || isRequestingRevision"
                             @click="openReject"
                             >Reject</MpButton
                         >
@@ -562,6 +574,49 @@
             </MpModalContent>
             <MpModalOverlay />
         </MpModal>
+
+        <MpModal
+            :is-open="isRequestingRevisionOpen"
+            size="md"
+            @close="closeRequestRevision"
+        >
+            <MpModalContent>
+                <MpModalHeader>
+                    Request revision
+                    <MpModalCloseButton />
+                </MpModalHeader>
+                <MpModalBody>
+                    <MpFormControl id="detail-revision-notes" is-required>
+                        <MpFormLabel>Revision Notes</MpFormLabel>
+                        <MpTextarea
+                            v-model="revisionNotes"
+                            placeholder="Explain what needs to be revised"
+                        />
+                    </MpFormControl>
+                </MpModalBody>
+                <MpModalFooter>
+                    <MpButtonGroup>
+                        <MpButton
+                            variant="ghost"
+                            @click="closeRequestRevision"
+                            >Cancel</MpButton
+                        >
+                        <MpButton
+                            variant="primary"
+                            :is-disabled="
+                                !canReject(revisionNotes) ||
+                                isRequestingRevision
+                            "
+                            :is-loading="isRequestingRevision"
+                            @click="confirmRequestRevision"
+                        >
+                            Request Revision
+                        </MpButton>
+                    </MpButtonGroup>
+                </MpModalFooter>
+            </MpModalContent>
+            <MpModalOverlay />
+        </MpModal>
     </MpFlex>
 </template>
 
@@ -624,8 +679,9 @@ import {
     useDeleteEvaluateGriQuantitative,
     useApproveEvaluateGriQuantitative,
     useRejectEvaluateGriQuantitative,
+    useRequestRevisionEvaluateGriQuantitative,
     isDetailReadOnly,
-    latestRejectionNote,
+    latestApproverNote,
     groupItemsByCategory,
     fromSubmissionValues,
     toSubmissionValue,
@@ -657,6 +713,7 @@ const timelineStatus: Record<
     APPROVED: "approved",
     REJECTED: "rejected",
     CANCEL: "canceled",
+    REQUEST_REVISION: "rejected",
 };
 
 // Section marker rows get a distinct tint so they read as structural, not another data row.
@@ -694,6 +751,7 @@ const actionVerb: Record<ApprovalAction, string> = {
     APPROVED: "Approved by",
     REJECTED: "Rejected by",
     CANCEL: "Canceled by",
+    REQUEST_REVISION: "Revision requested by",
 };
 
 function approverLabel(log: ApprovalLog, a: ApprovalApprover) {
@@ -738,8 +796,14 @@ const approvalLogs = computed(() =>
         (a, b) => a.stage_order - b.stage_order,
     ),
 );
-const rejectionNote = computed(() =>
-    detail.value ? latestRejectionNote(detail.value.approval_logs) : null,
+// GROU-657 — the banner is driven by whether a note exists, not by flow_status, because a
+// revision request returns the submission to 'draft' (not 'rejected'), and would otherwise never
+// show. Labelled by the approver's action so a genuine rejection still reads "rejected".
+const approverNote = computed(() =>
+    detail.value ? latestApproverNote(detail.value.approval_logs) : null,
+);
+const noteIsRevision = computed(
+    () => approverNote.value?.action === "REQUEST_REVISION",
 );
 
 const items = computed(() => detail.value?.items ?? []);
@@ -915,6 +979,14 @@ const isRejectSubmitting = computed(() => rejectMutation.isPending.value);
 const isRejecting = ref(false);
 const rejectNotes = ref("");
 
+// GROU-657 — third approver decision; same availability as approve/reject (canAct)
+const requestRevisionMutation = useRequestRevisionEvaluateGriQuantitative();
+const isRequestingRevision = computed(
+    () => requestRevisionMutation.isPending.value,
+);
+const isRequestingRevisionOpen = ref(false);
+const revisionNotes = ref("");
+
 async function approve() {
     if (!detail.value) return;
     try {
@@ -946,6 +1018,31 @@ async function confirmReject() {
         return;
     }
     closeReject();
+    router.push("/evaluate-gri-quantitative/approval");
+}
+
+function openRequestRevision() {
+    revisionNotes.value = "";
+    isRequestingRevisionOpen.value = true;
+}
+
+function closeRequestRevision() {
+    isRequestingRevisionOpen.value = false;
+    revisionNotes.value = "";
+}
+
+async function confirmRequestRevision() {
+    if (!detail.value || !canReject(revisionNotes.value)) return;
+    try {
+        await requestRevisionMutation.mutateAsync({
+            id: detail.value.id,
+            remarks: revisionNotes.value.trim(),
+        });
+    } catch {
+        // http.ts already toasted the envelope error — keep the modal open for a retry
+        return;
+    }
+    closeRequestRevision();
     router.push("/evaluate-gri-quantitative/approval");
 }
 </script>
