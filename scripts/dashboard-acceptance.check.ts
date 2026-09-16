@@ -65,67 +65,67 @@ const EXPECTED: Record<string, { kpis: number; charts: string[] }> = {
   General: {
     kpis: 5,
     charts: [
-      'Gender per tahun',
-      'Status karyawan per tahun',
-      'Tren jumlah karyawan',
-      'Komposisi gender (%)',
-      'Tipe pekerja non-karyawan',
-      'Komposisi status karyawan (%)',
+      'Gender by year',
+      'Employment status by year',
+      'Employee headcount trend',
+      'Gender composition (%)',
+      'Non-employee worker type',
+      'Employment status composition (%)',
     ],
   },
   Energy: {
     kpis: 3,
     charts: [
-      'Konsumsi energi per tahun (GJ)',
-      'Tren konsumsi energi',
-      'Breakdown jenis bahan bakar non-renewable',
+      'Energy consumption by year (GJ)',
+      'Energy consumption trend',
+      'Non-renewable fuel type breakdown',
     ],
   },
   Waste: {
     kpis: 4,
     charts: [
-      'Limbah dialihkan dari pembuangan (ton)',
-      'Limbah dibuang (ton)',
-      'Tren total limbah per tahun (ton)',
+      'Waste diverted from disposal (ton)',
+      'Waste directed to disposal (ton)',
+      'Total waste trend by year (ton)',
     ],
   },
   Water: {
     kpis: 4,
     charts: [
-      'Penarikan air per sumber (ML)',
-      'Pembuangan air per tujuan (ML)',
-      'Tren penggunaan air (ML)',
+      'Water withdrawal by source (ML)',
+      'Water discharge by destination (ML)',
+      'Water usage trend (ML)',
     ],
   },
   'Diversity & Equal Opportunity': {
     kpis: 4,
     charts: [
-      'Komposisi governance bodies berdasarkan gender',
-      'Distribusi kelompok umur karyawan',
-      'Rasio gaji perempuan terhadap laki-laki per kategori',
+      'Governance body composition by gender',
+      'Employee age group distribution',
+      'Female-to-male salary ratio by category',
     ],
   },
   Employment: {
     kpis: 4,
     charts: [
-      'Karyawan baru berdasarkan gender & kelompok usia',
-      'Cuti orang tua — berhak, diambil, dan kembali',
+      'New employees by gender & age group',
+      'Parental leave — entitled, took, and returned',
     ],
   },
   OHS: {
     kpis: 4,
     charts: [
-      'Insiden keselamatan kerja per tahun',
-      'Insiden tetap vs kontrak',
-      'Tren jam kerja & tingkat kecelakaan',
+      'Occupational safety incidents by year',
+      'Permanent vs contract incidents',
+      'Hours worked & accident rate trend',
     ],
   },
   'Training & Education': {
     kpis: 4,
     charts: [
-      'Rata-rata jam pelatihan per gender',
-      'Rata-rata jam pelatihan per kategori karyawan',
-      'Tren jam pelatihan per tahun',
+      'Average training hours by gender',
+      'Average training hours by employee category',
+      'Training hours trend by year',
     ],
   },
 }
