@@ -204,7 +204,7 @@ const statusChartData = computed(() => ({
     labels: ["Answered", "Pending"],
     datasets: [
         {
-            label: "Narasi",
+            label: "Narratives",
             data: [
                 answeredCount.value,
                 narratives.value.length - answeredCount.value,
