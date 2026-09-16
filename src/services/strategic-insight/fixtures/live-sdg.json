@@ -4,9 +4,9 @@
       "actions": [
         {
           "adoption_status": "TAKE",
-          "baseline": "baseline sekarang",
+          "baseline": "current baseline",
           "created_at": null,
-          "detail_action_solution": "Berinvestasi pada energi terbarukan",
+          "detail_action_solution": "Investing in renewable energy",
           "ids": "123",
           "impact": "Operations Impact",
           "indicator_id": {
@@ -14,7 +14,7 @@
             "id": "oP229ralLrzM",
             "name": "Sustainability Investment"
           },
-          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "key_business_action": "Partnership with business partners/non-profit organizations working in occupational safety",
           "pillar_id": {
             "id": "qT4ROSu3d1NL",
             "name": "Operation"
@@ -27,14 +27,14 @@
             "name": "SDG 12",
             "number": 12
           },
-          "target": "target nanti",
+          "target": "future target",
           "updated_at": null
         },
         {
           "adoption_status": "TAKE",
-          "baseline": "baseline sekarang",
+          "baseline": "current baseline",
           "created_at": null,
-          "detail_action_solution": "Berinvestasi pada energi terbarukan",
+          "detail_action_solution": "Investing in renewable energy",
           "ids": "1234",
           "impact": "Investment Impact",
           "indicator_id": {
@@ -42,7 +42,7 @@
             "id": "oP229ralLrzM",
             "name": "Sustainability Investment"
           },
-          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "key_business_action": "Partnership with business partners/non-profit organizations working in occupational safety",
           "pillar_id": {
             "id": "qT4ROSu3d1NLdssd",
             "name": "Investment"
@@ -55,7 +55,7 @@
             "name": "SDG 1",
             "number": 1
           },
-          "target": "target nanti",
+          "target": "future target",
           "updated_at": null
         }
       ],
@@ -71,7 +71,7 @@
   ],
   "summary": [
     {
-      "description": "Adopted dari total 17 SDG PBB",
+      "description": "Adopted from a total of 17 UN SDGs",
       "key": "sdg_roadmap",
       "name": "Holding SDG Roadmap",
       "total": 17,
