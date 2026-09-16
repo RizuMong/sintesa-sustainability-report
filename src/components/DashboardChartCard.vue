@@ -86,7 +86,7 @@ const seriesLines = computed(() => {
             .map((label, i) => {
                 const value = series.data[i];
                 if (value === undefined) return null;
-                return `${label}: ${value.toLocaleString("id-ID")}`;
+                return `${label}: ${value.toLocaleString("en-US")}`;
             })
             .filter((v): v is string => v !== null);
         return [pairs.join(" · ")];
@@ -97,7 +97,7 @@ const seriesLines = computed(() => {
             .map((label, i) => {
                 const value = series.data[i];
                 if (value === undefined) return null;
-                return `${label}: ${value.toLocaleString("id-ID")}`;
+                return `${label}: ${value.toLocaleString("en-US")}`;
             })
             .filter((v): v is string => v !== null);
         return `${series.label}: ${pairs.join(" · ")}`;

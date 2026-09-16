@@ -248,7 +248,7 @@ function formatSummary(kpi: StrategicInsightGriSummary): string {
     const isRatio = kpi.aggregation === "AVERAGE" && Math.abs(kpi.value) < 10;
     const value = isRatio
         ? kpi.value.toFixed(2)
-        : (Math.round(kpi.value * 10) / 10).toLocaleString("id-ID");
+        : (Math.round(kpi.value * 10) / 10).toLocaleString("en-US");
     const suffix = kpi.unit?.name ? ` ${kpi.unit.name}` : "";
     const denominator = kpi.total === undefined ? "" : ` / ${kpi.total}`;
     return `${value}${denominator}${suffix}`;
