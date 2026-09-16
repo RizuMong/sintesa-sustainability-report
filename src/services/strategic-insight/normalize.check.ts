@@ -56,8 +56,8 @@ assert.equal(energy.sequence, 2)
 // Both categories have no dimensions[] yet (Phase 2), so no cards render — but chartCardsFor must
 // not throw, and the category must resolve to a real tab rather than falling through generically.
 // categoryCaption() is the direct probe for resolveTab() without reaching into chart-spec.ts internals.
-assert.equal(categoryCaption(general), 'Total karyawan & pekerja non-karyawan', 'general gri_codes must resolve resolveTab() to "general"')
-assert.equal(categoryCaption(energy), 'Konsumsi energi dalam organisasi', 'energy gri_codes must resolve resolveTab() to "energy"')
+assert.equal(categoryCaption(general), 'Total employees & non-employee workers', 'general gri_codes must resolve resolveTab() to "general"')
+assert.equal(categoryCaption(energy), 'Energy consumption within the organization', 'energy gri_codes must resolve resolveTab() to "energy"')
 
 // chartCardsFor must not throw even with empty dimensions[] (Phase 2 fills these in)
 assert.doesNotThrow(() => chartCardsFor(general))

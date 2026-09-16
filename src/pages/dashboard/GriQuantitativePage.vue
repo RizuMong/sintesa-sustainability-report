@@ -89,7 +89,7 @@
                 </MpTabs>
 
                 <MpText size="label" color="text.secondary"
-                    >Menampilkan:
+                    >Showing:
                     {{ filterState.activeFilterLabel.value }}</MpText
                 >
 

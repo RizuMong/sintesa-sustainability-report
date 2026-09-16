@@ -64,23 +64,23 @@
 
         <MpFlex v-else direction="column" padding="24px" gap="6">
             <MpText size="label" color="text.secondary"
-                >Menampilkan: {{ filterState.activeFilterLabel.value }}</MpText
+                >Showing: {{ filterState.activeFilterLabel.value }}</MpText
             >
 
             <div :class="css({ display: 'flex', gap: '2' })">
                 <SummaryBox
                     variant="blue"
-                    label="Total narasi"
+                    label="Total narratives"
                     :amount="narratives.length"
                 />
                 <SummaryBox
                     variant="green"
-                    label="Sudah diisi"
+                    label="Answered"
                     :amount="answeredCount"
                 />
                 <SummaryBox
                     variant="orange"
-                    label="Belum diisi"
+                    label="Pending"
                     :amount="narratives.length - answeredCount"
                 />
             </div>
@@ -88,7 +88,7 @@
             <MpFlex gap="4" wrap="wrap">
                 <MpChart
                     id="gri-qual-review-status"
-                    title="Status pengisian"
+                    title="Completion status"
                     type="doughnut"
                     width-container="330px"
                     width-chart="330px"

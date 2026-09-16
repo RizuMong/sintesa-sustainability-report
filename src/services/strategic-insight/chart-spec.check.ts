@@ -53,58 +53,58 @@ const tabs = orderedCategories(contract)
 // real multi-entity payload arrives).
 const expectedTitles: Record<string, string[]> = {
   General: [
-    'Gender per tahun',
-    'Status karyawan per tahun',
-    'Tren jumlah karyawan',
-    'Komposisi gender (%)',
-    'Tipe pekerja non-karyawan',
-    'Komposisi status karyawan (%)',
+    'Gender by year',
+    'Employment status by year',
+    'Employee headcount trend',
+    'Gender composition (%)',
+    'Non-employee worker type',
+    'Employment status composition (%)',
   ],
   Energy: [
-    'Konsumsi energi per tahun (GJ)',
-    'Tren konsumsi energi',
-    'Breakdown jenis bahan bakar non-renewable',
+    'Energy consumption by year (GJ)',
+    'Energy consumption trend',
+    'Non-renewable fuel type breakdown',
   ],
   Waste: [
-    'Limbah dialihkan dari pembuangan (ton)',
-    'Limbah dibuang (ton)',
-    'Tren total limbah per tahun (ton)',
+    'Waste diverted from disposal (ton)',
+    'Waste directed to disposal (ton)',
+    'Total waste trend by year (ton)',
   ],
   Water: [
-    'Penarikan air per sumber (ML)',
-    'Pembuangan air per tujuan (ML)',
-    'Tren penggunaan air (ML)',
+    'Water withdrawal by source (ML)',
+    'Water discharge by destination (ML)',
+    'Water usage trend (ML)',
   ],
   'Diversity & Equal Opportunity': [
-    'Komposisi governance bodies berdasarkan gender',
-    'Distribusi kelompok umur karyawan',
-    'Rasio gaji perempuan terhadap laki-laki per kategori',
+    'Governance body composition by gender',
+    'Employee age group distribution',
+    'Female-to-male salary ratio by category',
   ],
   Employment: [
-    'Karyawan baru berdasarkan gender & kelompok usia',
-    'Cuti orang tua — berhak, diambil, dan kembali',
+    'New employees by gender & age group',
+    'Parental leave — entitled, took, and returned',
   ],
   OHS: [
-    'Insiden keselamatan kerja per tahun',
-    'Insiden tetap vs kontrak',
-    'Tren jam kerja & tingkat kecelakaan',
+    'Occupational safety incidents by year',
+    'Permanent vs contract incidents',
+    'Hours worked & accident rate trend',
   ],
   'Training & Education': [
-    'Rata-rata jam pelatihan per gender',
-    'Rata-rata jam pelatihan per kategori karyawan',
-    'Tren jam pelatihan per tahun',
+    'Average training hours by gender',
+    'Average training hours by employee category',
+    'Training hours trend by year',
   ],
 }
 
 const expectedCaptions: Record<string, string> = {
-  General: 'Total karyawan & pekerja non-karyawan',
-  Energy: 'Konsumsi energi dalam organisasi',
-  Waste: 'Pengelolaan limbah',
-  Water: 'Penarikan & pembuangan air',
-  'Diversity & Equal Opportunity': 'Keragaman & kesetaraan kesempatan',
-  Employment: 'Rekrutmen & cuti orang tua',
-  OHS: 'Keselamatan & kesehatan kerja',
-  'Training & Education': 'Pelatihan & pendidikan karyawan',
+  General: 'Total employees & non-employee workers',
+  Energy: 'Energy consumption within the organization',
+  Waste: 'Waste management',
+  Water: 'Water withdrawal & discharge',
+  'Diversity & Equal Opportunity': 'Diversity & equal opportunity',
+  Employment: 'Recruitment & parental leave',
+  OHS: 'Occupational health & safety',
+  'Training & Education': 'Employee training & education',
 }
 
 let cardCount = 0
@@ -143,8 +143,8 @@ for (const tab of tabs) {
 
 // ---- Water withdrawal vs discharge must differ (different metric_key/water_flow filter) ----
 const waterCards = cardsByTab.get('Water')!
-const withdrawalCard = waterCards.find((c) => c.title === 'Penarikan air per sumber (ML)')!
-const dischargeCard = waterCards.find((c) => c.title === 'Pembuangan air per tujuan (ML)')!
+const withdrawalCard = waterCards.find((c) => c.title === 'Water withdrawal by source (ML)')!
+const dischargeCard = waterCards.find((c) => c.title === 'Water discharge by destination (ML)')!
 assert.notDeepEqual(
   withdrawalCard.datasets,
   dischargeCard.datasets,
@@ -155,7 +155,7 @@ assert.notDeepEqual(
 const diversity = tabs.find((c) => c.category_id.name === 'Diversity & Equal Opportunity')!
 const salaryCard = cardsByTab
   .get('Diversity & Equal Opportunity')!
-  .find((c) => c.title === 'Rasio gaji perempuan terhadap laki-laki per kategori')!
+  .find((c) => c.title === 'Female-to-male salary ratio by category')!
 for (const ds of salaryCard.datasets) {
   for (const v of ds.data) {
     if (v === 0) continue

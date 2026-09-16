@@ -112,14 +112,14 @@ function resolveTab(category: StrategicInsightGriCategory): GriTabKey {
 }
 
 const CAPTIONS: Record<Exclude<GriTabKey, null>, string> = {
-  general: 'Total karyawan & pekerja non-karyawan',
-  energy: 'Konsumsi energi dalam organisasi',
-  waste: 'Pengelolaan limbah',
-  water: 'Penarikan & pembuangan air',
-  diversity: 'Keragaman & kesetaraan kesempatan',
-  employment: 'Rekrutmen & cuti orang tua',
-  ohs: 'Keselamatan & kesehatan kerja',
-  training: 'Pelatihan & pendidikan karyawan',
+  general: 'Total employees & non-employee workers',
+  energy: 'Energy consumption within the organization',
+  waste: 'Waste management',
+  water: 'Water withdrawal & discharge',
+  diversity: 'Diversity & equal opportunity',
+  employment: 'Recruitment & parental leave',
+  ohs: 'Occupational health & safety',
+  training: 'Employee training & education',
 }
 
 export function categoryCaption(category: StrategicInsightGriCategory): string {
@@ -140,7 +140,7 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-general-gender-per-tahun',
-      title: 'Gender per tahun',
+      title: 'Gender by year',
       caption: 'GRI 2-7a',
       kind: 'bar',
       width: 'half',
@@ -149,7 +149,7 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-general-status-karyawan-per-tahun',
-      title: 'Status karyawan per tahun',
+      title: 'Employment status by year',
       caption: 'GRI 2-7b',
       kind: 'bar',
       width: 'half',
@@ -158,7 +158,7 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-general-tren-jumlah-karyawan',
-      title: 'Tren jumlah karyawan',
+      title: 'Employee headcount trend',
       caption: '',
       kind: 'line',
       width: 'half',
@@ -166,7 +166,7 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
       datasets: [
         { label: 'Total', data: totalPerPeriod(itemsAt(items, 'gender', 'MALE').concat(itemsAt(items, 'gender', 'FEMALE')), periods) },
         {
-          label: 'Tetap',
+          label: 'Permanent',
           data: periods.map((p) =>
             aggregateItems(itemsAt(items, 'employment_status', 'PERMANENT').filter((i) => i.period === p)),
           ),
@@ -175,7 +175,7 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-general-komposisi-gender',
-      title: 'Komposisi gender (%)',
+      title: 'Gender composition (%)',
       caption: '',
       kind: 'doughnut',
       width: 'half',
@@ -185,17 +185,17 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
     entities.length > 1
       ? card({
           id: 'gri-quant-general-perbandingan-antar-pt',
-          title: 'Perbandingan total karyawan antar PT',
+          title: 'Total employees comparison across entities',
           caption: '',
           kind: 'bar-horizontal',
           width: 'full',
           labels: entities.map((e) => e.code),
-          datasets: [{ label: 'Total karyawan', data: entities.map((e) => e.value) }],
+          datasets: [{ label: 'Total employees', data: entities.map((e) => e.value) }],
         })
       : null,
     card({
       id: 'gri-quant-general-tipe-pekerja-non-karyawan',
-      title: 'Tipe pekerja non-karyawan',
+      title: 'Non-employee worker type',
       caption: 'GRI 2-8a',
       kind: 'bar',
       width: 'half',
@@ -204,7 +204,7 @@ function generalCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-general-komposisi-status-karyawan',
-      title: 'Komposisi status karyawan (%)',
+      title: 'Employment status composition (%)',
       caption: '',
       kind: 'pie',
       width: 'half',
@@ -225,7 +225,7 @@ function energyCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-energy-konsumsi-per-tahun',
-      title: 'Konsumsi energi per tahun (GJ)',
+      title: 'Energy consumption by year (GJ)',
       caption: 'GRI 302-1a/b — Non-renewable vs Renewable',
       kind: 'bar',
       width: 'half',
@@ -234,8 +234,8 @@ function energyCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-energy-tren-konsumsi',
-      title: 'Tren konsumsi energi',
-      caption: 'GRI 302-1 — Total energi per tahun',
+      title: 'Energy consumption trend',
+      caption: 'GRI 302-1 — Total energy by year',
       kind: 'line',
       width: 'half',
       labels: periods.map(String),
@@ -243,7 +243,7 @@ function energyCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-energy-breakdown-bahan-bakar',
-      title: 'Breakdown jenis bahan bakar non-renewable',
+      title: 'Non-renewable fuel type breakdown',
       caption: 'GRI 302-1a',
       kind: 'bar',
       width: 'full',
@@ -267,8 +267,8 @@ function wasteCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-waste-dialihkan',
-      title: 'Limbah dialihkan dari pembuangan (ton)',
-      caption: 'GRI 306-4a — Berdasarkan komposisi',
+      title: 'Waste diverted from disposal (ton)',
+      caption: 'GRI 306-4a — By composition',
       kind: 'bar-stacked',
       width: 'half',
       labels: periods.map(String),
@@ -281,8 +281,8 @@ function wasteCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-waste-dibuang',
-      title: 'Limbah dibuang (ton)',
-      caption: 'GRI 306-5a — Berdasarkan komposisi',
+      title: 'Waste directed to disposal (ton)',
+      caption: 'GRI 306-5a — By composition',
       kind: 'bar-stacked',
       width: 'half',
       labels: periods.map(String),
@@ -295,7 +295,7 @@ function wasteCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-waste-tren-total',
-      title: 'Tren total limbah per tahun (ton)',
+      title: 'Total waste trend by year (ton)',
       caption: 'GRI 306-4 & 306-5 — Divert vs Disposal',
       kind: 'line',
       width: 'full',
@@ -320,7 +320,7 @@ function waterCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-water-penarikan-per-sumber',
-      title: 'Penarikan air per sumber (ML)',
+      title: 'Water withdrawal by source (ML)',
       caption: 'GRI 303-3a',
       kind: 'bar-stacked',
       width: 'half',
@@ -329,7 +329,7 @@ function waterCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-water-pembuangan-per-tujuan',
-      title: 'Pembuangan air per tujuan (ML)',
+      title: 'Water discharge by destination (ML)',
       caption: 'GRI 303-4a',
       kind: 'bar-stacked',
       width: 'half',
@@ -338,7 +338,7 @@ function waterCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-water-tren-penggunaan',
-      title: 'Tren penggunaan air (ML)',
+      title: 'Water usage trend (ML)',
       caption: 'GRI 303-3 & 303-4',
       kind: 'line',
       width: 'full',
@@ -360,7 +360,7 @@ function diversityCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-diversity-governance-gender',
-      title: 'Komposisi governance bodies berdasarkan gender',
+      title: 'Governance body composition by gender',
       caption: 'GRI 405-1a',
       kind: 'bar',
       width: 'half',
@@ -369,7 +369,7 @@ function diversityCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-diversity-distribusi-umur',
-      title: 'Distribusi kelompok umur karyawan',
+      title: 'Employee age group distribution',
       caption: 'GRI 405-1b',
       kind: 'bar-stacked',
       width: 'half',
@@ -378,7 +378,7 @@ function diversityCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-diversity-rasio-gaji',
-      title: 'Rasio gaji perempuan terhadap laki-laki per kategori',
+      title: 'Female-to-male salary ratio by category',
       caption: 'GRI 405-2a',
       kind: 'bar',
       width: 'full',
@@ -403,7 +403,7 @@ function employmentCards(category: StrategicInsightGriCategory): ChartCard[] {
   const parentalItems = byMetric(items, 'parental_leave')
   const hirePeriods = periodsOf(hireItems)
 
-  // Cuti orang tua: x-axis is parental_stage, series is gender — the one card whose axes are
+  // Parental leave: x-axis is parental_stage, series is gender — the one card whose axes are
   // both dimension members rather than periods, so it is built directly rather than via
   // seriesOverPeriods (which always puts periods on x).
   const parentalDatasets: ChartCardSeries[] = gender.map((g) => ({
@@ -416,7 +416,7 @@ function employmentCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-employment-karyawan-baru',
-      title: 'Karyawan baru berdasarkan gender & kelompok usia',
+      title: 'New employees by gender & age group',
       caption: 'GRI 401-1a',
       kind: 'bar',
       width: 'half',
@@ -425,7 +425,7 @@ function employmentCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-employment-cuti-orang-tua',
-      title: 'Cuti orang tua — berhak, diambil, dan kembali',
+      title: 'Parental leave — entitled, took, and returned',
       caption: 'GRI 401-3a/b/c',
       kind: 'bar',
       width: 'half',
@@ -447,7 +447,7 @@ function ohsCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-ohs-insiden-per-tahun',
-      title: 'Insiden keselamatan kerja per tahun',
+      title: 'Occupational safety incidents by year',
       caption: 'GRI 403-9a',
       kind: 'bar',
       width: 'half',
@@ -456,7 +456,7 @@ function ohsCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-ohs-tetap-vs-kontrak',
-      title: 'Insiden tetap vs kontrak',
+      title: 'Permanent vs contract incidents',
       caption: 'GRI 403-9a',
       kind: 'bar',
       width: 'half',
@@ -465,7 +465,7 @@ function ohsCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-ohs-tren-kecelakaan',
-      title: 'Tren jam kerja & tingkat kecelakaan',
+      title: 'Hours worked & accident rate trend',
       caption: 'GRI 403-9a',
       kind: 'line',
       width: 'full',
@@ -491,7 +491,7 @@ function trainingCards(category: StrategicInsightGriCategory): ChartCard[] {
   const cards: (ChartCard | null)[] = [
     card({
       id: 'gri-quant-training-per-gender',
-      title: 'Rata-rata jam pelatihan per gender',
+      title: 'Average training hours by gender',
       caption: 'GRI 404-1a',
       kind: 'bar',
       width: 'half',
@@ -500,7 +500,7 @@ function trainingCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-training-per-kategori',
-      title: 'Rata-rata jam pelatihan per kategori karyawan',
+      title: 'Average training hours by employee category',
       caption: 'GRI 404-1a',
       kind: 'bar',
       width: 'half',
@@ -509,7 +509,7 @@ function trainingCards(category: StrategicInsightGriCategory): ChartCard[] {
     }),
     card({
       id: 'gri-quant-training-tren',
-      title: 'Tren jam pelatihan per tahun',
+      title: 'Training hours trend by year',
       caption: 'GRI 404-1',
       kind: 'line',
       width: 'full',

@@ -16,43 +16,43 @@
         "members": [
           {
             "key": "MALE",
-            "name": "Laki-laki"
+            "name": "Male"
           },
           {
             "key": "FEMALE",
-            "name": "Perempuan"
+            "name": "Female"
           }
         ]
       },
       {
         "key": "employment_status",
-        "name": "Status Karyawan",
+        "name": "Employment Status",
         "members": [
           {
             "key": "PERMANENT",
-            "name": "Tetap"
+            "name": "Permanent"
           },
           {
             "key": "CONTRACT",
-            "name": "Kontrak"
+            "name": "Contract"
           }
         ]
       },
       {
         "key": "worker_type",
-        "name": "Tipe Pekerja Non-Karyawan",
+        "name": "Non-Employee Worker Type",
         "members": [
           {
             "key": "CONTRACTOR",
-            "name": "Kontraktor"
+            "name": "Contractor"
           },
           {
             "key": "INTERN",
-            "name": "Magang"
+            "name": "Intern"
           },
           {
             "key": "VOLUNTEER",
-            "name": "Sukarela"
+            "name": "Volunteer"
           },
           {
             "key": "OUTSOURCED",
@@ -64,35 +64,35 @@
     "summary": [
       {
         "key": "total_employee",
-        "name": "Total Karyawan",
+        "name": "Total Employees",
         "value": 8614,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "male",
-        "name": "Laki-laki",
+        "name": "Male",
         "value": 4477,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "female",
-        "name": "Perempuan",
+        "name": "Female",
         "value": 4137,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "permanent_employee",
-        "name": "Karyawan Tetap",
+        "name": "Permanent Employees",
         "value": 7102,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "contract_employee",
-        "name": "Karyawan Kontrak",
+        "name": "Contract Employees",
         "value": 1512,
         "unit": null,
         "aggregation": "SUM"
@@ -114,7 +114,7 @@
         "labels": {
           "gender": "MALE"
         },
-        "description": "Laki-laki",
+        "description": "Male",
         "value": 880,
         "unit": null,
         "input_type": "NUMBER"
@@ -134,7 +134,7 @@
         "labels": {
           "gender": "FEMALE"
         },
-        "description": "Perempuan",
+        "description": "Female",
         "value": 1680,
         "unit": null,
         "input_type": "NUMBER"
@@ -154,7 +154,7 @@
         "labels": {
           "employment_status": "PERMANENT"
         },
-        "description": "Tetap",
+        "description": "Permanent",
         "value": 590,
         "unit": null,
         "input_type": "NUMBER"
@@ -174,7 +174,7 @@
         "labels": {
           "worker_type": "INTERN"
         },
-        "description": "Magang",
+        "description": "Intern",
         "value": 18,
         "unit": null,
         "input_type": "NUMBER"
@@ -193,7 +193,7 @@
     "dimensions": [
       {
         "key": "renewability",
-        "name": "Sumber Energi",
+        "name": "Energy Source",
         "members": [
           {
             "key": "NON_RENEWABLE",
@@ -207,11 +207,11 @@
       },
       {
         "key": "fuel_type",
-        "name": "Jenis Bahan Bakar",
+        "name": "Fuel Type",
         "members": [
           {
             "key": "DIESEL",
-            "name": "Solar"
+            "name": "Diesel"
           },
           {
             "key": "BIODIESEL",
@@ -219,7 +219,7 @@
           },
           {
             "key": "GRID",
-            "name": "Grid/Batubara"
+            "name": "Grid/Coal"
           }
         ]
       }
@@ -247,7 +247,7 @@
       },
       {
         "key": "renewable_ratio",
-        "name": "% Energi Terbarukan",
+        "name": "% Renewable Energy",
         "value": 9,
         "unit": {
           "id": "9",
@@ -273,7 +273,7 @@
           "renewability": "NON_RENEWABLE",
           "fuel_type": "DIESEL"
         },
-        "description": "Non-Renewable — Solar",
+        "description": "Non-Renewable — Diesel",
         "value": 132000,
         "unit": {
           "id": "3",
@@ -319,7 +319,7 @@
     "dimensions": [
       {
         "key": "waste_route",
-        "name": "Rute Limbah",
+        "name": "Waste Route",
         "members": [
           {
             "key": "RECYCLED",
@@ -452,21 +452,21 @@
     "dimensions": [
       {
         "key": "water_flow",
-        "name": "Aliran Air",
+        "name": "Water Flow",
         "members": [
           {
             "key": "WITHDRAWAL",
-            "name": "Penarikan"
+            "name": "Withdrawal"
           },
           {
             "key": "DISCHARGE",
-            "name": "Pembuangan"
+            "name": "Discharge"
           }
         ]
       },
       {
         "key": "water_source",
-        "name": "Sumber Air",
+        "name": "Water Source",
         "members": [
           {
             "key": "SURFACE",
@@ -546,7 +546,7 @@
           "water_flow": "WITHDRAWAL",
           "water_source": "SURFACE"
         },
-        "description": "Penarikan — Surface",
+        "description": "Withdrawal — Surface",
         "value": 108,
         "unit": {
           "id": "12",
@@ -570,7 +570,7 @@
           "water_flow": "DISCHARGE",
           "water_source": "THIRD_PARTY"
         },
-        "description": "Pembuangan — Third-party",
+        "description": "Discharge — Third-party",
         "value": 25,
         "unit": {
           "id": "12",
@@ -597,35 +597,35 @@
         "members": [
           {
             "key": "MALE",
-            "name": "Pria"
+            "name": "Male"
           },
           {
             "key": "FEMALE",
-            "name": "Wanita"
+            "name": "Female"
           }
         ]
       },
       {
         "key": "age_band",
-        "name": "Kelompok Umur",
+        "name": "Age Group",
         "members": [
           {
             "key": "UNDER_30",
-            "name": "<30 tahun"
+            "name": "<30 years"
           },
           {
             "key": "BETWEEN_30_50",
-            "name": "30-50 tahun"
+            "name": "30-50 years"
           },
           {
             "key": "OVER_50",
-            "name": ">50 tahun"
+            "name": ">50 years"
           }
         ]
       },
       {
         "key": "employee_category",
-        "name": "Kategori Karyawan",
+        "name": "Employee Category",
         "members": [
           {
             "key": "SENIOR",
@@ -649,7 +649,7 @@
     "summary": [
       {
         "key": "governance_male_ratio",
-        "name": "Governance — Pria (%)",
+        "name": "Governance — Male (%)",
         "value": 71,
         "unit": {
           "id": "9",
@@ -659,7 +659,7 @@
       },
       {
         "key": "governance_female_ratio",
-        "name": "Governance — Wanita (%)",
+        "name": "Governance — Female (%)",
         "value": 29,
         "unit": {
           "id": "9",
@@ -669,14 +669,14 @@
       },
       {
         "key": "salary_ratio_senior",
-        "name": "Rasio Gaji F/M (Senior)",
+        "name": "Salary Ratio F/M (Senior)",
         "value": 0.93,
         "unit": null,
         "aggregation": "AVERAGE"
       },
       {
         "key": "salary_ratio_junior",
-        "name": "Rasio Gaji F/M (Junior)",
+        "name": "Salary Ratio F/M (Junior)",
         "value": 0.99,
         "unit": null,
         "aggregation": "AVERAGE"
@@ -698,7 +698,7 @@
         "labels": {
           "gender": "FEMALE"
         },
-        "description": "Wanita",
+        "description": "Female",
         "value": 3,
         "unit": null,
         "input_type": "NUMBER"
@@ -718,7 +718,7 @@
         "labels": {
           "age_band": "BETWEEN_30_50"
         },
-        "description": "30-50 tahun",
+        "description": "30-50 years",
         "value": 425,
         "unit": null,
         "input_type": "NUMBER"
@@ -762,47 +762,47 @@
         "members": [
           {
             "key": "MALE",
-            "name": "Pria"
+            "name": "Male"
           },
           {
             "key": "FEMALE",
-            "name": "Wanita"
+            "name": "Female"
           }
         ]
       },
       {
         "key": "age_band",
-        "name": "Kelompok Umur",
+        "name": "Age Group",
         "members": [
           {
             "key": "UNDER_30",
-            "name": "<30 tahun"
+            "name": "<30 years"
           },
           {
             "key": "BETWEEN_30_50",
-            "name": "30-50 tahun"
+            "name": "30-50 years"
           },
           {
             "key": "OVER_50",
-            "name": ">50 tahun"
+            "name": ">50 years"
           }
         ]
       },
       {
         "key": "parental_stage",
-        "name": "Tahap Cuti Orang Tua",
+        "name": "Parental Leave Stage",
         "members": [
           {
             "key": "ENTITLED",
-            "name": "Berhak"
+            "name": "Entitled"
           },
           {
             "key": "TOOK",
-            "name": "Mengambil"
+            "name": "Took"
           },
           {
             "key": "RETURNED",
-            "name": "Kembali"
+            "name": "Returned"
           }
         ]
       }
@@ -810,28 +810,28 @@
     "summary": [
       {
         "key": "new_hire_male",
-        "name": "Karyawan Baru (Pria)",
+        "name": "New Hires (Male)",
         "value": 131,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "new_hire_female",
-        "name": "Karyawan Baru (Wanita)",
+        "name": "New Hires (Female)",
         "value": 168,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "parental_entitled_male",
-        "name": "Hak Cuti Orang Tua (Pria)",
+        "name": "Parental Leave Entitled (Male)",
         "value": 106,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "parental_entitled_female",
-        "name": "Hak Cuti Orang Tua (Wanita)",
+        "name": "Parental Leave Entitled (Female)",
         "value": 89,
         "unit": null,
         "aggregation": "SUM"
@@ -854,7 +854,7 @@
           "gender": "FEMALE",
           "age_band": "UNDER_30"
         },
-        "description": "Wanita — <30 tahun",
+        "description": "Female — <30 years",
         "value": 48,
         "unit": null,
         "input_type": "NUMBER"
@@ -875,7 +875,7 @@
           "gender": "MALE",
           "parental_stage": "ENTITLED"
         },
-        "description": "Pria — Berhak",
+        "description": "Male — Entitled",
         "value": 28,
         "unit": null,
         "input_type": "NUMBER"
@@ -894,37 +894,37 @@
     "dimensions": [
       {
         "key": "incident_type",
-        "name": "Jenis Insiden",
+        "name": "Incident Type",
         "members": [
           {
             "key": "FATALITY",
-            "name": "Kematian akibat kerja"
+            "name": "Work-related fatality"
           },
           {
             "key": "HIGH_CONSEQUENCE",
-            "name": "Cedera berat (non-fatal)"
+            "name": "High-consequence injury (non-fatal)"
           },
           {
             "key": "RECORDABLE",
-            "name": "Kecelakaan tercatat"
+            "name": "Recordable incident"
           },
           {
             "key": "HOURS_WORKED",
-            "name": "Total jam kerja"
+            "name": "Total hours worked"
           }
         ]
       },
       {
         "key": "employment_status",
-        "name": "Status Karyawan",
+        "name": "Employment Status",
         "members": [
           {
             "key": "PERMANENT",
-            "name": "Karyawan Tetap"
+            "name": "Permanent Employee"
           },
           {
             "key": "CONTRACT",
-            "name": "Karyawan Kontrak"
+            "name": "Contract Employee"
           }
         ]
       }
@@ -932,28 +932,28 @@
     "summary": [
       {
         "key": "work_related_fatalities",
-        "name": "Kematian akibat kerja",
+        "name": "Work-related fatalities",
         "value": 0,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "high_consequence_injuries",
-        "name": "Cedera berat (non-fatal)",
+        "name": "High-consequence injuries (non-fatal)",
         "value": 1,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "recordable_injuries",
-        "name": "Kecelakaan tercatat",
+        "name": "Recordable incidents",
         "value": 11,
         "unit": null,
         "aggregation": "SUM"
       },
       {
         "key": "total_hours_worked",
-        "name": "Total jam kerja",
+        "name": "Total hours worked",
         "value": 1590000,
         "unit": {
           "id": "14",
@@ -979,7 +979,7 @@
           "incident_type": "RECORDABLE",
           "employment_status": "PERMANENT"
         },
-        "description": "Kecelakaan tercatat — Karyawan Tetap",
+        "description": "Recordable incident — Permanent Employee",
         "value": 8,
         "unit": null,
         "input_type": "NUMBER"
@@ -1000,7 +1000,7 @@
           "incident_type": "HOURS_WORKED",
           "employment_status": "PERMANENT"
         },
-        "description": "Total jam kerja — Karyawan Tetap",
+        "description": "Total hours worked — Permanent Employee",
         "value": 1340000,
         "unit": {
           "id": "14",
@@ -1026,17 +1026,17 @@
         "members": [
           {
             "key": "MALE",
-            "name": "Pria"
+            "name": "Male"
           },
           {
             "key": "FEMALE",
-            "name": "Wanita"
+            "name": "Female"
           }
         ]
       },
       {
         "key": "employee_category",
-        "name": "Kategori Karyawan",
+        "name": "Employee Category",
         "members": [
           {
             "key": "SENIOR",
@@ -1060,7 +1060,7 @@
     "summary": [
       {
         "key": "avg_training_hours_male",
-        "name": "Rata-rata jam pelatihan (Pria)",
+        "name": "Average training hours (Male)",
         "value": 29.4,
         "unit": {
           "id": "14",
@@ -1070,7 +1070,7 @@
       },
       {
         "key": "avg_training_hours_female",
-        "name": "Rata-rata jam pelatihan (Wanita)",
+        "name": "Average training hours (Female)",
         "value": 26.3,
         "unit": {
           "id": "14",
@@ -1080,7 +1080,7 @@
       },
       {
         "key": "avg_training_hours_senior",
-        "name": "Jam pelatihan (Senior)",
+        "name": "Training hours (Senior)",
         "value": 44.6,
         "unit": {
           "id": "14",
@@ -1090,7 +1090,7 @@
       },
       {
         "key": "avg_training_hours_junior",
-        "name": "Jam pelatihan (Junior)",
+        "name": "Training hours (Junior)",
         "value": 22.9,
         "unit": {
           "id": "14",
@@ -1115,7 +1115,7 @@
         "labels": {
           "gender": "MALE"
         },
-        "description": "Pria",
+        "description": "Male",
         "value": 36,
         "unit": {
           "id": "14",
