@@ -258,7 +258,7 @@ assert.equal(
   assert.equal(
     summaryValue(general, 'male')!.value,
     Math.round(male),
-    'the Laki-laki KPI must equal the summed male headcount items',
+    'the Male KPI must equal the summed male headcount items',
   )
 
   const energy = categories.find((c) => c.category_id.name === 'Energy')!
@@ -271,7 +271,7 @@ assert.equal(
   const expectedRatio = (ren / (ren + nonRen)) * 100
   assert.ok(
     Math.abs(summaryValue(energy, 'renewable_ratio')!.value - expectedRatio) < 1,
-    'the % Energi Terbarukan KPI must match the charted renewable share',
+    'the % Renewable Energy KPI must match the charted renewable share',
   )
 }
 

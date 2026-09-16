@@ -159,40 +159,40 @@ type ChartSource =
 
 const mockupCharts: { id: string; title: string; source: ChartSource }[] = [
   // General (7)
-  { id: 'c-gender', title: 'Gender per tahun', source: { via: 'dimension', category: 'General', dimension: 'gender' } },
-  { id: 'c-status', title: 'Status karyawan per tahun', source: { via: 'dimension', category: 'General', dimension: 'employment_status' } },
-  { id: 'c-trend', title: 'Tren jumlah karyawan', source: { via: 'trend', category: 'General', dimension: 'gender' } },
-  { id: 'c-donut', title: 'Komposisi gender (%)', source: { via: 'derived', category: 'General', dimension: 'gender', note: 'share of total' } },
-  { id: 'pt-bars', title: 'Perbandingan total karyawan antar PT', source: { via: 'entities', category: 'General' } },
-  { id: 'c-worker', title: 'Tipe pekerja non-karyawan', source: { via: 'dimension', category: 'General', dimension: 'worker_type' } },
-  { id: 'c-pie', title: 'Komposisi status karyawan (%)', source: { via: 'derived', category: 'General', dimension: 'employment_status', note: 'share of total' } },
+  { id: 'c-gender', title: 'Gender by year', source: { via: 'dimension', category: 'General', dimension: 'gender' } },
+  { id: 'c-status', title: 'Employment status by year', source: { via: 'dimension', category: 'General', dimension: 'employment_status' } },
+  { id: 'c-trend', title: 'Employee headcount trend', source: { via: 'trend', category: 'General', dimension: 'gender' } },
+  { id: 'c-donut', title: 'Gender composition (%)', source: { via: 'derived', category: 'General', dimension: 'gender', note: 'share of total' } },
+  { id: 'pt-bars', title: 'Total employees comparison across entities', source: { via: 'entities', category: 'General' } },
+  { id: 'c-worker', title: 'Non-employee worker type', source: { via: 'dimension', category: 'General', dimension: 'worker_type' } },
+  { id: 'c-pie', title: 'Employment status composition (%)', source: { via: 'derived', category: 'General', dimension: 'employment_status', note: 'share of total' } },
   // Energy (3)
-  { id: 'c-energy-bar', title: 'Konsumsi energi per tahun', source: { via: 'dimension', category: 'Energy', dimension: 'renewability' } },
-  { id: 'c-energy-trend', title: 'Tren konsumsi energi', source: { via: 'trend', category: 'Energy', dimension: 'renewability' } },
-  { id: 'c-energy-fuel', title: 'Breakdown jenis bahan bakar', source: { via: 'dimension', category: 'Energy', dimension: 'fuel_type' } },
+  { id: 'c-energy-bar', title: 'Energy consumption by year (GJ)', source: { via: 'dimension', category: 'Energy', dimension: 'renewability' } },
+  { id: 'c-energy-trend', title: 'Energy consumption trend', source: { via: 'trend', category: 'Energy', dimension: 'renewability' } },
+  { id: 'c-energy-fuel', title: 'Non-renewable fuel type breakdown', source: { via: 'dimension', category: 'Energy', dimension: 'fuel_type' } },
   // Waste (3) — divert vs disposal are two slices of one route dimension
-  { id: 'c-waste-divert', title: 'Limbah dialihkan', source: { via: 'dimension', category: 'Waste', dimension: 'waste_route' } },
-  { id: 'c-waste-disposal', title: 'Limbah dibuang', source: { via: 'dimension', category: 'Waste', dimension: 'waste_route' } },
-  { id: 'c-waste-trend', title: 'Tren total limbah', source: { via: 'trend', category: 'Waste', dimension: 'waste_route' } },
+  { id: 'c-waste-divert', title: 'Waste diverted from disposal (ton)', source: { via: 'dimension', category: 'Waste', dimension: 'waste_route' } },
+  { id: 'c-waste-disposal', title: 'Waste directed to disposal (ton)', source: { via: 'dimension', category: 'Waste', dimension: 'waste_route' } },
+  { id: 'c-waste-trend', title: 'Total waste trend by year (ton)', source: { via: 'trend', category: 'Waste', dimension: 'waste_route' } },
   // Water (3)
-  { id: 'c-water-withdraw', title: 'Penarikan air per sumber', source: { via: 'dimension', category: 'Water', dimension: 'water_source' } },
-  { id: 'c-water-discharge', title: 'Pembuangan air per tujuan', source: { via: 'dimension', category: 'Water', dimension: 'water_source' } },
-  { id: 'c-water-trend', title: 'Tren penggunaan air', source: { via: 'trend', category: 'Water', dimension: 'water_flow' } },
+  { id: 'c-water-withdraw', title: 'Water withdrawal by source (ML)', source: { via: 'dimension', category: 'Water', dimension: 'water_source' } },
+  { id: 'c-water-discharge', title: 'Water discharge by destination (ML)', source: { via: 'dimension', category: 'Water', dimension: 'water_source' } },
+  { id: 'c-water-trend', title: 'Water usage trend (ML)', source: { via: 'trend', category: 'Water', dimension: 'water_flow' } },
   // Diversity (3)
-  { id: 'c-div-gov-gender', title: 'Governance per gender', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'gender' } },
-  { id: 'c-div-age', title: 'Distribusi kelompok umur', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'age_band' } },
-  { id: 'c-div-salary', title: 'Rasio gaji per kategori', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'employee_category' } },
+  { id: 'c-div-gov-gender', title: 'Governance body composition by gender', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'gender' } },
+  { id: 'c-div-age', title: 'Employee age group distribution', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'age_band' } },
+  { id: 'c-div-salary', title: 'Female-to-male salary ratio by category', source: { via: 'dimension', category: 'Diversity & Equal Opportunity', dimension: 'employee_category' } },
   // Employment (2)
-  { id: 'c-emp-new', title: 'Karyawan baru', source: { via: 'dimension', category: 'Employment', dimension: 'gender' } },
-  { id: 'c-emp-parental', title: 'Cuti orang tua', source: { via: 'dimension', category: 'Employment', dimension: 'parental_stage' } },
+  { id: 'c-emp-new', title: 'New employees by gender & age group', source: { via: 'dimension', category: 'Employment', dimension: 'gender' } },
+  { id: 'c-emp-parental', title: 'Parental leave — entitled, took, and returned', source: { via: 'dimension', category: 'Employment', dimension: 'parental_stage' } },
   // OHS (3)
-  { id: 'c-ohs-incident', title: 'Insiden per tahun', source: { via: 'dimension', category: 'OHS', dimension: 'incident_type' } },
-  { id: 'c-ohs-type', title: 'Insiden tetap vs kontrak', source: { via: 'dimension', category: 'OHS', dimension: 'employment_status' } },
-  { id: 'c-ohs-trend', title: 'Tren jam kerja & kecelakaan', source: { via: 'trend', category: 'OHS', dimension: 'incident_type' } },
+  { id: 'c-ohs-incident', title: 'Occupational safety incidents by year', source: { via: 'dimension', category: 'OHS', dimension: 'incident_type' } },
+  { id: 'c-ohs-type', title: 'Permanent vs contract incidents', source: { via: 'dimension', category: 'OHS', dimension: 'employment_status' } },
+  { id: 'c-ohs-trend', title: 'Hours worked & accident rate trend', source: { via: 'trend', category: 'OHS', dimension: 'incident_type' } },
   // Training (3)
-  { id: 'c-train-gender', title: 'Jam pelatihan per gender', source: { via: 'dimension', category: 'Training & Education', dimension: 'gender' } },
-  { id: 'c-train-category', title: 'Jam pelatihan per kategori', source: { via: 'dimension', category: 'Training & Education', dimension: 'employee_category' } },
-  { id: 'c-train-trend', title: 'Tren jam pelatihan', source: { via: 'trend', category: 'Training & Education', dimension: 'gender' } },
+  { id: 'c-train-gender', title: 'Average training hours by gender', source: { via: 'dimension', category: 'Training & Education', dimension: 'gender' } },
+  { id: 'c-train-category', title: 'Average training hours by employee category', source: { via: 'dimension', category: 'Training & Education', dimension: 'employee_category' } },
+  { id: 'c-train-trend', title: 'Training hours trend by year', source: { via: 'trend', category: 'Training & Education', dimension: 'gender' } },
 ]
 
 assert.equal(mockupCharts.length, 27, 'the mockup draws 27 charts (26 canvas + pt-bars)')
@@ -280,7 +280,7 @@ assert.equal(aggregateItems(recordable), 8, 'OHS recordable, permanent only, fro
 // the same items split on the other axis
 assert.deepEqual(
   seriesByDimension(ohs, 'employment_status').map((s) => s.name),
-  ['Karyawan Tetap', 'Karyawan Kontrak'],
+  ['Permanent Employee', 'Contract Employee'],
 )
 
 // ---- AVERAGE KPIs are not re-summed ----
