@@ -1116,8 +1116,13 @@ const previewPeriod = String(new Date().getFullYear());
 const route = useRoute();
 const router = useRouter();
 
-const id = route.query.id as string | undefined;
-const isEdit = computed(() => Boolean(id));
+// Reactive: the detail route reuses the same component instance across ?id= navigations (e.g.
+// Save on record A redirecting the router to /master-key-indicator-quantitative and back into
+// detail for record B never remounts DetailPage.vue). A plain `const` here froze the id at the
+// first record ever opened in a session, so useMkiGriQuantitativeDetail() and the `watch(detail)`
+// prefill below silently kept serving stale values for every subsequent record.
+const id = computed(() => route.query.id as string | undefined);
+const isEdit = computed(() => Boolean(id.value));
 const isConfirmingDelete = ref(false);
 const isClientView = ref(false);
 
@@ -1460,8 +1465,8 @@ async function save() {
     // skipped and the user saw literally nothing happen after clicking Save.
     isSubmitting.value = true;
     try {
-        if (isEdit.value && id) {
-            await updateMutation.mutateAsync({ ...buildPayload(), id });
+        if (isEdit.value && id.value) {
+            await updateMutation.mutateAsync({ ...buildPayload(), id: id.value });
             toast.notify({
                 id: "mki-update",
                 variant: "success",
@@ -1492,9 +1497,9 @@ async function save() {
 }
 
 async function confirmDelete() {
-    if (!id) return;
+    if (!id.value) return;
     try {
-        await deleteMutation.mutateAsync(id);
+        await deleteMutation.mutateAsync(id.value);
     } catch {
         isConfirmingDelete.value = false;
         toast.notify({
