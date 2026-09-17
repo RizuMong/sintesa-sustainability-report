@@ -48,9 +48,9 @@ assert.equal(hasDuplicateSubmission(rejected, 'E1', 'P1', 'T1'), false, 'rejecte
 const cancelled = [summary({ id: 'S3', flow_status: 'cancelled' })]
 assert.equal(hasDuplicateSubmission(cancelled, 'E1', 'P1', 'T1'), false, 'cancelled does not block')
 
-// AC-84 — submitted (and anything not draft/rejected) is read-only; rejected reopens for edit
+// AC-84 — anything that is not a draft is read-only; a rejected submission stays view-only
 assert.equal(isReadOnly('draft'), false)
-assert.equal(isReadOnly('rejected'), false)
+assert.equal(isReadOnly('rejected'), true, 'GROU: rejected is settled — Submit/Update are hidden')
 assert.equal(isReadOnly('submitted'), true)
 assert.equal(isReadOnly('approved'), true)
 assert.equal(isReadOnly('cancelled'), true)
@@ -59,7 +59,7 @@ assert.equal(isReadOnly('sent'), true, 'unknown/live flow_status values are trea
 // GROU-650 — approval context is always view-only; requestor context keeps isReadOnly()'s behaviour
 assert.equal(isDetailReadOnly('rejected', true), true, 'GROU-650: rejected is view-only in the approval context')
 assert.equal(isDetailReadOnly('draft', true), true)
-assert.equal(isDetailReadOnly('rejected', false), false, 'requestor still revises a rejected submission')
+assert.equal(isDetailReadOnly('rejected', false), true, 'rejected is view-only for the requestor too')
 assert.equal(isDetailReadOnly('draft', false), false)
 
 // AC-85 — reopened rejected submissions show the latest reviewer note

@@ -22,17 +22,17 @@ export function hasDuplicateSubmission(
   )
 }
 
-// AC-84 — submitted is read-only; only a rejected submission reopens for edit/resubmit. Anything
-// that isn't 'draft' or 'rejected' (e.g. an in-review status) is treated as locked, defensively —
-// safer than an exact-match on 'submitted' given the live API has been observed to answer flow
-// statuses ('sent') outside the §3-locked SubmissionFlowStatus union.
+// AC-84 — only a draft is editable. A rejected submission is settled and view-only: its Submit and
+// Update actions are hidden entirely (not merely disabled). Anything that isn't 'draft' (e.g. an
+// in-review status) is treated as locked, defensively — safer than an exact-match on 'submitted'
+// given the live API has been observed to answer flow statuses ('sent') outside the §3-locked
+// SubmissionFlowStatus union.
 export function isReadOnly(flowStatus: SubmissionFlowStatus | string): boolean {
-  return flowStatus !== 'draft' && flowStatus !== 'rejected'
+  return flowStatus !== 'draft'
 }
 
-// GROU-650 — the detail screen is shared by the requestor and the approver. isReadOnly() lets a
-// rejected submission reopen for edit/resubmit (AC-84), which is correct for the requestor only;
-// opened from the Review & Approval queue the screen is approve/reject/view-only.
+// GROU-650 — the detail screen is shared by the requestor and the approver. Opened from the
+// Review & Approval queue the screen is approve/reject/view-only.
 export function isDetailReadOnly(flowStatus: SubmissionFlowStatus | string, fromApproval: boolean): boolean {
   return fromApproval || isReadOnly(flowStatus)
 }

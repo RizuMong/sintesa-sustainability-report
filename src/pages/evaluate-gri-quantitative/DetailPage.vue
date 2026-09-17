@@ -65,7 +65,7 @@
             <MpFlex v-else-if="detail" gap="6" alignItems="flex-start">
                 <MpFlex direction="column" gap="6" flex="2" minWidth="0">
                     <MpFlex
-                        v-if="approverNote && !fromApproval && !readOnly"
+                        v-if="approverNote && !fromApproval"
                         direction="column"
                         gap="1"
                         padding="16px"
