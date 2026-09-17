@@ -35,7 +35,8 @@ Contract source of truth: `api/Evaluate GRI - Quantitative/*.yml`.
   all render the right unit through one function.
 - **Submit / Update sit below the form**, not in the page header — matching the Officeless
   submission screen. Delete (draft only) stays in the header.
-- Read-only whenever `isReadOnly(flow_status)` (anything but `draft`/`rejected`). This is also why
+- Read-only whenever `isReadOnly(flow_status)` (anything but `draft`) — a `rejected` submission is
+  settled, so Submit/Update are not rendered at all rather than merely disabled. This is also why
   Request Revision (below) needed no edit/resubmit or duplicate-guard changes: the contract returns
   a revision-requested submission to `flow_status: 'draft'`, which `isReadOnly()` and
   `BLOCKING_STATUSES` (`hasDuplicateSubmission()`) already handle correctly for `draft`.
