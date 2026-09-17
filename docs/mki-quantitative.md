@@ -85,7 +85,7 @@ so `useMkiGriQuantitativeDetail(id)` picks it out of the list query, mirroring
     labels: Record<string, string>
     type?: 'SECTION'                  // marker row — see Section 4.2
     name?: string                     // section title, SECTION rows only
-    unit?: { id: string; name: string } | null   // PER_ROW mode only
+    unit?: { id: string; name: string } | null   // always sent per row (see note below); may be null
   }[]
   unit_mode?: 'NONE' | 'UNIFORM' | 'PER_ROW'   // absent = legacy metric-level unit
   unit?: { id: string; name: string } | null   // UNIFORM mode only
@@ -139,7 +139,11 @@ from the mockup's implied data model:
   submitted values on any reorder. Inserting a Section shifts every following array index, which
   would have blanked every cell after it. `stampSequences()` (`master-key-indicator-quantitative/rows.ts`)
   fixes this: it only assigns a fresh sequence to rows that don't have one yet.
-- **Unit precedence**: `row.unit` (PER_ROW) → top-level `unit` (UNIFORM) → `metric.unit` (legacy,
+- **Uniformity is UI-only**: whatever the `unit_mode` select says, the payload always carries a
+  per-row `rows[].unit`. UNIFORM stamps the same unit on every data row, NONE stamps `null`, PER_ROW
+  stamps each row's own pick (which may be `null` — a per-row unit is optional and not validated).
+  Section rows always send `unit: null`.
+- **Unit precedence (read side)**: `row.unit` (PER_ROW) → top-level `unit` (UNIFORM) → `metric.unit` (legacy,
   `unit_mode` absent). The legacy term is last on purpose, not migrated away — it is what makes every
   indicator saved before this change keep rendering its unit exactly as before. One function,
   `resolveUnit()`, applies this precedence in both the builder's Live Preview and the Evaluate matrix.
@@ -163,7 +167,8 @@ from the mockup's implied data model:
   matching the mockup's row grid. "Add Section" inserts a marker row (name input, spans the label
   columns); "Add Row" is unaffected by unit mode. A **Unit** select (None / Uniform / Per row) sits
   above the table; Uniform shows one Master Unit picker for the whole indicator, Per row adds a
-  per-row unit column.
+  per-row unit column (each row's unit is optional). The mode only shapes the UI — the payload is
+  always per-row.
 - All three lists are **drag-to-reorder**. Columns/metrics still stamp `sequence` from array position;
   rows do not — see the `sequence`-as-identity note above.
 - **Live Preview** — mirrors what the subsidiary sees. With 2+ metrics the header becomes two rows:

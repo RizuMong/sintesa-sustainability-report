@@ -26,7 +26,7 @@ declare global {
     // until the next section. Flat so drag-reorder and `sequence` identity stay one-dimensional.
     type?: 'SECTION'
     name?: string
-    // per-row unit, only when the indicator's unit_mode is 'PER_ROW'
+    // per-row unit — always sent; UNIFORM mode stamps the same unit on every row
     unit?: Ref2 | null
   }
 

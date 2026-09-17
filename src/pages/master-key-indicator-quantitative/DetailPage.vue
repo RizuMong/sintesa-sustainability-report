@@ -1242,12 +1242,7 @@ const validationErrors = computed(() => {
     if (!form.code) found.code = "Select a GRI code.";
     if (!form.description.trim()) found.description = "Enter a description.";
     if (!form.columns.length) found.columns = "Add at least one label column.";
-    if (
-        form.unitMode === "PER_ROW" &&
-        form.rows.some((r) => !isSection(r) && !r.unitId)
-    ) {
-        found.unit = "Set a unit for every row.";
-    }
+    // Per-row unit is optional: a row may legitimately have no unit.
     if (form.unitMode === "UNIFORM" && !form.unitId) {
         found.unit = "Select a unit.";
     }
@@ -1304,6 +1299,12 @@ const metricHint = computed(() =>
 
 function metricHeader(metric: FormMetric) {
     return metric.name || "(Metric)";
+}
+
+function rowUnitRef(row: FormRow): Ref2 | null {
+    if (form.unitMode === "NONE" || isSection(row)) return null;
+    if (form.unitMode === "UNIFORM") return unitRef(form.unitId);
+    return unitRef(row.unitId);
 }
 
 function unitRef(unitId: string): Ref2 | null {
@@ -1450,7 +1451,9 @@ function buildPayload(): MkiGriQuantitativePayload {
             sequence: r.sequence,
             labels: { ...r.labels },
             ...(r.type ? { type: r.type, name: r.name ?? "" } : {}),
-            ...(form.unitMode === "PER_ROW" ? { unit: unitRef(r.unitId) } : {}),
+            // Uniformity is UI-only: the backend always receives a per-row unit. UNIFORM just
+            // stamps the same unit on every row, NONE stamps null.
+            unit: rowUnitRef(r),
         })),
         unit_mode: form.unitMode,
         unit: form.unitMode === "UNIFORM" ? unitRef(form.unitId) : null,
