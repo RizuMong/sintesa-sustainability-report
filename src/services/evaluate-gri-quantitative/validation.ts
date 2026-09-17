@@ -82,15 +82,21 @@ export function requestorSummary(items: EvaluateGriQuantitativeSummary[]) {
 // Approval summary blocks — Awaiting Approval / Approved by Me / Approved / Rejected.
 // "by me" is matched on the approver's email because that is the only identity the embed token
 // yields (POST /v1/tools/auth, method: decrypt). Rows with no email match simply don't count.
+// The API spells the approver's approve action 'APPROVE' (Detail.yml:57) while the stage status
+// uses 'APPROVED' elsewhere — accept both so the count doesn't silently sit at zero.
+const APPROVE_ACTIONS: ApprovalAction[] = ['APPROVE', 'APPROVED']
+
 export function approvalSummary(items: EvaluateGriQuantitativeSummary[], myEmail?: string | null) {
-  const actedByMe = (item: EvaluateGriQuantitativeSummary, action: ApprovalAction) =>
+  const actedByMe = (item: EvaluateGriQuantitativeSummary, actions: ApprovalAction[]) =>
     Boolean(myEmail) &&
-    item.approval_logs.some((log) =>
-      log.approvers.some((a) => a.action === action && a.user.email.toLowerCase() === myEmail!.toLowerCase()),
+    (item.approval_logs ?? []).some((log) =>
+      (log.approvers ?? []).some(
+        (a) => actions.includes(a.action) && a.user?.email?.toLowerCase() === myEmail!.toLowerCase(),
+      ),
     )
   return {
     awaitingApproval: items.filter(isAwaitingApproval).length,
-    approvedByMe: items.filter((i) => actedByMe(i, 'APPROVED')).length,
+    approvedByMe: items.filter((i) => actedByMe(i, APPROVE_ACTIONS)).length,
     approved: items.filter((i) => i.flow_status === 'approved').length,
     rejected: items.filter((i) => i.flow_status === 'rejected').length,
   }

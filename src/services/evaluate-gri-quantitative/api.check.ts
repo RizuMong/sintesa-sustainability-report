@@ -141,10 +141,27 @@ const approvedByMeLogs: ApprovalLog[] = [
     status: 'APPROVED',
   },
 ]
-const approvalBoard = [...board, summary({ id: 'F', flow_status: 'submitted', approval_logs: approvedByMeLogs })]
+const approveSpellingLogs: ApprovalLog[] = [
+  {
+    approval_type: 'By PIC',
+    approvers: [
+      { acted_at: 400, action: 'APPROVE', notes: null, position: ref('POS1'), user: { id: 'U9', name: 'Me', email: 'me@x.com' } },
+    ],
+    minimum_action: 1,
+    request_id: 'R3',
+    stage_order: 1,
+    status: 'APPROVE',
+  },
+]
+const approvalBoard = [
+  ...board,
+  summary({ id: 'F', flow_status: 'submitted', approval_logs: approvedByMeLogs }),
+  // Detail.yml:57 spells the approver action 'APPROVE', not 'APPROVED' — both must count
+  summary({ id: 'H', flow_status: 'submitted', approval_logs: approveSpellingLogs }),
+]
 assert.deepEqual(approvalSummary(approvalBoard, 'me@x.com'), {
-  awaitingApproval: 3,
-  approvedByMe: 1,
+  awaitingApproval: 4,
+  approvedByMe: 2,
   approved: 1,
   rejected: 1,
 })
