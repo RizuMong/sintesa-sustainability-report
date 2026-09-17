@@ -26,7 +26,7 @@
                     :is-loading="isLoading"
                     :is-active="isApprovedByMeActive"
                     is-hoverable
-                    @click="applyFilter({ column: APPROVED_BY_ME, value: '' })"
+                    @click="applyScope({ column: APPROVED_BY_ME, value: '' })"
                 />
                 <SummaryBox
                     variant="green"
@@ -109,33 +109,31 @@ const filterColumns = computed(() => [
     { value: "template_id.name", label: "Template" },
 ]);
 // The queue is always scoped to one flow_status: it opens on Awaiting Approval and a box click
-// switches status, there is no unfiltered "all" state (the popover's Reset returns here too).
-// "Approved by Me" spans several flow_statuses, so it filters through a predicate rather than a
-// flow_status value; the other three boxes stay plain status filters.
+// switches status, there is no unfiltered "all" state. The Filter popover narrows *within* that
+// status rather than replacing it, so filtering on Rejected only ever searches rejected rows.
+// "Approved by Me" spans several flow_statuses, so it scopes through a predicate rather than a
+// flow_status value; the other three boxes stay plain status scopes.
 const DEFAULT_STATUS_FILTER = { column: "flow_status", value: "sent" };
 const APPROVED_BY_ME = "__approved_by_me";
-const { filteredItems, activeFilter, applyFilter, resetFilter } = useTableFilter(
-    items,
-    DEFAULT_STATUS_FILTER,
-    {
+const { filteredItems, scopeFilter, applyFilter, applyScope, resetFilter } =
+    useTableFilter(items, DEFAULT_STATUS_FILTER, {
         [APPROVED_BY_ME]: (row: EvaluateGriQuantitativeSummary) =>
             isApprovedByMe(row, myEmail.value),
-    },
-);
+    });
 
 const isApprovedByMeActive = computed(
-    () => activeFilter.value?.column === APPROVED_BY_ME,
+    () => scopeFilter.value?.column === APPROVED_BY_ME,
 );
 
 function isStatusActive(status: string) {
     return (
-        activeFilter.value?.column === "flow_status" &&
-        activeFilter.value.value === status
+        scopeFilter.value?.column === "flow_status" &&
+        scopeFilter.value.value === status
     );
 }
 
 function selectStatusFilter(status: string) {
-    applyFilter({ column: "flow_status", value: status });
+    applyScope({ column: "flow_status", value: status });
 }
 
 function onRowClick(row: EvaluateGriQuantitativeSummary) {

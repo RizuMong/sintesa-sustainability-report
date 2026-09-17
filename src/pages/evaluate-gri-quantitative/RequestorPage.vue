@@ -256,14 +256,11 @@ const filterColumns = computed(() => [
 ]);
 
 // The table is always scoped to one flow_status: it opens on Draft and a box click switches status,
-// there is no unfiltered "all" state (the popover's Reset returns here too).
+// there is no unfiltered "all" state. The Filter popover narrows *within* the current status
+// instead of replacing it, so filtering on Rejected only ever searches rejected rows.
 const DEFAULT_STATUS_FILTER = { column: "flow_status", value: "draft" };
-const { filteredItems, activeFilter, applyFilter, resetFilter } =
+const { filteredItems, scopeFilter, applyFilter, applyScope, resetFilter } =
     useTableFilter(items, DEFAULT_STATUS_FILTER);
-
-// ponytail: reuses TableFilter's single substring filter, so picking an Entity/Period/Template in
-// the popover replaces the status scope instead of narrowing within it — split into two filter
-// states if that ever confuses anyone.
 const summaryBoxes = computed(() => [
     { status: "draft", variant: "gray", label: "Draft", amount: summary.value.draft },
     {
@@ -278,13 +275,13 @@ const summaryBoxes = computed(() => [
 
 function isStatusActive(status: string) {
     return (
-        activeFilter.value?.column === "flow_status" &&
-        activeFilter.value.value === status
+        scopeFilter.value?.column === "flow_status" &&
+        scopeFilter.value.value === status
     );
 }
 
 function selectStatusFilter(status: string) {
-    applyFilter({ column: "flow_status", value: status });
+    applyScope({ column: "flow_status", value: status });
 }
 
 const openCreate = ref(false);
