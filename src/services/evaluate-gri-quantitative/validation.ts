@@ -86,17 +86,22 @@ export function requestorSummary(items: EvaluateGriQuantitativeSummary[]) {
 // uses 'APPROVED' elsewhere — accept both so the count doesn't silently sit at zero.
 const APPROVE_ACTIONS: ApprovalAction[] = ['APPROVE', 'APPROVED']
 
+// Exported so the "Approved by Me" summary block can also act as a table filter — it has no
+// flow_status of its own, so it filters by this predicate instead of a field value.
+export function isApprovedByMe(item: EvaluateGriQuantitativeSummary, myEmail?: string | null): boolean {
+  if (!myEmail) return false
+  const mine = myEmail.toLowerCase()
+  return (item.approval_logs ?? []).some((log) =>
+    (log.approvers ?? []).some(
+      (a) => APPROVE_ACTIONS.includes(a.action) && a.user?.email?.toLowerCase() === mine,
+    ),
+  )
+}
+
 export function approvalSummary(items: EvaluateGriQuantitativeSummary[], myEmail?: string | null) {
-  const actedByMe = (item: EvaluateGriQuantitativeSummary, actions: ApprovalAction[]) =>
-    Boolean(myEmail) &&
-    (item.approval_logs ?? []).some((log) =>
-      (log.approvers ?? []).some(
-        (a) => actions.includes(a.action) && a.user?.email?.toLowerCase() === myEmail!.toLowerCase(),
-      ),
-    )
   return {
     awaitingApproval: items.filter(isAwaitingApproval).length,
-    approvedByMe: items.filter((i) => actedByMe(i, APPROVE_ACTIONS)).length,
+    approvedByMe: items.filter((i) => isApprovedByMe(i, myEmail)).length,
     approved: items.filter((i) => i.flow_status === 'approved').length,
     rejected: items.filter((i) => i.flow_status === 'rejected').length,
   }

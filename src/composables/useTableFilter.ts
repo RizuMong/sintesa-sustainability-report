@@ -13,15 +13,21 @@ function getFieldValue(row: unknown, key: string): unknown {
 // `initialFilter` is the filter the table starts on and the one resetFilter() returns to — pages
 // whose summary blocks act as status tabs (evaluate-gri-quantitative) pass a flow_status filter so
 // the list is never shown unfiltered; pages that pass nothing behave as before (start/reset = all).
+// `predicates` lets a page expose a filter that isn't a field/substring match — the approval
+// screen's "Approved by Me" block is a predicate over approval_logs, not a flow_status value.
+// A filter whose column names a predicate uses it and ignores `value`.
 export function useTableFilter<T>(
   items: Ref<T[]> | ComputedRef<T[]>,
   initialFilter: ActiveFilter | null = null,
+  predicates: Record<string, (row: T) => boolean> = {},
 ) {
   const activeFilter = ref<ActiveFilter | null>(initialFilter)
 
   const filteredItems = computed(() => {
     if (!activeFilter.value) return items.value
     const { column, value } = activeFilter.value
+    const predicate = predicates[column]
+    if (predicate) return items.value.filter(predicate)
     const needle = value.toLowerCase()
     return items.value.filter((row) => String(getFieldValue(row, column) ?? '').toLowerCase().includes(needle))
   })

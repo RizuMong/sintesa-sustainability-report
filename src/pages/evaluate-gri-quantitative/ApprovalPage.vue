@@ -24,6 +24,9 @@
                     label="Approved by Me"
                     :amount="summary.approvedByMe"
                     :is-loading="isLoading"
+                    :is-active="isApprovedByMeActive"
+                    is-hoverable
+                    @click="applyFilter({ column: APPROVED_BY_ME, value: '' })"
                 />
                 <SummaryBox
                     variant="green"
@@ -89,6 +92,7 @@ import {
     useRejectEvaluateGriQuantitative,
     useRequestRevisionEvaluateGriQuantitative,
     approvalSummary,
+    isApprovedByMe,
 } from "@/services/evaluate-gri-quantitative";
 
 // Scoped to GRI Quantitative only — the Qualitative and Action Plan Realization queues have their
@@ -97,6 +101,7 @@ const router = useRouter();
 
 const { data, isLoading } = useGetApprovalList();
 const items = computed(() => data.value ?? []);
+const { data: myEmail } = useCurrentUserEmail();
 
 const filterColumns = computed(() => [
     { value: "entity_id.name", label: "Entity" },
@@ -105,10 +110,22 @@ const filterColumns = computed(() => [
 ]);
 // The queue is always scoped to one flow_status: it opens on Awaiting Approval and a box click
 // switches status, there is no unfiltered "all" state (the popover's Reset returns here too).
-// "Approved by Me" has no flow_status of its own, so it stays a plain counter.
+// "Approved by Me" spans several flow_statuses, so it filters through a predicate rather than a
+// flow_status value; the other three boxes stay plain status filters.
 const DEFAULT_STATUS_FILTER = { column: "flow_status", value: "sent" };
-const { filteredItems, activeFilter, applyFilter, resetFilter } =
-    useTableFilter(items, DEFAULT_STATUS_FILTER);
+const APPROVED_BY_ME = "__approved_by_me";
+const { filteredItems, activeFilter, applyFilter, resetFilter } = useTableFilter(
+    items,
+    DEFAULT_STATUS_FILTER,
+    {
+        [APPROVED_BY_ME]: (row: EvaluateGriQuantitativeSummary) =>
+            isApprovedByMe(row, myEmail.value),
+    },
+);
+
+const isApprovedByMeActive = computed(
+    () => activeFilter.value?.column === APPROVED_BY_ME,
+);
 
 function isStatusActive(status: string) {
     return (
@@ -128,7 +145,6 @@ function onRowClick(row: EvaluateGriQuantitativeSummary) {
     });
 }
 
-const { data: myEmail } = useCurrentUserEmail();
 const summary = computed(() => approvalSummary(items.value, myEmail.value));
 
 const approveMutation = useApproveEvaluateGriQuantitative();

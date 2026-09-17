@@ -12,6 +12,7 @@ import {
   latestRejectionNote,
   requestorSummary,
   toSubmissionValue,
+  isApprovedByMe,
 } from './validation.ts'
 
 const ref = (id: string, name = id): Ref2 => ({ id, name })
@@ -166,6 +167,12 @@ assert.deepEqual(approvalSummary(approvalBoard, 'me@x.com'), {
   rejected: 1,
 })
 assert.equal(approvalSummary(approvalBoard, null).approvedByMe, 0, 'no identity means nothing counts as mine')
+// the same predicate backs the clickable "Approved by Me" summary block's table filter
+assert.deepEqual(
+  approvalBoard.filter((i) => isApprovedByMe(i, 'me@x.com')).map((i) => i.id),
+  ['F', 'H'],
+)
+assert.equal(approvalBoard.filter((i) => isApprovedByMe(i, null)).length, 0)
 
 // matrix cell <-> Update.yml items[].values[] mapping
 const numberMetric = {
