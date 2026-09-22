@@ -1,6 +1,6 @@
 // run: node --experimental-strip-types src/services/master-key-indicator-quantitative/rows.check.ts
 import assert from 'node:assert/strict'
-import { dataRows, isSection, nextSequence, resolveUnit, stampSequences } from './rows.ts'
+import { dataRows, inferUnitMode, isSection, nextSequence, resolveUnit, stampSequences } from './rows.ts'
 
 const section = { type: 'SECTION' as const }
 const legacyRow = { type: undefined }
@@ -15,8 +15,17 @@ const rowUnit = { id: 'r', name: 'Row Unit' }
 const uniformUnit = { id: 'u', name: 'Uniform Unit' }
 const metric = { unit: metricUnit }
 
-// AC 5 path — no unit_mode on the record falls back to the metric-level unit
-assert.deepEqual(resolveUnit({ unit: rowUnit }, metric, undefined, uniformUnit), metricUnit)
+// AC 5 path — a pre-ticket record has no row unit, so it falls back to the metric-level unit
+assert.deepEqual(resolveUnit({ unit: null }, metric, undefined, uniformUnit), metricUnit)
+// but a record the backend returned without unit_mode still renders its per-row unit
+assert.deepEqual(resolveUnit({ unit: rowUnit }, metric, undefined, uniformUnit), rowUnit)
+
+// inferUnitMode recovers the dropped unit_mode from the rows
+assert.equal(inferUnitMode([{ unit: null }, { unit: null }]), 'NONE')
+assert.equal(inferUnitMode([{ unit: rowUnit }, { unit: rowUnit }]), 'UNIFORM')
+assert.equal(inferUnitMode([{ unit: rowUnit }, { unit: uniformUnit }]), 'PER_ROW')
+// section rows never carry a unit and must not drag the mode to PER_ROW
+assert.equal(inferUnitMode([{ type: 'SECTION' as const, unit: null }, { unit: rowUnit }]), 'UNIFORM')
 
 assert.deepEqual(resolveUnit({ unit: rowUnit }, metric, 'PER_ROW', uniformUnit), rowUnit)
 assert.equal(resolveUnit({ unit: null }, metric, 'PER_ROW', uniformUnit), null)

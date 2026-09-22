@@ -1030,6 +1030,8 @@ import {
     useCreateMkiGriQuantitative,
     useUpdateMkiGriQuantitative,
     useDeleteMkiGriQuantitative,
+    dataRows,
+    inferUnitMode,
     isSection,
     resolveUnit,
     stampSequences,
@@ -1414,8 +1416,13 @@ watch(
             name: r.name,
             unitId: r.unit?.id ?? "",
         }));
-        form.unitMode = next.unit_mode ?? "NONE";
-        form.unitId = next.unit?.id ?? "";
+        // The backend does not echo unit_mode back, so recover it from the rows it does echo.
+        form.unitMode = next.unit_mode ?? inferUnitMode(next.rows);
+        form.unitId =
+            next.unit?.id ??
+            (form.unitMode === "UNIFORM"
+                ? (dataRows(next.rows)[0]?.unit?.id ?? "")
+                : "");
         pristine.value = snapshot();
     },
     { immediate: true },

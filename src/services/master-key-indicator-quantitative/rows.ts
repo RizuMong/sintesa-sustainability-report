@@ -21,7 +21,17 @@ export function resolveUnit(
   if (mode === 'NONE') return null
   if (mode === 'PER_ROW') return row?.unit ?? null
   if (mode === 'UNIFORM') return uniform ?? null
-  return metric?.unit ?? null
+  // No mode on the record: either a genuinely pre-ticket record (metric-level unit only), or one
+  // the backend round-tripped without echoing unit_mode — that one still carries its per-row unit.
+  return row?.unit ?? metric?.unit ?? null
+}
+
+// The index/detail responses do not echo unit_mode (the backend only stores the per-row unit), so
+// a saved record comes back looking legacy. Recover the mode the user picked from the rows.
+export function inferUnitMode(rows: Pick<MkiQuantRow, 'type' | 'unit'>[]): MkiQuantUnitMode {
+  const ids = dataRows(rows).map((row) => row.unit?.id ?? '')
+  if (ids.every((id) => !id)) return 'NONE'
+  return ids.every((id) => id === ids[0]) ? 'UNIFORM' : 'PER_ROW'
 }
 
 // ponytail: `sequence` doubles as the evaluate cell identity (row_key = `row_${sequence}` in
