@@ -56,14 +56,55 @@ function groupByNumber(flat: FlatAction[]): Map<number, FlatAction[]> {
   return groups
 }
 
+// The 17 official UN Sustainable Development Goals. Permanent vocabulary, deliberately declared
+// OUTSIDE the DEMO_PAD block below: the take-rate chart has to render all 17 categories (GROU-833
+// AC-2) whether or not the backend has data for a goal, so this list must survive the day the demo
+// padding is deleted.
+export const SDG_CATALOG: { number: number; name: string }[] = [
+  { number: 1, name: 'No Poverty' },
+  { number: 2, name: 'Zero Hunger' },
+  { number: 3, name: 'Good Health and Well-being' },
+  { number: 4, name: 'Quality Education' },
+  { number: 5, name: 'Gender Equality' },
+  { number: 6, name: 'Clean Water and Sanitation' },
+  { number: 7, name: 'Affordable and Clean Energy' },
+  { number: 8, name: 'Decent Work and Economic Growth' },
+  { number: 9, name: 'Industry, Innovation and Infrastructure' },
+  { number: 10, name: 'Reduced Inequalities' },
+  { number: 11, name: 'Sustainable Cities and Communities' },
+  { number: 12, name: 'Responsible Consumption and Production' },
+  { number: 13, name: 'Climate Action' },
+  { number: 14, name: 'Life Below Water' },
+  { number: 15, name: 'Life on Land' },
+  { number: 16, name: 'Peace, Justice and Strong Institutions' },
+  { number: 17, name: 'Partnerships for the Goals' },
+]
+
 // The wire's sdg_id.name is the bare code ("SDG 1"), not a title, and SdgPage.vue renders
 // "SDG {{number}} — {{name}}" — so passing it straight through prints "SDG 1 — SDG 1". Prefer the
-// real UN goal title from ROADMAP_SDGS (which we already carry for the padding), falling back to
-// whatever the wire said for an SDG outside the roadmap. Function, not a const map, because
-// ROADMAP_SDGS is declared further down with the rest of the demo block.
+// real UN goal title from SDG_CATALOG, falling back to whatever the wire said for a number outside
+// 1..17.
 function sdgName(number: number, wireName: string): string {
-  const meta = ROADMAP_SDGS.find((s) => s.number === number)
-  return meta ? meta.name : wireName
+  return SDG_CATALOG.find((s) => s.number === number)?.name ?? wireName
+}
+
+// Zero-fills the matrix out to all 17 goals, sorted by number (GROU-833 AC-2: the take-rate chart
+// shows every SDG, not only the ones the payload happens to carry). Additive and non-destructive —
+// a goal the backend DID return is passed through untouched; a missing one becomes an explicit
+// 0% / 0 / 0 row rather than a gap in the axis. Pure, so normalize-sdg.check.ts can assert on it.
+export function padMatrixToAllSdgs(
+  matrix: StrategicInsightSdgMatrixRow[],
+): StrategicInsightSdgMatrixRow[] {
+  const byNumber = new Map(matrix.map((row) => [row.sdg.number, row]))
+  return SDG_CATALOG.map(
+    (goal) =>
+      byNumber.get(goal.number) ?? {
+        sdg: { id: String(goal.number), number: goal.number, name: goal.name },
+        take_rate: 0,
+        aligned_count: 0,
+        initiated_count: 0,
+      },
+  )
 }
 
 function deriveMatrixRow(
@@ -121,17 +162,17 @@ export const DEMO_PAD = true
 
 // The mockup's 10-SDG roadmap (docs/dashboard-sdg-api-gaps.md's proposed `sdgs[]`, transcribed
 // verbatim): adopted = 5, 7, 8, 12, 13, 16; non-adopted (bottom-up only) = 1, 3, 14, 15.
-const ROADMAP_SDGS: { number: number; name: string; short_name: string; adopted: boolean }[] = [
-  { number: 1, name: 'No Poverty', short_name: 'No Poverty', adopted: false },
-  { number: 3, name: 'Good Health and Well-being', short_name: 'Health', adopted: false },
-  { number: 5, name: 'Gender Equality', short_name: 'Gender Eq.', adopted: true },
-  { number: 7, name: 'Affordable and Clean Energy', short_name: 'Clean Energy', adopted: true },
-  { number: 8, name: 'Decent Work and Economic Growth', short_name: 'Decent Work', adopted: true },
-  { number: 12, name: 'Responsible Consumption and Production', short_name: 'Resp. Cons.', adopted: true },
-  { number: 13, name: 'Climate Action', short_name: 'Climate', adopted: true },
-  { number: 14, name: 'Life Below Water', short_name: 'Life Below Water', adopted: false },
-  { number: 15, name: 'Life on Land', short_name: 'Life on Land', adopted: false },
-  { number: 16, name: 'Peace, Justice and Strong Institutions', short_name: 'Peace & Justice', adopted: true },
+const ROADMAP_SDGS: { number: number; short_name: string; adopted: boolean }[] = [
+  { number: 1, short_name: 'No Poverty', adopted: false },
+  { number: 3, short_name: 'Health', adopted: false },
+  { number: 5, short_name: 'Gender Eq.', adopted: true },
+  { number: 7, short_name: 'Clean Energy', adopted: true },
+  { number: 8, short_name: 'Decent Work', adopted: true },
+  { number: 12, short_name: 'Resp. Cons.', adopted: true },
+  { number: 13, short_name: 'Climate', adopted: true },
+  { number: 14, short_name: 'Life Below Water', adopted: false },
+  { number: 15, short_name: 'Life on Land', adopted: false },
+  { number: 16, short_name: 'Peace & Justice', adopted: true },
 ]
 
 // The mockup's subsidiaries, used to vary the entity on padded drill-down rows.

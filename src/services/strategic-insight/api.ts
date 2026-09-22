@@ -17,6 +17,7 @@ export {
 
 export { categoryCaption, chartCardsFor } from './chart-spec'
 export { demoEntities, demoPeriods } from './demo-data'
+export { SDG_CATALOG, padMatrixToAllSdgs } from './normalize-sdg'
 export type { ChartCard, ChartCardKind, ChartCardSeries, ChartCardWidth } from './chart-spec'
 export { nextTabIndex } from './tab-index'
 

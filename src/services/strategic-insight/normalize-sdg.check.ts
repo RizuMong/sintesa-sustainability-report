@@ -20,7 +20,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { normalizeSdg, DEMO_PAD } from './normalize-sdg.ts'
+import { normalizeSdg, padMatrixToAllSdgs, SDG_CATALOG, DEMO_PAD } from './normalize-sdg.ts'
 
 const fixturePath = fileURLToPath(new URL('./fixtures/live-sdg.json', import.meta.url))
 const wire = JSON.parse(readFileSync(fixturePath, 'utf8')) as StrategicInsightSdgWireResponse
@@ -149,5 +149,49 @@ console.log('ok — normalize-sdg: client-side period filter visibly changes the
 const filteredByEntity = normalizeSdg(wire, { entity_id: 'e1' })
 assert.ok(filteredByEntity.matrix.length < unfiltered.matrix.length, 'an entity_id filter must narrow the padded matrix')
 console.log('ok — normalize-sdg: client-side entity_id filter visibly changes the result')
+
+// ---- GROU-833: zero-fill to all 17 goals for the take-rate chart ----
+console.log('=========================================================')
+console.log('Phase 4 — 17-SDG zero-fill (GROU-833)')
+console.log('=========================================================')
+
+assert.equal(SDG_CATALOG.length, 17, 'SDG_CATALOG must carry all 17 goals')
+assert.deepEqual(
+  SDG_CATALOG.map((g) => g.number),
+  Array.from({ length: 17 }, (_, i) => i + 1),
+  'SDG_CATALOG must be numbers 1..17 in order, with no gaps or duplicates',
+)
+
+const padded = padMatrixToAllSdgs(unfiltered.matrix)
+assert.equal(padded.length, 17, 'the chart axis must carry all 17 goals regardless of payload')
+assert.deepEqual(
+  padded.map((r) => r.sdg.number),
+  Array.from({ length: 17 }, (_, i) => i + 1),
+  'padded rows must be sorted 1..17',
+)
+console.log('ok — normalize-sdg: padMatrixToAllSdgs returns all 17 goals in order')
+
+// Non-destructive: every real row survives byte-identical, only absent goals are invented.
+for (const real of unfiltered.matrix) {
+  const after = padded.find((r) => r.sdg.number === real.sdg.number)
+  assert.deepEqual(after, real, `padding must not alter real data for SDG ${real.sdg.number}`)
+}
+// ...and the invented ones are explicit zeros, not undefined/NaN holes in the axis.
+const realNumbers = new Set(unfiltered.matrix.map((r) => r.sdg.number))
+const invented = padded.filter((r) => !realNumbers.has(r.sdg.number))
+assert.ok(invented.length > 0, 'the live fixture cannot already cover all 17 — expected some padding')
+for (const row of invented) {
+  assert.equal(row.take_rate, 0, `padded SDG ${row.sdg.number} must be 0%, not undefined`)
+  assert.equal(row.aligned_count, 0)
+  assert.equal(row.initiated_count, 0)
+  assert.equal(row.sdg.id, String(row.sdg.number), 'padded id must use the same String(number) key')
+  assert.ok(row.sdg.name.length > 0 && row.sdg.name !== `SDG ${row.sdg.number}`, 'padded row needs a real goal title')
+}
+console.log('ok — normalize-sdg: real rows survive padding untouched, absent goals become explicit zeros')
+
+// The detail selector joins on sdg.id, so the padded key must still match detail items.
+const joinable = padded.filter((r) => unfiltered.detail.some((d) => d.sdg_id === r.sdg.id))
+assert.ok(joinable.length > 0, 'padded rows must stay joinable to detail items on sdg.id')
+console.log('ok — normalize-sdg: padded rows keep the sdg.id join the drill-down selector needs')
 
 console.log('\nALL CHECKS PASSED')
