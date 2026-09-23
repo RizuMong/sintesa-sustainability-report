@@ -15,6 +15,8 @@ const props = defineProps({
     isFilter: Boolean,
     isActive: Boolean,
     isHoverable: Boolean,
+    isFullWidth: Boolean,
+    description: String,
 });
 
 const slots = useSlots();
@@ -37,7 +39,7 @@ const summaryBoxStyle = sva({
             display: "flex",
             flexDirection: "column",
             width: "197px",
-            height: "89px",
+            minHeight: "89px",
             minWidth: "0",
             borderWidth: "1px",
             transition: "all 0.1s ease, box-shadow 0.5s ease",
@@ -231,6 +233,7 @@ const labelColor =
         :class="['group', root]"
         :style="{
             cursor: props.isHoverable || props.isFilter ? 'pointer' : '',
+            width: props.isFullWidth ? '100%' : undefined,
         }"
         v-bind="$attrs"
     >
@@ -279,6 +282,9 @@ const labelColor =
                 </MpText>
                 <MpText as="h2" size="h2">
                     {{ amount }}
+                </MpText>
+                <MpText v-if="description" size="label-small" color="gray.600">
+                    {{ description }}
                 </MpText>
 
                 <div

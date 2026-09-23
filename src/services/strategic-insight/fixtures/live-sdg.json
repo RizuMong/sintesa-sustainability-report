@@ -4,74 +4,618 @@
       "actions": [
         {
           "adoption_status": "TAKE",
-          "baseline": "current baseline",
-          "created_at": null,
-          "detail_action_solution": "Investing in renewable energy",
-          "ids": "123",
-          "impact": "Operations Impact",
-          "indicator_id": {
-            "evidence": "Required",
-            "id": "oP229ralLrzM",
-            "name": "Sustainability Investment"
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Pemutakhiran pedoman pelaksanaan  Kesehatan dan Keselamatan Kerja (K3)",
+          "ids": "HZWOCPTV9tsq",
+          "impact": "Investment Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat kebijakan Kesehatan dan Keselamatan Kerja (K3) untuk menciptakan lingkungan kerja yang sehat dan aman",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
           },
-          "key_business_action": "Partnership with business partners/non-profit organizations working in occupational safety",
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "kAehVqfKhTjJ",
+            "name": "SDG 1",
+            "number": 1
+          },
+          "target": null,
+          "updated_at": 1789463136345
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Pemeriksaan berkala filter air",
+          "ids": "kA6MTrHKaTE0",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Program beasiswa pendidikan vokasi untuk masyarakat sekitar area operasional",
+          "period": 2026,
+          "pillar_id": {
+            "id": "Z31A7yKMdUrJ",
+            "name": "Investment"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 10",
+          "sdg_id": {
+            "id": "EwGok8Dh3xXQ",
+            "name": "SDG 10",
+            "number": 19
+          },
+          "target": null,
+          "updated_at": 1789463136491
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Bekerjasama dengan Dinas Pemadam Kebakaran  (untuk simulasi kebakaran, fire drill, earthquake drill dll)",
+          "ids": "UK8X3aeLRWEZ",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "period": 2026,
           "pillar_id": {
             "id": "qT4ROSu3d1NL",
             "name": "Operation"
           },
           "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 10",
+          "sdg_id": {
+            "id": "31OeymHWMpTD",
+            "name": "SDG 9",
+            "number": 9
+          },
+          "target": null,
+          "updated_at": 1789463136423
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Pemeriksaan berkala filter air",
+          "ids": "9LQgM4sFRgqD6",
+          "impact": "Investment Impact",
+          "indicator_id": null,
+          "key_business_action": "Program beasiswa pendidikan vokasi untuk masyarakat sekitar area operasional",
           "period": 2026,
-          "sdg_ambition_esg_alignment": "SDG 1",
+          "pillar_id": {
+            "id": "qT4ROSu3d1NL",
+            "name": "Operation"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "Jrvnlc0aKE3W",
+            "name": "SDG 3",
+            "number": 3
+          },
+          "target": null,
+          "updated_at": 1789463136236
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Membuat panduan  tata kelola sampah domestik dan limbah produksi",
+          "ids": "vlzBG8umoozLX",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
           "sdg_id": {
             "id": "s6X9n1U8Bjl0",
             "name": "SDG 12",
             "number": 12
           },
-          "target": "future target",
-          "updated_at": null
+          "target": null,
+          "updated_at": 1789463136593
         },
         {
           "adoption_status": "TAKE",
-          "baseline": "current baseline",
-          "created_at": null,
-          "detail_action_solution": "Investing in renewable energy",
-          "ids": "1234",
-          "impact": "Investment Impact",
-          "indicator_id": {
-            "evidence": "Required",
-            "id": "oP229ralLrzM",
-            "name": "Sustainability Investment"
-          },
-          "key_business_action": "Partnership with business partners/non-profit organizations working in occupational safety",
-          "pillar_id": {
-            "id": "qT4ROSu3d1NLdssd",
-            "name": "Investment"
-          },
-          "plan_origin": "INITIATE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Pemutakhiran kebijakan pengelolaan  limbah B3  dan penguranganpembelian material yang mengandung bahan B3",
+          "ids": "OyvPYUxJNcLJ5",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
           "period": 2026,
-          "sdg_ambition_esg_alignment": "SDG 1",
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
           "sdg_id": {
             "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136407
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Melakukan identifikasi kebutuhan material operasional Perusahaan yang menggunakan material daur ulang dalam proses procurement",
+          "ids": "FpAHnO8GNPXhE",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136329
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482769,
+          "detail_action_solution": "Melakukan identifikasi kebutuhan material operasional Perusahaan yang mengandung bahan B3 dalam proses procurement",
+          "ids": "n04CoYJqapfHK",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136508
+        }
+      ],
+      "adoption_skip_count": 0,
+      "adoption_take_count": 8,
+      "entity_id": {
+        "id": "daCbSej46w1n",
+        "name": "Widjajatunggal Sejahtera, PT"
+      },
+      "entity_type": "HOLDING",
+      "execution_percentage": 100
+    },
+    {
+      "actions": [
+        {
+          "adoption_status": "TAKE",
+          "baseline": "[QA test] Baseline 2025: 0 dokumen K3",
+          "created_at": 1789367482865,
+          "detail_action_solution": "Pemutakhiran pedoman pelaksanaan  Kesehatan dan Keselamatan Kerja (K3)",
+          "ids": "cEfk8MFuQNaCN",
+          "impact": "Investment Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat kebijakan Kesehatan dan Keselamatan Kerja (K3) untuk menciptakan lingkungan kerja yang sehat dan aman",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "kAehVqfKhTjJ",
             "name": "SDG 1",
             "number": 1
           },
-          "target": "future target",
-          "updated_at": null
+          "target": "[QA test] Target 2026: 1 pedoman K3 terbit",
+          "updated_at": 1789463136440
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": "sebelumnya sudah ada program serupa namun realisasi dibawah 40%",
+          "created_at": 1789367482865,
+          "detail_action_solution": "Pemeriksaan berkala filter air",
+          "ids": "7JClc9IdGQDZo",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Program beasiswa pendidikan vokasi untuk masyarakat sekitar area operasional",
+          "period": 2026,
+          "pillar_id": {
+            "id": "Z31A7yKMdUrJ",
+            "name": "Investment"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 10",
+          "sdg_id": {
+            "id": "EwGok8Dh3xXQ",
+            "name": "SDG 19",
+            "number": 19
+          },
+          "target": "realisasi diatas 70%",
+          "updated_at": 1789616740137
+        },
+        {
+          "adoption_status": "SKIP",
+          "baseline": null,
+          "created_at": 1789367482865,
+          "detail_action_solution": "Bekerjasama dengan Dinas Pemadam Kebakaran  (untuk simulasi kebakaran, fire drill, earthquake drill dll)",
+          "ids": "CmDYfQNSgVrwo",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "period": 2026,
+          "pillar_id": {
+            "id": "qT4ROSu3d1NL",
+            "name": "Operation"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 10",
+          "sdg_id": {
+            "id": "31OeymHWMpTD",
+            "name": "SDG 9",
+            "number": 9
+          },
+          "target": null,
+          "updated_at": 1789616800935
+        },
+        {
+          "adoption_status": "SKIP",
+          "baseline": null,
+          "created_at": 1789367482865,
+          "detail_action_solution": "Pemeriksaan berkala filter air",
+          "ids": "L5RbWt6pnKHAk",
+          "impact": "Investment Impact",
+          "indicator_id": null,
+          "key_business_action": "Program beasiswa pendidikan vokasi untuk masyarakat sekitar area operasional",
+          "period": 2026,
+          "pillar_id": {
+            "id": "qT4ROSu3d1NL",
+            "name": "Operation"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "Jrvnlc0aKE3W",
+            "name": "SDG 3",
+            "number": 3
+          },
+          "target": null,
+          "updated_at": 1789616801352
+        },
+        {
+          "adoption_status": "SKIP",
+          "baseline": null,
+          "created_at": 1789367482865,
+          "detail_action_solution": "Membuat panduan  tata kelola sampah domestik dan limbah produksi",
+          "ids": "EwUAgWphZXx5b",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789616801766
+        },
+        {
+          "adoption_status": "SKIP",
+          "baseline": null,
+          "created_at": 1789367482865,
+          "detail_action_solution": "Pemutakhiran kebijakan pengelolaan  limbah B3  dan penguranganpembelian material yang mengandung bahan B3",
+          "ids": "cEfk8MFuQcamj",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789616802059
+        },
+        {
+          "adoption_status": "SKIP",
+          "baseline": null,
+          "created_at": 1789367482865,
+          "detail_action_solution": "Melakukan identifikasi kebutuhan material operasional Perusahaan yang menggunakan material daur ulang dalam proses procurement",
+          "ids": "s6b0OmM8G2jnN",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789616802478
+        },
+        {
+          "adoption_status": "SKIP",
+          "baseline": null,
+          "created_at": 1789367482865,
+          "detail_action_solution": "Melakukan identifikasi kebutuhan material operasional Perusahaan yang mengandung bahan B3 dalam proses procurement",
+          "ids": "tSocBkiyvNJMM",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789616774508
         }
       ],
-      "adoption_skip_count": 1,
-      "adoption_take_count": 9,
+      "adoption_skip_count": 6,
+      "adoption_take_count": 2,
       "entity_id": {
-        "id": "1",
-        "name": "Sintesa"
+        "id": "2BFKQp2Yt5bn",
+        "name": "Menara Duta, PT"
       },
-      "entity_type": "HOLDING",
-      "execution_percentage": 10
+      "entity_type": "SUBSIDIARY",
+      "execution_percentage": 25
+    },
+    {
+      "actions": [
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Pemutakhiran pedoman pelaksanaan  Kesehatan dan Keselamatan Kerja (K3)",
+          "ids": "AeXW4vZsgy1qz",
+          "impact": "Investment Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat kebijakan Kesehatan dan Keselamatan Kerja (K3) untuk menciptakan lingkungan kerja yang sehat dan aman",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "kAehVqfKhTjJ",
+            "name": "SDG 1",
+            "number": 1
+          },
+          "target": null,
+          "updated_at": 1789463136262
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Pemeriksaan berkala filter air",
+          "ids": "hfLsH0kB8gv7r",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Program beasiswa pendidikan vokasi untuk masyarakat sekitar area operasional",
+          "period": 2026,
+          "pillar_id": {
+            "id": "Z31A7yKMdUrJ",
+            "name": "Investment"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 10",
+          "sdg_id": {
+            "id": "EwGok8Dh3xXQ",
+            "name": "SDG 10",
+            "number": 19
+          },
+          "target": null,
+          "updated_at": 1789463136473
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Bekerjasama dengan Dinas Pemadam Kebakaran  (untuk simulasi kebakaran, fire drill, earthquake drill dll)",
+          "ids": "pQeZ0ygkeRleF",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Kerjasama dengan mitra kerja/ non profit organization yang bergerak di bidang keselamatan kerja",
+          "period": 2026,
+          "pillar_id": {
+            "id": "qT4ROSu3d1NL",
+            "name": "Operation"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": "SDG 10",
+          "sdg_id": {
+            "id": "31OeymHWMpTD",
+            "name": "SDG 9",
+            "number": 9
+          },
+          "target": null,
+          "updated_at": 1789463136546
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Pemeriksaan berkala filter air",
+          "ids": "MWdrx2OnozyX",
+          "impact": "Investment Impact",
+          "indicator_id": null,
+          "key_business_action": "Program beasiswa pendidikan vokasi untuk masyarakat sekitar area operasional",
+          "period": 2026,
+          "pillar_id": {
+            "id": "qT4ROSu3d1NL",
+            "name": "Operation"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "Jrvnlc0aKE3W",
+            "name": "SDG 3",
+            "number": 3
+          },
+          "target": null,
+          "updated_at": 1789463136391
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Membuat panduan  tata kelola sampah domestik dan limbah produksi",
+          "ids": "AeXW4vZszi1jh",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136278
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Pemutakhiran kebijakan pengelolaan  limbah B3  dan penguranganpembelian material yang mengandung bahan B3",
+          "ids": "pQeZ0ygkMelev",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136526
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Melakukan identifikasi kebutuhan material operasional Perusahaan yang menggunakan material daur ulang dalam proses procurement",
+          "ids": "L5RbWt6p66HRL",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136361
+        },
+        {
+          "adoption_status": "TAKE",
+          "baseline": null,
+          "created_at": 1789367482917,
+          "detail_action_solution": "Melakukan identifikasi kebutuhan material operasional Perusahaan yang mengandung bahan B3 dalam proses procurement",
+          "ids": "zYwpsZ9cZbwQ3",
+          "impact": "Operation Impact",
+          "indicator_id": null,
+          "key_business_action": "Membuat  kebijakan yang mengatur pengelolaan sampah domestik dan limbah produksi",
+          "period": 2026,
+          "pillar_id": {
+            "id": "4tSZIxTO6lzE",
+            "name": "Policies"
+          },
+          "plan_origin": "HOLDING",
+          "sdg_ambition_esg_alignment": null,
+          "sdg_id": {
+            "id": "s6X9n1U8Bjl0",
+            "name": "SDG 12",
+            "number": 12
+          },
+          "target": null,
+          "updated_at": 1789463136608
+        }
+      ],
+      "adoption_skip_count": 0,
+      "adoption_take_count": 8,
+      "entity_id": {
+        "id": "OyvPcwLJDLyC",
+        "name": "Meppo-Gen, PT"
+      },
+      "entity_type": "SUBSIDIARY",
+      "execution_percentage": 100
     }
   ],
   "summary": [
     {
-      "description": "Adopted from a total of 17 UN SDGs",
+      "description": "Adopted dari total 17 SDG PBB",
       "key": "sdg_roadmap",
       "name": "Holding SDG Roadmap",
       "total": 17,
@@ -81,19 +625,19 @@
       "description": "Actions mapped to Holding SDGs",
       "key": "strategic_alignment",
       "name": "Strategic Alignment",
-      "value": 82
+      "value": 24
     },
     {
       "description": "Overall 'Take' ratio on mandates",
       "key": "execution_rate",
       "name": "Avg. Execution Rate",
-      "value": 74
+      "value": 75
     },
     {
       "description": "Actions outside Holding Roadmap",
       "key": "bottom_up_initiatives",
       "name": "Bottom-Up Initiatives",
-      "value": 28
+      "value": 0
     }
   ]
 }

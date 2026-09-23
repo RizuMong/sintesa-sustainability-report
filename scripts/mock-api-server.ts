@@ -48,10 +48,10 @@ function loadExample(file: string, exampleName: string): unknown {
 // falls back to (src/services/strategic-insight/demo-data.ts) — the mock server and the browser
 // therefore agree, and this file does not grow its own second copy of the fixture logic.
 const griQuantitative = demoGriQuantitative()
-// NOT loadExample('Dashboard/SDG.yml', 'Response Dummy'): that committed example predates the live
-// probe and is missing sdg_id.number entirely (see docs/dashboard-sdg-api-gaps.md), which
-// normalizeSdg() requires to group the matrix correctly. Serve the live-verified fixture instead —
-// same file normalize-sdg.check.ts asserts against, so the mock server and the unit check agree.
+// NOT loadExample('Dashboard/SDG.yml', '200'): that would re-parse the yml (and need the
+// gitignored api/ symlink) every time this server starts. Read the committed fixture file instead
+// — same file normalize-sdg.check.ts asserts against, so the mock server and the unit check agree,
+// and the check stays self-contained without the api/ symlink.
 const sdg = JSON.parse(
   readFileSync(fileURLToPath(new URL('../src/services/strategic-insight/fixtures/live-sdg.json', import.meta.url)), 'utf8'),
 )

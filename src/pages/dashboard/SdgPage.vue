@@ -55,6 +55,23 @@
                         </option>
                     </MpSelect>
                 </MpFormControl>
+                <MpFormControl id="sdg-filter-impact">
+                    <MpFormLabel>Impact</MpFormLabel>
+                    <MpSelect
+                        v-model="filterState.state.impact"
+                        placeholder="All Impacts"
+                        is-full-width
+                    >
+                        <option value="">All Impacts</option>
+                        <option
+                            v-for="impact in IMPACT_OPTIONS"
+                            :key="impact"
+                            :value="impact"
+                        >
+                            {{ impact }}
+                        </option>
+                    </MpSelect>
+                </MpFormControl>
             </MpFlex>
         </MpFlex>
 
@@ -71,45 +88,107 @@
         >
             <div :class="css({ display: 'flex', gap: '2' })">
                 <SummaryBox
-                    variant="blue"
-                    label="Holding SDG Roadmap"
-                    :amount="kpi.holding_sdg_roadmap"
-                />
-                <SummaryBox
-                    variant="green"
-                    label="Strategic Alignment %"
-                    :amount="`${kpi.strategic_alignment_rate}%`"
-                />
-                <SummaryBox
-                    variant="orange"
-                    label="Execution Rate (Take)"
-                    :amount="`${kpi.execution_rate_take}%`"
-                />
-                <SummaryBox
-                    variant="gray"
-                    label="Bottom-Up Initiatives"
-                    :amount="kpi.bottom_up_initiatives"
+                    v-for="block in summary"
+                    :key="block.key"
+                    is-full-width
+                    :class="css({ flex: '1', minWidth: '0' })"
+                    :label="block.name"
+                    :description="block.description"
+                    :amount="formatSummaryAmount(block)"
                 />
             </div>
 
+            <!-- Strategic Action Matrix: an MpTable, not a chart (decision 3 in
+                 plans/sdg-dashboard-adjustments/plan.md) — a per-cell click is free, long SDG
+                 labels stay readable as column headers, and the acceptance check can assert on
+                 real DOM instead of canvas pixels. -->
             <MpFlex direction="column" gap="3">
-                <!-- GROU-833: was an MpTable, now a horizontal bar chart. Horizontal, not
-                     vertical, because 17 category labels ("SDG 12 — Responsible Consumption and
-                     Production") are unreadable on an x-axis; one bar per row gives each label a
-                     full line. Rows come from padMatrixToAllSdgs() so all 17 goals are on the axis
-                     even when the payload carries only a handful (AC-2). DashboardChartCard also
-                     renders the print-ready text mirror, which is what preserves the exact
-                     Take Rate numbers the table used to show. -->
-                <DashboardChartCard
-                    v-if="matrix.length"
-                    id="sdg-take-rate-per-sdg"
-                    title="Strategic Action Matrix — Take Rate per SDG"
-                    caption="Holding-only Take / (Take + Skip) — all 17 goals"
-                    kind="bar-horizontal"
-                    height="520px"
-                    :labels="takeRateData.labels"
-                    :datasets="takeRateData.datasets"
-                />
+                <MpText as="h2" size="h3" weight="semiBold"
+                    >Strategic Action Matrix</MpText
+                >
+                <MpFlex v-if="columns.length" gap="4" alignItems="center">
+                    <MpFlex
+                        v-for="legend in cellLegend"
+                        :key="legend.status"
+                        gap="1"
+                        alignItems="center"
+                    >
+                        <div :class="css(legend.swatchStyle)" />
+                        <MpText size="label-small" color="text.secondary">{{
+                            legend.label
+                        }}</MpText>
+                    </MpFlex>
+                </MpFlex>
+                <MpTableContainer v-if="columns.length">
+                    <MpTable>
+                        <MpTableHead>
+                            <!-- Column grouping header (Holding SDGs / Initiative SDGs), rule 4:
+                                 Entity + Execution % sit outside both groups under one blank
+                                 colspan="2" cell. Empty groups are omitted (colspan="0" isn't
+                                 valid HTML) — against the current contract only Holding SDGs
+                                 renders, spanning all 5 SDG columns. -->
+                            <MpTableRow>
+                                <MpTableCell colspan="2" />
+                                <MpTableCell
+                                    v-for="group in columnGroups"
+                                    :key="group.group"
+                                    scope="colgroup"
+                                    :colspan="group.span"
+                                    :class="css({
+                                        textAlign: 'center',
+                                        backgroundColor: 'background.neutral.subtle',
+                                        color: 'text.secondary',
+                                        fontWeight: 'semiBold',
+                                    })"
+                                >
+                                    {{ group.label }}
+                                </MpTableCell>
+                            </MpTableRow>
+                            <MpTableRow>
+                                <MpTableCell scope="col">Entity</MpTableCell>
+                                <MpTableCell scope="col"
+                                    >Execution %</MpTableCell
+                                >
+                                <MpTableCell
+                                    v-for="column in columns"
+                                    :key="column.sdg_id"
+                                    scope="col"
+                                >
+                                    {{ column.name }}
+                                </MpTableCell>
+                            </MpTableRow>
+                        </MpTableHead>
+                        <MpTableBody>
+                            <MpTableRow
+                                v-for="row in matrix"
+                                :key="row.entity.id"
+                            >
+                                <MpTableCell as="td" scope="row">{{
+                                    row.entity.name
+                                }}</MpTableCell>
+                                <MpTableCell as="td" scope="row"
+                                    >{{ row.execution_percentage }}%</MpTableCell
+                                >
+                                <MpTableCell
+                                    v-for="cell in row.cells"
+                                    :key="cell.sdg_id"
+                                    as="td"
+                                    scope="row"
+                                    :class="css(cellStyle(cell.status))"
+                                    @click="
+                                        selection = {
+                                            kind: 'cell',
+                                            entityId: row.entity.id,
+                                            sdgId: cell.sdg_id,
+                                        }
+                                    "
+                                >
+                                    {{ cell.take_percentage }}%
+                                </MpTableCell>
+                            </MpTableRow>
+                        </MpTableBody>
+                    </MpTable>
+                </MpTableContainer>
                 <MpFlex
                     v-else
                     direction="column"
@@ -117,9 +196,6 @@
                     gap="2"
                     paddingY="10"
                 >
-                    <MpText as="h2" size="h3" weight="semiBold"
-                        >Strategic Action Matrix — Take Rate per SDG</MpText
-                    >
                     <MpImage
                         src="https://cdn.mekari.design/illustration/blank-slate/NoData_PB_L_01.png"
                         alt="empty state illustration"
@@ -136,125 +212,24 @@
             </MpFlex>
 
             <MpFlex direction="column" gap="3">
-                <!-- DashboardChartCard, not a raw MpChart: the hand-rolled MpChart here rendered
-                     every bar crammed into the first category slot while the x-axis labels spread
-                     across the full width, because it passed no chart height (MpChart's default
-                     collapses the plot area) and none of the legend/stacking props. The GRI page's
-                     card wrapper already solves all of that, and carries the print-ready text
-                     mirror this page was duplicating by hand. Caught by screenshot review — the
-                     canvas HAD painted pixels, so the acceptance check passed it. -->
                 <DashboardChartCard
-                    id="sdg-aligned-vs-initiated"
-                    title="Aligned vs Initiated per SDG"
-                    caption="Holding-mandated actions vs bottom-up initiatives"
-                    kind="bar"
+                    v-if="matrix.length"
+                    id="sdg-alignment-gap"
+                    title="Strategic Alignment Gap"
+                    caption="Holding-mandated actions vs bottom-up initiatives, per entity"
+                    kind="bar-stacked-horizontal"
                     height="320px"
-                    :labels="alignedVsInitiatedData.labels"
-                    :datasets="alignedVsInitiatedData.datasets"
+                    :labels="alignmentGapData.labels"
+                    :datasets="alignmentGapData.datasets"
+                    :on-segment-click="onAlignmentGapClick"
                 />
             </MpFlex>
 
-            <!-- GROU-833: the drill-down used to be driven by clicking a row of the matrix
-                 table. A chart bar is not a row and MpChart exposes no per-bar click, so the
-                 selector became explicit — same `selectedSdgId`, same detail table below, just a
-                 different control driving it. Lists all 17 goals; the ones with no action plan
-                 fall through to the existing "No action plan items" message. -->
-            <MpFlex direction="column" gap="3">
-                <MpFormControl id="sdg-detail-selector">
-                    <MpFormLabel>Show detail for</MpFormLabel>
-                    <MpSelect v-model="selectedSdgValue">
-                        <option value="">Select an SDG</option>
-                        <option
-                            v-for="row in allSdgRows"
-                            :key="row.sdg.id"
-                            :value="row.sdg.id"
-                        >
-                            SDG {{ row.sdg.number }} — {{ row.sdg.name }}
-                        </option>
-                    </MpSelect>
-                </MpFormControl>
-            </MpFlex>
-
-            <MpFlex v-if="selectedSdgId" direction="column" gap="3">
-                <MpText as="h2" size="h3" weight="semiBold">
-                    Detail — SDG {{ selectedMatrixRow?.sdg.number }}
-                    {{ selectedMatrixRow?.sdg.name }}
-                </MpText>
-                <MpTableContainer v-if="selectedDetail.length">
-                    <MpTable>
-                        <MpTableHead>
-                            <MpTableRow>
-                                <MpTableCell scope="col">Entity</MpTableCell>
-                                <MpTableCell scope="col"
-                                    >Key Business Action</MpTableCell
-                                >
-                                <MpTableCell scope="col"
-                                    >Action Indicator</MpTableCell
-                                >
-                                <MpTableCell scope="col"
-                                    >Created By</MpTableCell
-                                >
-                                <MpTableCell scope="col">Decision</MpTableCell>
-                                <MpTableCell scope="col"
-                                    >Skip Reason</MpTableCell
-                                >
-                            </MpTableRow>
-                        </MpTableHead>
-                        <MpTableBody>
-                            <MpTableRow
-                                v-for="item in selectedDetail"
-                                :key="item.id"
-                            >
-                                <MpTableCell as="td" scope="row">{{
-                                    item.entity.name
-                                }}</MpTableCell>
-                                <MpTableCell as="td" scope="row">{{
-                                    item.key_business_action
-                                }}</MpTableCell>
-                                <MpTableCell as="td" scope="row">{{
-                                    item.action_indicator?.name ?? "-"
-                                }}</MpTableCell>
-                                <MpTableCell as="td" scope="row">
-                                    <MpFlex
-                                        direction="column"
-                                        gap="1"
-                                        alignItems="flex-start"
-                                    >
-                                        <MpText size="label-small">{{
-                                            item.created_by_level
-                                        }}</MpText>
-                                        <MpBadge
-                                            v-if="item.unverified"
-                                            for="tableStatus"
-                                            type="announcement"
-                                            >Unverified / Non-Official
-                                            SDG</MpBadge
-                                        >
-                                    </MpFlex>
-                                </MpTableCell>
-                                <MpTableCell as="td" scope="row">
-                                    <MpBadge
-                                        for="tableStatus"
-                                        :type="
-                                            decisionBadgeType[
-                                                item.decision ?? 'none'
-                                            ]
-                                        "
-                                        >{{
-                                            item.decision ?? "Pending"
-                                        }}</MpBadge
-                                    >
-                                </MpTableCell>
-                                <MpTableCell as="td" scope="row">{{
-                                    item.skip_reason ?? "-"
-                                }}</MpTableCell>
-                            </MpTableRow>
-                        </MpTableBody>
-                    </MpTable>
-                </MpTableContainer>
-                <MpText v-else size="label" color="text.secondary"
-                    >No action plan items for this SDG yet.</MpText
-                >
+            <MpFlex v-if="selection" direction="column" gap="3">
+                <SdgActionPlanDetail
+                    :items="selectedDetail"
+                    :heading="selectedDetailHeading"
+                />
             </MpFlex>
         </MpFlex>
     </MpFlex>
@@ -276,79 +251,134 @@ import {
     MpTableRow,
     MpTableCell,
     MpTableContainer,
-    MpBadge,
     css,
 } from "@mekari/pixel3";
 import SummaryBox from "@/components/SummaryBox.vue";
 import DashboardChartCard from "@/components/DashboardChartCard.vue";
+import SdgActionPlanDetail from "@/components/SdgActionPlanDetail.vue";
 import {
-    padMatrixToAllSdgs,
     useSdgInsight,
     useStrategicInsightFilterState,
+    IMPACT_OPTIONS,
 } from "@/services/strategic-insight";
 
 const filterState = useStrategicInsightFilterState();
 const { data, isLoading } = useSdgInsight(filterState.params);
 
-const kpi = computed<StrategicInsightSdgKpi>(
-    () =>
-        data.value?.kpi ?? {
-            holding_sdg_roadmap: 0,
-            strategic_alignment_rate: 0,
-            execution_rate_take: 0,
-            bottom_up_initiatives: 0,
-        },
-);
+const summary = computed(() => data.value?.summary ?? []);
+const columns = computed(() => data.value?.columns ?? []);
 const matrix = computed(() => data.value?.matrix ?? []);
 const detail = computed(() => data.value?.detail ?? []);
 
-// All 17 goals, zero-filled — what the take-rate chart plots and what the detail selector lists.
-const allSdgRows = computed(() => padMatrixToAllSdgs(matrix.value));
+// Run-length-encode columns (already sorted group-then-number, see normalize-sdg.ts) into
+// contiguous group spans for the grouping header row. A group with no columns never appears, so
+// the template never has to emit a colspan="0" cell.
+const columnGroups = computed(() => {
+    const groups: { group: "HOLDING" | "INITIATE"; label: string; span: number }[] = [];
+    for (const column of columns.value) {
+        const last = groups[groups.length - 1];
+        if (last && last.group === column.group) {
+            last.span += 1;
+        } else {
+            groups.push({
+                group: column.group,
+                label: column.group === "HOLDING" ? "Holding SDGs" : "Initiative SDGs",
+                span: 1,
+            });
+        }
+    }
+    return groups;
+});
 
-// MpSelect binds a string; selectedSdgId keeps the null-or-id shape the detail section already
-// expects, so nothing downstream of it changed.
-const selectedSdgValue = ref("");
-const selectedSdgId = computed(() => selectedSdgValue.value || null);
-const selectedMatrixRow = computed(() =>
-    allSdgRows.value.find((row) => row.sdg.id === selectedSdgId.value),
-);
-const selectedDetail = computed(() =>
-    detail.value.filter((item) => item.sdg_id === selectedSdgId.value),
-);
+// total present -> "value / total"; else percent-formatted keys -> "value%"; else the bare value.
+const PERCENT_KEYS = new Set(["execution_rate", "strategic_alignment"]);
+function formatSummaryAmount(block: StrategicInsightSdgSummary): string {
+    if (block.total !== undefined) return `${block.value} / ${block.total}`;
+    if (PERCENT_KEYS.has(block.key)) return `${block.value}%`;
+    return String(block.value);
+}
 
-const takeRateData = computed(() => ({
-    labels: allSdgRows.value.map((row) => `SDG ${row.sdg.number} — ${row.sdg.name}`),
+type SdgDetailSelection =
+    | { kind: "cell"; entityId: string; sdgId: string }
+    | { kind: "origin"; entityId: string; planOrigin: "HOLDING" | "INITIATE" }
+    | null;
+
+const selection = ref<SdgDetailSelection>(null);
+
+const selectedDetail = computed(() => {
+    const sel = selection.value;
+    if (!sel) return [];
+    if (sel.kind === "cell") {
+        return detail.value.filter(
+            (item) => item.entity_id === sel.entityId && item.sdg_id === sel.sdgId,
+        );
+    }
+    return detail.value.filter(
+        (item) =>
+            item.entity_id === sel.entityId && item.plan_origin === sel.planOrigin,
+    );
+});
+
+const selectedDetailHeading = computed(() => {
+    const sel = selection.value;
+    if (!sel) return "Action Plan Details";
+    const entityName =
+        matrix.value.find((row) => row.entity.id === sel.entityId)?.entity.name ??
+        sel.entityId;
+    if (sel.kind === "cell") {
+        const sdgName =
+            columns.value.find((c) => c.sdg_id === sel.sdgId)?.name ?? sel.sdgId;
+        return `Detail — ${entityName} · ${sdgName}`;
+    }
+    return `Detail — ${entityName} · ${sel.planOrigin === "HOLDING" ? "Holding" : "Initiate"}`;
+});
+
+// Cell colour map (decision 1 in plan.md): TAKE -> green, INITIATE -> orange (Pixel 3 has no
+// yellow scale), SKIP/NONE -> plain surface with a gray.100 border.
+const cellLegend = [
+    {
+        status: "TAKE",
+        label: "Take",
+        swatchStyle: { w: "3", h: "3", rounded: "sm", bg: "green.100", borderWidth: "1px", borderColor: "green.400" },
+    },
+    {
+        status: "INITIATE",
+        label: "Initiate",
+        swatchStyle: { w: "3", h: "3", rounded: "sm", bg: "orange.100", borderWidth: "1px", borderColor: "orange.400" },
+    },
+    {
+        status: "SKIP",
+        label: "Skip / None",
+        swatchStyle: { w: "3", h: "3", rounded: "sm", bg: "background.surface", borderWidth: "1px", borderColor: "gray.100" },
+    },
+] as const;
+
+function cellStyle(status: SdgCellStatus) {
+    const base = { cursor: "pointer" as const };
+    switch (status) {
+        case "TAKE":
+            return { ...base, bg: "green.50", color: "green.700" };
+        case "INITIATE":
+            return { ...base, bg: "orange.50", color: "orange.700" };
+        default:
+            return { ...base, bg: "background.surface", borderWidth: "1px", borderColor: "gray.100" };
+    }
+}
+
+const alignmentGapData = computed(() => ({
+    labels: matrix.value.map((row) => row.entity.name),
     datasets: [
-        {
-            label: "Take Rate (%)",
-            data: allSdgRows.value.map((row) => row.take_rate),
-        },
+        { label: "Holding", data: matrix.value.map((row) => row.holding_count) },
+        { label: "Initiate", data: matrix.value.map((row) => row.initiate_count) },
     ],
 }));
 
-const alignedVsInitiatedData = computed(() => ({
-    labels: matrix.value.map((row) => `SDG ${row.sdg.number}`),
-    datasets: [
-        {
-            label: "Aligned",
-            data: matrix.value.map((row) => row.aligned_count),
-        },
-        {
-            label: "Initiated",
-            data: matrix.value.map((row) => row.initiated_count),
-        },
-    ],
-}));
-
-// none === decision null (Pending Response) — kept out of the global TakeSkipDecision union
-const decisionBadgeType: Record<
-    "Take" | "Skip" | "none",
-    "completed" | "announcement" | "information"
-> = {
-    Take: "completed",
-    Skip: "announcement",
-    none: "information",
-};
+function onAlignmentGapClick(datasetIndex: number, index: number) {
+    const row = matrix.value[index];
+    if (!row) return;
+    const planOrigin: "HOLDING" | "INITIATE" = datasetIndex === 0 ? "HOLDING" : "INITIATE";
+    selection.value = { kind: "origin", entityId: row.entity.id, planOrigin };
+}
 </script>
 
 <style scoped>

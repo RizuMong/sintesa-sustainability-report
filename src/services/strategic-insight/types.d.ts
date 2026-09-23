@@ -16,39 +16,67 @@ declare global {
     // not `category_id`. BE stores GRI Quantitative categories without an id, so there is no id to
     // filter on — see api/Dashboard/GRI - Quantitative.yml's disabled `category` param.
     category?: string
+    // 'Investment Impact' | 'Operation Impact' — literal wire strings, not an uppercase token.
+    // Sent as a param only (decided) — backend ignores it today (gap B2), no client-side filter.
+    impact?: string
   }
 
   // ---- SDG page (AC-70..73) ----
-  interface StrategicInsightSdgKpi {
-    holding_sdg_roadmap: number // count of Holding-adopted SDGs with a published framework
-    strategic_alignment_rate: number // %, aligned action plans / total roadmap items
-    execution_rate_take: number // %, Holding-only Take / (Take+Skip) — AC-72 anti-greenwashing rule
-    bottom_up_initiatives: number // count of Subsidiary-originated (created_by_level = 'Subsidiary') items
+  // Passed straight through from wire `summary[]` — the page needs name/description/total, not
+  // four flattened numbers.
+  interface StrategicInsightSdgSummary {
+    key: string
+    name: string
+    description: string
+    value: number
+    total?: number
+  }
+
+  type SdgCellStatus = 'TAKE' | 'INITIATE' | 'SKIP' | 'NONE'
+
+  interface StrategicInsightSdgCell {
+    sdg_id: string // sdg_id.id — the column key
+    status: SdgCellStatus // INITIATE > TAKE > SKIP precedence
+    take_percentage: number // TAKE count / actions in cell, 0..100
+    action_count: number
   }
 
   interface StrategicInsightSdgMatrixRow {
-    sdg: Ref2 & { number: number }
-    take_rate: number // %, Holding-only numerator/denominator (AC-72)
-    aligned_count: number
-    initiated_count: number
+    // one per entity, replaces the per-SDG row
+    entity: Ref2
+    entity_type: 'HOLDING' | 'SUBSIDIARY'
+    execution_percentage: number // row-level, straight from the wire
+    holding_count: number // plan_origin === 'HOLDING'
+    initiate_count: number // plan_origin === 'INITIATE'
+    cells: StrategicInsightSdgCell[]
+  }
+
+  interface StrategicInsightSdgColumn {
+    // ordered column vocabulary for the matrix header
+    sdg_id: string
+    name: string // sdg_id.name, first seen wins
+    number: number
+    // HOLDING if ANY action for this sdg_id (any entity, post-filter) has plan_origin HOLDING,
+    // else INITIATE. Columns are sorted (group, number) with HOLDING first so each group's
+    // columns stay contiguous — required for a colspan-based grouping header row.
+    group: 'HOLDING' | 'INITIATE'
   }
 
   interface StrategicInsightSdgDetailItem {
-    id: string
+    id: string // action.ids
+    entity_id: string // for the alignment-gap drill-down
     sdg_id: string
-    entity: Ref2
+    sdg_name: string // sdg_id.name — the SDG column of the detail table
     key_business_action: string
-    action_indicator: Ref2 | null
-    created_by_level: MkiCreatedByLevel // reuse mki-sdg's global ('Holding' | 'Subsidiary')
-    unverified: boolean // §4 Unverified flag — true only when created_by_level = 'Subsidiary'
-    decision: TakeSkipDecision // reuse action-plan-submission's global ('Take' | 'Skip' | null)
-    skip_reason: string | null
+    plan_origin: string
+    adoption_status: string
   }
 
   interface StrategicInsightSdgResponse {
-    kpi: StrategicInsightSdgKpi
+    summary: StrategicInsightSdgSummary[]
+    columns: StrategicInsightSdgColumn[]
     matrix: StrategicInsightSdgMatrixRow[]
-    detail: StrategicInsightSdgDetailItem[] // drill-down source, filtered client-side by sdg_id on row click
+    detail: StrategicInsightSdgDetailItem[]
   }
 
   // ---- wire shape — what GET /v1/strategic-insight/sdg actually sends today ----
@@ -67,9 +95,14 @@ declare global {
 
   interface StrategicInsightSdgWireAction {
     ids: string // NOTE: plural field name on the wire, singular id value
-    sdg_id: Ref2 & { number: number } // TRAP: id is duplicated across different SDGs in live dummy data — group on number, never id
-    adoption_status: 'TAKE' | 'SKIP' | 'PENDING' | string // observed live: TAKE, PENDING; SKIP documented in the contract example
-    plan_origin: 'HOLDING' | 'INITIATE' | 'SUBSIDIARY'
+    // TRAP (e1a3b38 example 200): id EwGok8Dh3xXQ carries name "SDG 10" in two entities and
+    // "SDG 19" in the third, same number (19) throughout — group cells on `id` (consistent),
+    // label the column from the first `name` seen for that id.
+    sdg_id: Ref2 & { number: number }
+    adoption_status: 'TAKE' | 'SKIP' | 'INITIATE' | 'PENDING' | string // INITIATE: gap A1, not seen live yet but drives cell-status precedence
+    // 'SUBSIDIARY' is DEPRECATED as of e1a3b38 — the backend now emits 'INITIATE' for what used
+    // to be 'SUBSIDIARY'. Do not special-case 'SUBSIDIARY' anywhere downstream.
+    plan_origin: 'HOLDING' | 'INITIATE'
     impact: string
     key_business_action: string
     detail_action_solution: string

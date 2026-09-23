@@ -26,11 +26,21 @@ export function useGriQualitativeInsight(filters: MaybeRefOrGetter<StrategicInsi
   })
 }
 
+// ponytail: no impact-vocabulary endpoint exists anywhere in api/ (checked Master SDG/ too), and
+// api/Dashboard/SDG.yml (e1a3b38) declares the param's enum as these two literal wire strings —
+// not uppercase tokens. Hardcoded until a master-impact endpoint shows up.
+export const IMPACT_OPTIONS = ['Investment Impact', 'Operation Impact']
+
 // Shared "Reporting Period + Entity" global filter bar (AC-71, AC-73, AC-74) — all three dashboard
 // pages use the same two selects and the same active-filter label, so it lives here once instead of
-// three times.
+// three times. `impact` is SDG-only: the GRI pages never render that select, so `state.impact` stays
+// '' for them and `params.impact` stays undefined — no param leaks onto GRI requests.
 export function useStrategicInsightFilterState() {
-  const state = reactive<{ period: string; entityId: string }>({ period: '', entityId: '' })
+  const state = reactive<{ period: string; entityId: string; impact: string }>({
+    period: '',
+    entityId: '',
+    impact: '',
+  })
 
   // ponytail: the two selects fall back to the demo vocabulary for the same reason the dashboard
   // itself does — GET /v1/master-period returns a single active year, and /v1/master-entity returns
@@ -55,15 +65,17 @@ export function useStrategicInsightFilterState() {
   const params = computed<StrategicInsightFilterParams>(() => ({
     period: state.period || undefined,
     entity_id: state.entityId || undefined,
+    impact: state.impact || undefined,
   }))
 
-  // e.g. "WS · 2025" or "All Entities · All Periods" (AC-76 dynamic subtitle)
+  // e.g. "WS · 2025 · Investment Impact" or "All Entities · All Periods · All Impacts" (AC-76 dynamic subtitle)
   const activeFilterLabel = computed(() => {
     const entityLabel = state.entityId ? (entities.value.find((e) => e.id === state.entityId)?.name ?? '') : 'All Entities'
     const periodLabel = state.period
       ? (periods.value.find((p) => String(p.year) === state.period)?.year ?? state.period)
       : 'All Periods'
-    return `${entityLabel} · ${periodLabel}`
+    const impactLabel = state.impact || 'All Impacts'
+    return `${entityLabel} · ${periodLabel} · ${impactLabel}`
   })
 
   return { state, periods, entities, params, activeFilterLabel }

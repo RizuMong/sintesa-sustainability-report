@@ -422,6 +422,19 @@ Confirmed directly by BE, superseding the corresponding open question above:
   or the proposed contract in this doc applied for real; those two check files' assertions are
   otherwise correct and don't need to change.
 
+- **Resolved 2026-09-23 — the normative example is restored.** `api/Dashboard/GRI -
+  Quantitative.yml` now carries three examples: `Response Dummy` (the normative one, the proposed
+  contract above rendered for all 8 categories, with `category_id`/`gri_codes`/`sequence`/
+  `dimensions[]`/`labels{}`/`unit`/per-item `aggregation`), `Legacy Response (pre
+  dimensions/labels)` (the BE dump that had taken over the `Response Dummy` name) and `200` (the
+  BE's `?category=General` dump). The restored body was taken verbatim from
+  `src/services/strategic-insight/fixtures/gri-quantitative-base.json`, which is itself a committed
+  copy of the lost example — so it round-trips: `node --experimental-strip-types
+  scripts/generate-demo-base.ts` regenerates that fixture from the collection byte-identically.
+  `contract.check.ts` and `chart-spec.check.ts` pass again (8 tabs, 32 KPI cards, 18 dimensions,
+  27 charts). This changes the *contract*, not the backend: A1-A5 remain open server-side and
+  `scripts/verify-api.ts` still exits non-zero.
+
 Confirmed for the sibling SDG endpoint (see docs/dashboard-sdg-api-gaps.md for the full analysis):
 
 - **`period` moved off the matrix row onto each action.** `StrategicInsightSdgWireMatrixRow` no

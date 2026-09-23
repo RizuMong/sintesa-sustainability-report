@@ -3,7 +3,13 @@ import { computed } from "vue";
 import { MpFlex, MpText, MpChart } from "@mekari/pixel3";
 
 type ChartKind =
-    "bar" | "bar-stacked" | "bar-horizontal" | "line" | "doughnut" | "pie";
+    | "bar"
+    | "bar-stacked"
+    | "bar-horizontal"
+    | "bar-stacked-horizontal"
+    | "line"
+    | "doughnut"
+    | "pie";
 
 interface ChartDataset {
     label: string;
@@ -19,10 +25,12 @@ const props = withDefaults(
         labels: string[];
         datasets: ChartDataset[];
         height?: string;
+        onSegmentClick?: (datasetIndex: number, index: number) => void;
     }>(),
     {
         caption: "",
         height: "220px",
+        onSegmentClick: undefined,
     },
 );
 
@@ -33,6 +41,7 @@ const chartType = computed(() => {
     switch (props.kind) {
         case "bar-stacked":
         case "bar-horizontal":
+        case "bar-stacked-horizontal":
             return "bar";
         case "doughnut":
             return "doughnut";
@@ -45,8 +54,12 @@ const chartType = computed(() => {
     }
 });
 
-const isStacked = computed(() => props.kind === "bar-stacked");
-const isHorizontal = computed(() => props.kind === "bar-horizontal");
+const isStacked = computed(
+    () => props.kind === "bar-stacked" || props.kind === "bar-stacked-horizontal",
+);
+const isHorizontal = computed(
+    () => props.kind === "bar-horizontal" || props.kind === "bar-stacked-horizontal",
+);
 const isArea = computed(
     () => props.kind === "line" && props.datasets.length === 1,
 );
@@ -68,6 +81,34 @@ const isShowLegend = computed(
         props.kind === "doughnut" ||
         props.datasets.length > 1,
 );
+
+// MpChart declares no per-bar click emit; it lodash-`merge`s `props.options` over its own
+// chart.js config, so this is the only way to hear about a bar click.
+const chartOptions = computed(() => {
+    if (!props.onSegmentClick) return undefined;
+    const handler = props.onSegmentClick;
+    return {
+        onClick: (evt: unknown, elements: { datasetIndex: number; index: number }[], chart: {
+            getElementsAtEventForMode: (
+                evt: unknown,
+                mode: string,
+                options: Record<string, unknown>,
+                useFinalPosition: boolean,
+            ) => { datasetIndex: number; index: number }[];
+        }) => {
+            const picked =
+                elements[0] ??
+                chart.getElementsAtEventForMode(
+                    evt,
+                    "nearest",
+                    { intersect: true },
+                    true,
+                )[0];
+            if (!picked) return;
+            handler(picked.datasetIndex, picked.index);
+        },
+    };
+});
 
 const chartData = computed(() => ({
     labels: props.labels,
@@ -153,6 +194,8 @@ const seriesLines = computed(() => {
             :is-horizontal="isHorizontal"
             :is-area="isArea"
             :is-show-legend="isShowLegend"
+            :options="chartOptions"
+            :style="{ cursor: props.onSegmentClick ? 'pointer' : undefined }"
         />
 
         <MpFlex direction="column" gap="1">
