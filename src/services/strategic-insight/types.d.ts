@@ -46,7 +46,7 @@ declare global {
     entity: Ref2
     entity_type: 'HOLDING' | 'SUBSIDIARY'
     execution_percentage: number // row-level, straight from the wire
-    holding_count: number // plan_origin === 'HOLDING'
+    holding_count: number // plan_origin === 'HOLDING' && adoption_status === 'TAKE' — mandates actually taken
     initiate_count: number // plan_origin === 'INITIATE'
     cells: StrategicInsightSdgCell[]
   }
@@ -56,8 +56,8 @@ declare global {
     sdg_id: string
     name: string // sdg_id.name, first seen wins
     number: number
-    // HOLDING if ANY action for this sdg_id (any entity, post-filter) has plan_origin HOLDING,
-    // else INITIATE. Columns are sorted (group, number) with HOLDING first so each group's
+    // HOLDING if Master SDG marks this SDG "Adopted", else INITIATE (the "Bottom-Up Initiatives"
+    // group). Columns are sorted (group, number) with HOLDING first so each group's
     // columns stay contiguous — required for a colspan-based grouping header row.
     group: 'HOLDING' | 'INITIATE'
   }
@@ -125,6 +125,16 @@ declare global {
     adoption_take_count: number
     adoption_skip_count: number
     actions: StrategicInsightSdgWireAction[]
+  }
+
+  // GET /v1/master-sdg/index (api/Master SDG/Index.yml) — SDG Adoption Management, the source of
+  // truth for which SDGs are on the Holding roadmap.
+  interface StrategicInsightMasterSdg {
+    id: string
+    sdg_no: number
+    sdg_number: string // "SDG 1"
+    sdg_name: string
+    status: 'Adopted' | 'Not Adopted' | string
   }
 
   interface StrategicInsightSdgWireResponse {

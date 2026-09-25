@@ -55,6 +55,10 @@ const griQuantitative = demoGriQuantitative()
 const sdg = JSON.parse(
   readFileSync(fileURLToPath(new URL('../src/services/strategic-insight/fixtures/live-sdg.json', import.meta.url)), 'utf8'),
 )
+// SDG adoption status (api/Master SDG/Index.yml example) — decides the matrix column groups.
+const masterSdgs = JSON.parse(
+  readFileSync(fileURLToPath(new URL('../src/services/strategic-insight/fixtures/master-sdg.json', import.meta.url)), 'utf8'),
+)
 
 // master-entity / master-period feed the two filter selects. The entity payload uses the RAW
 // backend shape (uppercase entity_type, nested parent_entity_id) so it exercises the real
@@ -86,6 +90,7 @@ const handler = (req: import('node:http').IncomingMessage, res: import('node:htt
   if (path.endsWith('/v1/strategic-insight/sdg')) {
     return res.end(envelope(sdg))
   }
+  if (path.endsWith('/v1/master-sdg/index')) return res.end(envelope(masterSdgs))
   if (path.endsWith('/v1/master-entity/index')) return res.end(envelope(entities))
   if (path.endsWith('/v1/master-period/index')) return res.end(envelope(periods))
   if (path.endsWith('/v1/master-category/index')) return res.end(envelope([]))

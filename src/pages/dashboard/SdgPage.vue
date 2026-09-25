@@ -122,11 +122,10 @@
                 <MpTableContainer v-if="columns.length">
                     <MpTable>
                         <MpTableHead>
-                            <!-- Column grouping header (Holding SDGs / Initiative SDGs), rule 4:
+                            <!-- Column grouping header (Holding SDGs / Bottom-Up Initiatives), rule 4:
                                  Entity + Execution % sit outside both groups under one blank
                                  colspan="2" cell. Empty groups are omitted (colspan="0" isn't
-                                 valid HTML) — against the current contract only Holding SDGs
-                                 renders, spanning all 5 SDG columns. -->
+                                 valid HTML). Grouping follows Master SDG adoption status. -->
                             <MpTableRow>
                                 <MpTableCell colspan="2" />
                                 <MpTableCell
@@ -260,6 +259,7 @@ import {
     useSdgInsight,
     useStrategicInsightFilterState,
     IMPACT_OPTIONS,
+    isTakenMandate,
 } from "@/services/strategic-insight";
 
 const filterState = useStrategicInsightFilterState();
@@ -282,7 +282,7 @@ const columnGroups = computed(() => {
         } else {
             groups.push({
                 group: column.group,
-                label: column.group === "HOLDING" ? "Holding SDGs" : "Initiative SDGs",
+                label: column.group === "HOLDING" ? "Holding SDGs" : "Bottom-Up Initiatives",
                 span: 1,
             });
         }
@@ -313,9 +313,12 @@ const selectedDetail = computed(() => {
             (item) => item.entity_id === sel.entityId && item.sdg_id === sel.sdgId,
         );
     }
+    // Holding bar counts taken mandates only (holding_count), so its drill-down must match.
     return detail.value.filter(
         (item) =>
-            item.entity_id === sel.entityId && item.plan_origin === sel.planOrigin,
+            item.entity_id === sel.entityId &&
+            item.plan_origin === sel.planOrigin &&
+            (sel.planOrigin !== "HOLDING" || isTakenMandate(item)),
     );
 });
 

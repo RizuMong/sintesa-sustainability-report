@@ -102,15 +102,18 @@ const roadmap = boxes.find((b) => b.label.startsWith('Holding SDG Roadmap'))
 assert.ok(roadmap, 'Holding SDG Roadmap box must render')
 // The whole point of the Phase 2 `value / total` format — assert it exactly, not just "contains 9".
 assert.equal(roadmap!.amount, '9 / 17', `Holding SDG Roadmap must read "9 / 17", got "${roadmap!.amount}"`)
-// bottom_up_initiatives is legitimately 0 against this fixture (no INITIATE action anywhere in it)
-// — assert it renders that true zero, NOT that it's non-zero like the old (wrong) check did.
+// Recomputed FE-side from the fixture + Master SDG adoption: 9 actions sit on non-adopted SDGs
+// (1/9/10), and 15 of 24 on adopted SDG 3/12 -> 63% alignment, never > 100%.
 const bottomUp = boxes.find((b) => b.label.startsWith('Bottom-Up Initiatives'))
 assert.ok(bottomUp, 'Bottom-Up Initiatives box must render')
-assert.equal(bottomUp!.amount, '0', `Bottom-Up Initiatives must read "0", got "${bottomUp!.amount}"`)
+assert.equal(bottomUp!.amount, '9', `Bottom-Up Initiatives must read "9", got "${bottomUp!.amount}"`)
+const alignment = boxes.find((b) => b.label.startsWith('Strategic Alignment'))
+assert.equal(alignment?.amount, '63%', `Strategic Alignment must read "63%", got "${alignment?.amount}"`)
 console.log('ok — 4 summary boxes render with descriptions, Holding SDG Roadmap reads "9 / 17"')
 
-// ---- column grouping header row: "Holding SDGs" spanning all 5 SDG columns, no "Initiative
-// SDGs" cell (every action in this fixture is plan_origin HOLDING — gap A1/A2) ----
+// ---- column grouping header row: grouped by Master SDG adoption, not plan_origin. Every action
+// in the fixture is plan_origin HOLDING, but only SDG 3/12 are adopted -> "Holding SDGs" spans 2,
+// "Bottom-Up Initiatives" spans 3 (SDG 1/9/10) ----
 const groupHeader: { cells: { text: string; colSpan: number; scope: string | null }[] } = await evaluate(`
   (() => {
     const table = document.querySelectorAll('table')[0]
@@ -125,15 +128,15 @@ const groupHeader: { cells: { text: string; colSpan: number; scope: string | nul
 `)
 console.log('group header row:', JSON.stringify(groupHeader.cells))
 const groupCells = groupHeader.cells.filter((c) => c.text.length > 0)
-assert.equal(groupCells.length, 1, `expected exactly one non-empty group header cell, got: ${JSON.stringify(groupCells)}`)
-assert.equal(groupCells[0]!.text, 'Holding SDGs', `expected "Holding SDGs", got "${groupCells[0]!.text}"`)
-assert.equal(groupCells[0]!.colSpan, 5, `"Holding SDGs" must span all 5 SDG columns, got colspan=${groupCells[0]!.colSpan}`)
-assert.equal(groupCells[0]!.scope, 'colgroup', `group header cell must use scope="colgroup", got "${groupCells[0]!.scope}"`)
-assert.ok(
-  !groupHeader.cells.some((c) => c.text === 'Initiative SDGs'),
-  'no "Initiative SDGs" cell must render against this fixture (no INITIATE-origin actions)',
+assert.deepEqual(
+  groupCells.map((c) => [c.text, c.colSpan, c.scope]),
+  [
+    ['Holding SDGs', 2, 'colgroup'],
+    ['Bottom-Up Initiatives', 3, 'colgroup'],
+  ],
+  `group header cells wrong: ${JSON.stringify(groupCells)}`,
 )
-console.log('ok — group header row: "Holding SDGs" spans 5 columns, no "Initiative SDGs" cell')
+console.log('ok — group header row: "Holding SDGs" spans 2, "Bottom-Up Initiatives" spans 3')
 
 // ---- matrix table: 3 entity rows x 5 SDG columns ----
 // The SDG column headers now live in the SECOND thead row — the first is the grouping row above.
@@ -180,10 +183,10 @@ const cellColours: { greenBg: string | null; whiteBg: string | null } = await ev
     const menaraDuta = rows.find(r => r.querySelector('td')?.textContent.trim() === 'Menara Duta, PT')
     if (!menaraDuta) return { greenBg: null, whiteBg: null }
     const cells = Array.from(menaraDuta.querySelectorAll('td'))
-    // cells[0]=Entity, cells[1]=Execution %, cells[2..6]=SDG 1, SDG 3, SDG 9, SDG 12, SDG 10
+    // cells[0]=Entity, cells[1]=Execution %, cells[2..6]=SDG 3, SDG 12 | SDG 1, SDG 9, SDG 10
     return {
-      greenBg: getComputedStyle(cells[2]).backgroundColor,
-      whiteBg: getComputedStyle(cells[3]).backgroundColor,
+      greenBg: getComputedStyle(cells[4]).backgroundColor,
+      whiteBg: getComputedStyle(cells[2]).backgroundColor,
     }
   })()
 `)
@@ -214,7 +217,7 @@ await evaluate(`
     const table = document.querySelectorAll('table')[0]
     const rows = Array.from(table.querySelectorAll('tbody tr'))
     const menaraDuta = rows.find(r => r.querySelector('td')?.textContent.trim() === 'Menara Duta, PT')
-    const cell = menaraDuta.querySelectorAll('td')[2] // SDG 1 cell, 100% TAKE
+    const cell = menaraDuta.querySelectorAll('td')[4] // SDG 1 cell, 100% TAKE
     cell.click()
   })()
 `)

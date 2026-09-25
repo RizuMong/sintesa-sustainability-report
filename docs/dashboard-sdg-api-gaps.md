@@ -241,3 +241,20 @@ fields — `baseline`, `target`, `indicator_id`, `sdg_ambition_esg_alignment` ar
 the cloned action's own `.period` so the two stay in sync. `fixtures/live-sdg.json` updated to
 match (period moved from the row onto both example actions).
 
+
+## FE fix (2026-09-25) — Holding vs Bottom-Up classification
+
+Bug report: SDG 1 (not adopted) rendered under "Holding SDGs"; Strategic Alignment showed 164%;
+the Alignment Gap chart showed 35–43 "Holding" per entity (the whole mandate pool) instead of
+mandates actually taken.
+
+- **A2 closed FE-side via `GET /v1/master-sdg/index`** (`api/Master SDG/Index.yml`, `status:
+  Adopted | Not Adopted`). `getSdgInsight` fetches it alongside `/strategic-insight/sdg`; column
+  group = adoption status, never `plan_origin`. Non-adopted group renders "Bottom-Up Initiatives".
+- **`holding_count` = `plan_origin HOLDING && adoption_status TAKE`** (`isTakenMandate`). The
+  Holding bar's drill-down uses the same predicate.
+- **`summary[]` values recomputed FE-side** from the same filtered actions (name/description
+  stay the backend's): `sdg_roadmap` = adopted / master total; `strategic_alignment` = % actions on
+  adopted SDGs; `execution_rate` = taken / HOLDING-origin actions; `bottom_up_initiatives` = actions
+  on non-adopted SDGs. Backend `summary[]` values are ignored — BE should fix its own 164% so the
+  two don't diverge for other consumers.

@@ -4,6 +4,8 @@ import { applyDemoFilters, demoGriQuantitative } from './demo-data'
 import { normalizeGriQuantitative } from './normalize'
 import { normalizeSdg } from './normalize-sdg'
 
+export { isTakenMandate } from './normalize-sdg'
+
 export {
   aggregateItems,
   isNumericItem,
@@ -66,10 +68,13 @@ async function fetchGriQuantitative(
 
 const strategicInsightApi = {
   async getSdgInsight(params: StrategicInsightFilterParams = {}) {
-    const wire = await unwrap<StrategicInsightSdgWireResponse>(
-      http.get('/v1/strategic-insight/sdg', { params }),
-    )
-    return normalizeSdg(wire, params)
+    // ponytail: master-sdg fetched here rather than in its own services/master-sdg module — this
+    // page is its only consumer. Promote it to a module when a second screen needs it.
+    const [wire, masterSdgs] = await Promise.all([
+      unwrap<StrategicInsightSdgWireResponse>(http.get('/v1/strategic-insight/sdg', { params })),
+      unwrap<StrategicInsightMasterSdg[]>(http.get('/v1/master-sdg/index')),
+    ])
+    return normalizeSdg(wire, masterSdgs, params)
   },
   async getGriQuantitativeInsight(params: StrategicInsightFilterParams = {}) {
     const live = await fetchGriQuantitative(params)

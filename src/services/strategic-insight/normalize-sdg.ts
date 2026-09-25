@@ -47,20 +47,50 @@ function applyFilters(flat: FlatAction[], filters: StrategicInsightFilterParams)
 // comment on StrategicInsightSdgWireAction['sdg_id'] in types.d.ts — id EwGok8Dh3xXQ carries two
 // different names in example 200; this must collapse to one column.
 //
-// group: HOLDING if ANY action for that sdg_id has plan_origin HOLDING, else INITIATE (rule 1 in
-// the follow-up plan). Sorted (group, number), HOLDING first, so each group's columns stay
-// contiguous — a colspan-based grouping header can't span non-adjacent columns.
-function deriveColumns(flat: FlatAction[]): StrategicInsightSdgColumn[] {
+// group: HOLDING only if Master SDG (SDG Adoption Management) marks that SDG "Adopted", else
+// INITIATE (rendered "Bottom-Up Initiatives"). NOT inferred from plan_origin: a Holding-origin
+// action plan can still sit on a non-adopted SDG, and inferring from it put SDG 1 under "Holding
+// SDGs". Sorted (group, number), HOLDING first, so each group's columns stay contiguous — a
+// colspan-based grouping header can't span non-adjacent columns.
+function deriveColumns(flat: FlatAction[], adopted: Set<string>): StrategicInsightSdgColumn[] {
   const byId = new Map<string, StrategicInsightSdgColumn>()
   for (const { action } of flat) {
     const { id, name, number } = action.sdg_id
-    if (!byId.has(id)) byId.set(id, { sdg_id: id, name, number, group: 'INITIATE' })
-    if (action.plan_origin === 'HOLDING') byId.get(id)!.group = 'HOLDING'
+    if (!byId.has(id)) byId.set(id, { sdg_id: id, name, number, group: adopted.has(id) ? 'HOLDING' : 'INITIATE' })
   }
   return [...byId.values()].sort((a, b) => {
     if (a.group !== b.group) return a.group === 'HOLDING' ? -1 : 1
     return a.number - b.number
   })
+}
+
+// A Holding mandate counts only once the entity actually took it. The backend sends every mandate
+// available to an entity (PENDING/SKIP included), so counting plan_origin alone reported the whole
+// mandate pool (35/43 per entity) as "Holding" in the Strategic Alignment Gap chart.
+export function isTakenMandate(action: { plan_origin: string; adoption_status: string }): boolean {
+  return action.plan_origin === 'HOLDING' && action.adoption_status === 'TAKE'
+}
+
+const percent = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0)
+
+// Recomputed from the same filtered actions the matrix and chart use, so the four cards can't
+// disagree with them (the backend's own summary[] reported 164% alignment, and ignores the
+// client-side filters). name/description stay the backend's; unknown keys pass through.
+function deriveSummary(
+  wireSummary: StrategicInsightSdgWireSummary[],
+  flat: FlatAction[],
+  adopted: Set<string>,
+  masterSdgs: StrategicInsightMasterSdg[],
+): StrategicInsightSdgSummary[] {
+  const onRoadmap = flat.filter((i) => adopted.has(i.action.sdg_id.id)).length
+  const mandates = flat.filter((i) => i.action.plan_origin === 'HOLDING')
+  const values: Record<string, Pick<StrategicInsightSdgSummary, 'value' | 'total'>> = {
+    sdg_roadmap: { value: adopted.size, total: masterSdgs.length },
+    strategic_alignment: { value: percent(onRoadmap, flat.length) },
+    execution_rate: { value: percent(mandates.filter((i) => isTakenMandate(i.action)).length, mandates.length) },
+    bottom_up_initiatives: { value: flat.length - onRoadmap },
+  }
+  return wireSummary.map((s) => ({ ...s, ...values[s.key] }))
 }
 
 // INITIATE > TAKE > SKIP precedence (decision 1). Anything else (e.g. PENDING) falls through to
@@ -100,7 +130,7 @@ function deriveMatrixRow(
     entity: first.entity,
     entity_type: first.entityType,
     execution_percentage: first.executionPercentage,
-    holding_count: items.filter((i) => i.action.plan_origin === 'HOLDING').length,
+    holding_count: items.filter((i) => isTakenMandate(i.action)).length,
     initiate_count: items.filter((i) => i.action.plan_origin === 'INITIATE').length,
     // rectangular: a column this entity has no action for still gets an explicit empty cell.
     cells: columns.map((col) => deriveCell(col.sdg_id, byColumn.get(col.sdg_id) ?? [])),
@@ -122,10 +152,12 @@ function deriveDetailItem(item: FlatAction): StrategicInsightSdgDetailItem {
 
 export function normalizeSdg(
   wire: StrategicInsightSdgWireResponse,
+  masterSdgs: StrategicInsightMasterSdg[],
   filters: StrategicInsightFilterParams = {},
 ): StrategicInsightSdgResponse {
+  const adopted = new Set(masterSdgs.filter((s) => s.status === 'Adopted').map((s) => s.id))
   const flat = applyFilters(flattenActions(wire.matrix), filters)
-  const columns = deriveColumns(flat)
+  const columns = deriveColumns(flat, adopted)
 
   const byEntity = new Map<string, FlatAction[]>()
   for (const item of flat) {
@@ -137,5 +169,5 @@ export function normalizeSdg(
   const matrix = [...byEntity.values()].map((items) => deriveMatrixRow(items, columns))
   const detail = flat.map(deriveDetailItem)
 
-  return { summary: wire.summary, columns, matrix, detail }
+  return { summary: deriveSummary(wire.summary, flat, adopted, masterSdgs), columns, matrix, detail }
 }
