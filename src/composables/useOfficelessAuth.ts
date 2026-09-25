@@ -19,6 +19,19 @@ export function parseEmbedConfig(search: string): EmbedConfig {
   };
 }
 
+// embed params to re-attach on in-app navigation, so a reload / deep-link copy
+// of any page still carries the token. Only fills keys the target lacks.
+export function missingEmbedQuery(
+  query: Record<string, unknown>,
+  cfg: EmbedConfig,
+): Record<string, string> | null {
+  const embed = { token: cfg.token, env: cfg.env, company_id: cfg.companyId };
+  const missing = Object.fromEntries(
+    Object.entries(embed).filter(([k, v]) => v && query[k] == null),
+  ) as Record<string, string>;
+  return Object.keys(missing).length ? missing : null;
+}
+
 export function workflowApiBaseUrl(env: string | null): string {
   return `https://api-officeless${env === "development" ? "-dev" : ""}.mekari.com/28364`;
 }

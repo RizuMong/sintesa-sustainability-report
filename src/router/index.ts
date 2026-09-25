@@ -4,6 +4,7 @@ import EvaluateApprovalPage from '@/pages/evaluate-gri-quantitative/ApprovalPage
 import EvaluateDetailPage from '@/pages/evaluate-gri-quantitative/DetailPage.vue'
 import MasterKeyIndicatorListPage from '@/pages/master-key-indicator-quantitative/ListPage.vue'
 import MasterKeyIndicatorDetailPage from '@/pages/master-key-indicator-quantitative/DetailPage.vue'
+import { missingEmbedQuery, useOfficelessAuth } from '@/composables/useOfficelessAuth'
 import DashboardGriQuantitativePage from '@/pages/dashboard/GriQuantitativePage.vue'
 import DashboardGriQualitativePage from '@/pages/dashboard/GriQualitativePage.vue'
 import DashboardSdgPage from '@/pages/dashboard/SdgPage.vue'
@@ -38,4 +39,11 @@ export const router = createRouter({
     { path: '/data-export', name: 'data-export', component: DataExportListPage },
     { path: '/user-profile', name: 'user-profile', component: UserProfilePage },
   ],
+})
+
+// carry ?token/env/company_id on every navigation — pages push bare paths, the
+// captured embed config is the source of truth (see useOfficelessAuth)
+router.beforeEach((to) => {
+  const missing = missingEmbedQuery(to.query, useOfficelessAuth().config.value)
+  if (missing) return { ...to, query: { ...to.query, ...missing } }
 })
