@@ -113,7 +113,7 @@
                         gap="1"
                         alignItems="center"
                     >
-                        <div :class="css(legend.swatchStyle)" />
+                        <div :class="legend.swatchClass" />
                         <MpText size="label-small" color="text.secondary">{{
                             legend.label
                         }}</MpText>
@@ -129,16 +129,14 @@
                             <MpTableRow>
                                 <MpTableCell colspan="2" />
                                 <MpTableCell
-                                    v-for="group in columnGroups"
+                                    v-for="(group, groupIndex) in columnGroups"
                                     :key="group.group"
                                     scope="colgroup"
                                     :colspan="group.span"
-                                    :class="css({
-                                        textAlign: 'center',
-                                        backgroundColor: 'background.neutral.subtle',
-                                        color: 'text.secondary',
-                                        fontWeight: 'semiBold',
-                                    })"
+                                    :class="[
+                                        GROUP_HEADER_CLASS[group.group],
+                                        groupIndex > 0 ? GROUP_SEPARATOR_CLASS : '',
+                                    ]"
                                 >
                                     {{ group.label }}
                                 </MpTableCell>
@@ -152,6 +150,7 @@
                                     v-for="column in columns"
                                     :key="column.sdg_id"
                                     scope="col"
+                                    :class="groupSeparator(column.sdg_id)"
                                 >
                                     {{ column.name }}
                                 </MpTableCell>
@@ -173,7 +172,10 @@
                                     :key="cell.sdg_id"
                                     as="td"
                                     scope="row"
-                                    :class="css(cellStyle(cell.status))"
+                                    :class="[
+                                        CELL_CLASS[cell.status],
+                                        groupSeparator(cell.sdg_id),
+                                    ]"
                                     @click="
                                         selection = {
                                             kind: 'cell',
@@ -336,36 +338,56 @@ const selectedDetailHeading = computed(() => {
     return `Detail — ${entityName} · ${sel.planOrigin === "HOLDING" ? "Holding" : "Initiate"}`;
 });
 
-// Cell colour map (decision 1 in plan.md): TAKE -> green, INITIATE -> orange (Pixel 3 has no
-// yellow scale), SKIP/NONE -> plain surface with a gray.100 border.
+// Colours: this page renders in the 2.1 token theme (no nextTheme route meta), where the `yellow`
+// scale is undefined and `orange` IS the yellow/amber scale (orange.50 #FBF3DD, orange.400 #E0AB00).
+// Every class below is a literal css() call on purpose: @mekari/pixel3-postcss extracts CSS
+// statically, so style objects built at runtime (lookups, spreads, helper returns) get a class
+// name but no CSS rule.
+
+// Cell colour by action status (INITIATE > TAKE > SKIP precedence, see normalize-sdg.ts), regardless
+// of which column group the cell sits in: TAKE -> green, INITIATE -> yellow, SKIP/PENDING/NONE ->
+// plain surface with a gray.100 border.
 const cellLegend = [
     {
         status: "TAKE",
-        label: "Take",
-        swatchStyle: { w: "3", h: "3", rounded: "sm", bg: "green.100", borderWidth: "1px", borderColor: "green.400" },
+        label: "Adopted",
+        swatchClass: css({ w: "3", h: "3", rounded: "sm", bg: "green.50", borderWidth: "1px", borderColor: "green.400" }),
     },
     {
         status: "INITIATE",
         label: "Initiate",
-        swatchStyle: { w: "3", h: "3", rounded: "sm", bg: "orange.100", borderWidth: "1px", borderColor: "orange.400" },
+        swatchClass: css({ w: "3", h: "3", rounded: "sm", bg: "orange.50", borderWidth: "1px", borderColor: "orange.400" }),
     },
     {
         status: "SKIP",
-        label: "Skip / None",
-        swatchStyle: { w: "3", h: "3", rounded: "sm", bg: "background.surface", borderWidth: "1px", borderColor: "gray.100" },
+        label: "Skip",
+        swatchClass: css({ w: "3", h: "3", rounded: "sm", bg: "background.surface", borderWidth: "1px", borderColor: "gray.100" }),
     },
 ] as const;
 
-function cellStyle(status: SdgCellStatus) {
-    const base = { cursor: "pointer" as const };
-    switch (status) {
-        case "TAKE":
-            return { ...base, bg: "green.50", color: "green.700" };
-        case "INITIATE":
-            return { ...base, bg: "orange.50", color: "orange.700" };
-        default:
-            return { ...base, bg: "background.surface", borderWidth: "1px", borderColor: "gray.100" };
-    }
+const SKIP_CELL_CLASS = css({ cursor: "pointer", bg: "background.surface", borderWidth: "1px", borderColor: "gray.100" });
+const CELL_CLASS: Record<SdgCellStatus, string> = {
+    TAKE: css({ cursor: "pointer", bg: "green.50", color: "green.700" }),
+    INITIATE: css({ cursor: "pointer", bg: "orange.50", color: "orange.700" }),
+    SKIP: SKIP_CELL_CLASS,
+    NONE: SKIP_CELL_CLASS,
+};
+
+// Column groups: green header for Holding SDGs, yellow for Bottom-Up Initiatives, one separator
+// line between the two groups (header rows and body) in the default border colour — gray.100 in
+// 2.1, the same colour MpTable uses for its own cell borders (`border.default` is 2.4-only).
+const GROUP_HEADER_CLASS = {
+    HOLDING: css({ textAlign: "center", fontWeight: "semiBold", bg: "green.50", color: "green.700" }),
+    INITIATE: css({ textAlign: "center", fontWeight: "semiBold", bg: "orange.50", color: "orange.700" }),
+} as const;
+const GROUP_SEPARATOR_CLASS = css({ borderLeftWidth: "2px", borderLeftColor: "gray.100" });
+
+// The first column of a group that follows another group carries the separator. Relies on columns
+// being contiguous per group, which normalize-sdg.ts guarantees.
+function groupSeparator(sdgId: string): string {
+    const cols = columns.value;
+    const i = cols.findIndex((c) => c.sdg_id === sdgId);
+    return i > 0 && cols[i - 1]!.group !== cols[i]!.group ? GROUP_SEPARATOR_CLASS : "";
 }
 
 const alignmentGapData = computed(() => ({

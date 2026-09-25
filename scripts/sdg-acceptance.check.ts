@@ -138,6 +138,41 @@ assert.deepEqual(
 )
 console.log('ok — group header row: "Holding SDGs" spans 2, "Bottom-Up Initiatives" spans 3')
 
+// ---- group colours: Holding green, Bottom-Up yellow, one gray.100 (2.1 default border) separator between them ----
+// Asserted on computed style because @mekari/pixel3-postcss extracts CSS statically — a runtime-
+// built style object still gets a class name but no rule, which only the browser reveals.
+const groupStyle: { headers: string[][]; sdgLeft: string[]; bodyLeft: string[]; sepColors: string[] } = await evaluate(`
+  (() => {
+    const table = document.querySelectorAll('table')[0]
+    const s = (el) => getComputedStyle(el)
+    const headers = Array.from(table.querySelectorAll('thead tr')[0].children).slice(1)
+      .map(c => [s(c).backgroundColor, s(c).borderLeftWidth, s(c).borderTopWidth])
+    // children[2..6] = SDG 3, SDG 12 | SDG 1, SDG 9, SDG 10 — the separator sits on SDG 1's left edge
+    const left = (row) => Array.from(row.children).slice(2).map(c => s(c).borderLeftWidth)
+    const sepColors = [table.querySelectorAll('thead tr')[0].children[2], table.querySelectorAll('thead tr')[1].children[4], table.querySelectorAll('tbody tr')[0].children[4]].map(c => s(c).borderLeftColor)
+    return {
+      headers,
+      sdgLeft: left(table.querySelectorAll('thead tr')[1]),
+      bodyLeft: left(table.querySelectorAll('tbody tr')[0]),
+      sepColors,
+    }
+  })()
+`)
+console.log('group styles:', JSON.stringify(groupStyle))
+const [holdingHead, bottomUpHead] = groupStyle.headers.map(([bg, left, top]) => ({ bg: parseRgb(bg!), left, top }))
+assert.ok(holdingHead!.bg.g > holdingHead!.bg.r + 5 && holdingHead!.bg.g > holdingHead!.bg.b + 5, 'Holding header must be green')
+assert.ok(bottomUpHead!.bg.r > bottomUpHead!.bg.b + 10 && bottomUpHead!.bg.g > bottomUpHead!.bg.b + 10, 'Bottom-Up header must be yellow')
+assert.deepEqual([holdingHead!.left, holdingHead!.top, bottomUpHead!.top], ['0px', '0px', '0px'], 'no surrounding outline on the group headers')
+assert.equal(bottomUpHead!.left, '2px', 'Bottom-Up header must carry the group separator')
+for (const edges of [groupStyle.sdgLeft, groupStyle.bodyLeft]) {
+  assert.equal(edges[2], '2px', 'first Bottom-Up column must carry the separator')
+  assert.ok(edges.every((w, i) => i === 2 || w !== '2px'), `only the group boundary gets the separator: ${edges}`)
+}
+// Without a resolvable colour token the border falls back to currentColor, i.e. each cell's text
+// colour — exactly what `border.default` (2.4-only) produced here. Pin all three to gray.100.
+assert.deepEqual(groupStyle.sepColors, Array(3).fill('rgb(208, 214, 221)'), `separator must be gray.100 everywhere: ${groupStyle.sepColors}`)
+console.log('ok — group headers green/yellow, single gray.100 separator between the groups')
+
 // ---- matrix table: 3 entity rows x 5 SDG columns ----
 // The SDG column headers now live in the SECOND thead row — the first is the grouping row above.
 const matrix: { headers: string[]; rows: string[][] } = await evaluate(`
