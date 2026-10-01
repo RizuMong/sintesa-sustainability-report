@@ -92,23 +92,7 @@
                             :is-invalid="Boolean(errors.categoryId)"
                         >
                             <MpFormLabel>Category</MpFormLabel>
-                            <MpSelect
-                                v-model="form.categoryId"
-                                size="md"
-                                placeholder="Select category"
-                                is-full-width
-                            >
-                                <option value="" disabled>
-                                    Select category
-                                </option>
-                                <option
-                                    v-for="c in categories"
-                                    :key="c.id"
-                                    :value="c.id"
-                                >
-                                    {{ c.name }}
-                                </option>
-                            </MpSelect>
+                            <FilterSelect v-model="form.categoryId" :options="categories.map((c) => ({ value: c.id, label: c.name }))" placeholder="Select category" />
                             <MpFormErrorMessage v-if="errors.categoryId">{{
                                 errors.categoryId
                             }}</MpFormErrorMessage>
@@ -120,21 +104,7 @@
                             :is-invalid="Boolean(errors.code)"
                         >
                             <MpFormLabel>Code</MpFormLabel>
-                            <MpSelect
-                                v-model="form.code"
-                                size="md"
-                                placeholder="Select code"
-                                is-full-width
-                            >
-                                <option value="" disabled>Select code</option>
-                                <option
-                                    v-for="g in griCodes"
-                                    :key="g.id"
-                                    :value="g.gri_code"
-                                >
-                                    {{ g.gri_code }} — {{ g.disclosure_title }}
-                                </option>
-                            </MpSelect>
+                            <FilterSelect v-model="form.code" :options="griCodes.map((g) => ({ value: g.gri_code, label: `${g.gri_code} — ${g.disclosure_title}` }))" placeholder="Select code" />
                             <MpFormErrorMessage v-if="errors.code">{{
                                 errors.code
                             }}</MpFormErrorMessage>
@@ -444,19 +414,7 @@
                                                 <MpFormLabel
                                                     >Input Type</MpFormLabel
                                                 >
-                                                <MpSelect
-                                                    v-model="metric.input_type"
-                                                    size="md"
-                                                    is-full-width
-                                                >
-                                                    <option
-                                                        v-for="opt in inputTypeOptions"
-                                                        :key="opt.value"
-                                                        :value="opt.value"
-                                                    >
-                                                        {{ opt.label }}
-                                                    </option>
-                                                </MpSelect>
+                                                <FilterSelect v-model="metric.input_type" :options="inputTypeOptions" :clearable="false" />
                                             </MpFormControl>
                                         </MpFlex>
                                     </MpFlex>
@@ -523,19 +481,7 @@
                                     minWidth="200px"
                                 >
                                     <MpFormLabel>Unit</MpFormLabel>
-                                    <MpSelect
-                                        v-model="form.unitMode"
-                                        size="md"
-                                        is-full-width
-                                    >
-                                        <option
-                                            v-for="opt in unitModeOptions"
-                                            :key="opt.value"
-                                            :value="opt.value"
-                                        >
-                                            {{ opt.label }}
-                                        </option>
-                                    </MpSelect>
+                                    <FilterSelect v-model="form.unitMode" :options="unitModeOptions" :clearable="false" />
                                 </MpFormControl>
                                 <MpFormControl
                                     v-if="form.unitMode === 'UNIFORM'"
@@ -544,21 +490,7 @@
                                     :is-invalid="Boolean(errors.unit)"
                                 >
                                     <MpFormLabel>Unit</MpFormLabel>
-                                    <MpSelect
-                                        v-model="form.unitId"
-                                        size="md"
-                                        placeholder="No unit"
-                                        is-full-width
-                                    >
-                                        <option value="">No unit</option>
-                                        <option
-                                            v-for="u in units"
-                                            :key="u.id"
-                                            :value="u.id"
-                                        >
-                                            {{ u.name }}
-                                        </option>
-                                    </MpSelect>
+                                    <FilterSelect v-model="form.unitId" :options="units.map((u) => ({ value: u.id, label: u.name }))" placeholder="No unit" />
                                     <MpFormErrorMessage v-if="errors.unit">{{
                                         errors.unit
                                     }}</MpFormErrorMessage>
@@ -661,23 +593,7 @@
                                                     "
                                                     as="td"
                                                 >
-                                                    <MpSelect
-                                                        v-model="row.unitId"
-                                                        size="md"
-                                                        placeholder="No unit"
-                                                        is-full-width
-                                                    >
-                                                        <option value="">
-                                                            No unit
-                                                        </option>
-                                                        <option
-                                                            v-for="u in units"
-                                                            :key="u.id"
-                                                            :value="u.id"
-                                                        >
-                                                            {{ u.name }}
-                                                        </option>
-                                                    </MpSelect>
+                                                    <FilterSelect v-model="row.unitId" :options="units.map((u) => ({ value: u.id, label: u.name }))" placeholder="No unit" />
                                                 </MpTableCell>
                                             </template>
                                             <MpTableCell
@@ -984,6 +900,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import FilterSelect from "@/components/FilterSelect.vue";
 import { useRoute, useRouter } from "vue-router";
 import {
     MpFlex,
@@ -993,7 +910,6 @@ import {
     MpTooltip,
     MpInput,
     MpTextarea,
-    MpSelect,
     MpFormControl,
     MpFormLabel,
     MpIcon,

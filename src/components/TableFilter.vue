@@ -15,19 +15,15 @@
         <MpFlex direction="column" gap="4">
           <MpFormControl id="table-filter-column">
             <MpFormLabel>Filter by</MpFormLabel>
-            <MpSelect v-model="column" placeholder="Select column" is-full-width>
-              <option v-for="c in columns" :key="c.value" :value="c.value">{{ c.label }}</option>
-            </MpSelect>
+            <FilterSelect v-model="column" :options="columns" placeholder="Select column" />
           </MpFormControl>
           <MpFormControl id="table-filter-value">
             <MpFormLabel>Filter value</MpFormLabel>
-            <MpSelect v-if="valueOptions" v-model="value" placeholder="Select value" is-full-width :is-disabled="!column">
-              <option v-for="o in valueOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-            </MpSelect>
+            <FilterSelect v-if="valueOptions" v-model="value" :options="valueOptions" placeholder="Select value" :is-disabled="!column" />
             <MpInput v-else v-model="value" placeholder="Enter value" is-full-width :is-disabled="!column" />
           </MpFormControl>
           <MpFlex justifyContent="space-between" alignItems="center">
-            <MpButton variant="ghost" size="sm" @click="onReset">Reset</MpButton>
+            <MpButton variant="ghost" size="sm" @click="onReset">Clear filter</MpButton>
             <MpButton variant="primary" size="sm" @click="onApply">Apply</MpButton>
           </MpFlex>
         </MpFlex>
@@ -43,13 +39,14 @@ import {
   MpButton,
   MpFormControl,
   MpFormLabel,
-  MpSelect,
   MpInput,
   MpPopover,
   MpPopoverTrigger,
   MpPopoverContent,
   css,
 } from '@mekari/pixel3'
+
+import FilterSelect from './FilterSelect.vue'
 
 export interface TableFilterOption {
   value: string

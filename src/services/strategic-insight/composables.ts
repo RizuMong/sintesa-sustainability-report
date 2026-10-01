@@ -78,5 +78,12 @@ export function useStrategicInsightFilterState() {
     return `${entityLabel} · ${periodLabel} · ${impactLabel}`
   })
 
-  return { state, periods, entities, params, activeFilterLabel }
+  const hasActiveFilter = computed(() => Boolean(state.period || state.entityId || state.impact))
+  function reset() {
+    state.period = ''
+    state.entityId = ''
+    state.impact = ''
+  }
+
+  return { state, periods, entities, params, activeFilterLabel, hasActiveFilter, reset }
 }

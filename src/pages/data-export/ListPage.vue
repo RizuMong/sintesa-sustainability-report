@@ -14,29 +14,21 @@
       <MpFlex direction="column" gap="4">
         <MpFormControl id="data-export-period">
           <MpFormLabel>Period</MpFormLabel>
-          <MpSelect v-model="filter.period" placeholder="All periods" is-full-width>
-            <option value="">All periods</option>
-            <option v-for="p in periods" :key="p.id" :value="p.id">{{ p.year }}</option>
-          </MpSelect>
+          <FilterSelect v-model="filter.period" :options="periods.map((p) => ({ value: p.id, label: String(p.year) }))" placeholder="All periods" />
         </MpFormControl>
 
         <MpFormControl id="data-export-entity">
           <MpFormLabel>Entity</MpFormLabel>
-          <MpSelect v-model="filter.entity" placeholder="All entities" is-full-width>
-            <option value="">All entities</option>
-            <option v-for="e in entities" :key="e.id" :value="e.id">{{ e.name }}</option>
-          </MpSelect>
+          <FilterSelect v-model="filter.entity" :options="entities.map((e) => ({ value: e.id, label: e.name }))" placeholder="All entities" />
         </MpFormControl>
 
         <MpFormControl id="data-export-category" is-required>
           <MpFormLabel>Category</MpFormLabel>
-          <MpSelect v-model="filter.category" placeholder="Select category" is-full-width>
-            <option value="" disabled>Select category</option>
-            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-          </MpSelect>
+          <FilterSelect v-model="filter.category" :options="categories.map((c) => ({ value: c, label: c }))" placeholder="Select category" />
         </MpFormControl>
 
-        <MpFlex>
+        <MpFlex gap="2">
+          <MpButton variant="secondary" :is-disabled="!filter.period && !filter.entity && !filter.category" @click="onClear">Clear filters</MpButton>
           <MpButton :is-disabled="!filter.category" :is-loading="generateMutation.isPending.value" @click="onExport">
             Export
           </MpButton>
@@ -63,7 +55,8 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { MpFlex, MpText, MpButton, MpFormControl, MpFormLabel, MpSelect, MpBanner, MpBannerDescription, toast } from '@mekari/pixel3'
+import { MpFlex, MpText, MpButton, MpFormControl, MpFormLabel, MpBanner, MpBannerDescription, toast } from '@mekari/pixel3'
+import FilterSelect from '@/components/FilterSelect.vue'
 import { useGetMasterPeriod } from '@/services/master-period'
 import { useGetMasterEntity } from '@/services/master-entity'
 import { useGenerateExport, useGetExportHistory } from '@/services/data-export'
@@ -81,6 +74,11 @@ const filter = reactive<{ period: string; entity: string; category: ExportCatego
   category: '',
 })
 const resultUrl = ref('')
+function onClear() {
+  filter.period = ''
+  filter.entity = ''
+  filter.category = ''
+}
 
 const generateMutation = useGenerateExport()
 async function onExport() {

@@ -110,56 +110,15 @@
                     <MpFlex direction="column" gap="4">
                         <MpFormControl id="new-entity" is-required>
                             <MpFormLabel>Entity</MpFormLabel>
-                            <MpSelect
-                                v-model="form.entityId"
-                                placeholder="Select entity"
-                                is-full-width
-                            >
-                                <option value="" disabled>Select entity</option>
-                                <option
-                                    v-for="e in entities"
-                                    :key="e.id"
-                                    :value="e.id"
-                                >
-                                    {{ e.name }}
-                                </option>
-                            </MpSelect>
+                            <FilterSelect v-model="form.entityId" :options="entities.map((e) => ({ value: e.id, label: e.name }))" placeholder="Select entity" />
                         </MpFormControl>
                         <MpFormControl id="new-period" is-required>
                             <MpFormLabel>Period</MpFormLabel>
-                            <MpSelect
-                                v-model="form.periodId"
-                                placeholder="Select period"
-                                is-full-width
-                            >
-                                <option value="" disabled>Select period</option>
-                                <option
-                                    v-for="p in periods"
-                                    :key="p.id"
-                                    :value="p.id"
-                                >
-                                    {{ p.year }}
-                                </option>
-                            </MpSelect>
+                            <FilterSelect v-model="form.periodId" :options="periods.map((p) => ({ value: p.id, label: String(p.year) }))" placeholder="Select period" />
                         </MpFormControl>
                         <MpFormControl id="new-template" is-required>
                             <MpFormLabel>Template</MpFormLabel>
-                            <MpSelect
-                                v-model="form.templateId"
-                                placeholder="Select template"
-                                is-full-width
-                            >
-                                <option value="" disabled>
-                                    Select template
-                                </option>
-                                <option
-                                    v-for="t in publishedTemplates"
-                                    :key="t.id"
-                                    :value="t.id"
-                                >
-                                    {{ t.template_name }}
-                                </option>
-                            </MpSelect>
+                            <FilterSelect v-model="form.templateId" :options="publishedTemplates.map((t) => ({ value: t.id, label: t.template_name }))" placeholder="Select template" />
                         </MpFormControl>
                         <MpFormErrorMessage v-if="isDuplicate">
                             A submission for this entity, period and template
@@ -187,6 +146,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
+import FilterSelect from "@/components/FilterSelect.vue";
 import { useRouter } from "vue-router";
 import {
     MpFlex,
@@ -210,7 +170,6 @@ import {
     MpFormControl,
     MpFormLabel,
     MpFormErrorMessage,
-    MpSelect,
     css,
 } from "@mekari/pixel3";
 import { useTableFilter } from "@/composables/useTableFilter";

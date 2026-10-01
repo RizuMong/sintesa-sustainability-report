@@ -23,38 +23,13 @@
             <MpFlex gap="3">
                 <MpFormControl id="gri-qual-filter-period">
                     <MpFormLabel>Reporting Period</MpFormLabel>
-                    <MpSelect
-                        v-model="filterState.state.period"
-                        placeholder="All Periods"
-                        is-full-width
-                    >
-                        <option value="">All Periods</option>
-                        <option
-                            v-for="p in filterState.periods.value"
-                            :key="p.id"
-                            :value="String(p.year)"
-                        >
-                            {{ p.year }}
-                        </option>
-                    </MpSelect>
+                    <FilterSelect v-model="filterState.state.period" :options="filterState.periods.value.map((p) => ({ value: String(p.year), label: String(p.year) }))" placeholder="All Periods" />
                 </MpFormControl>
                 <MpFormControl id="gri-qual-filter-entity">
                     <MpFormLabel>Entity</MpFormLabel>
-                    <MpSelect
-                        v-model="filterState.state.entityId"
-                        placeholder="All Entities"
-                        is-full-width
-                    >
-                        <option value="">All Entities</option>
-                        <option
-                            v-for="e in filterState.entities.value"
-                            :key="e.id"
-                            :value="e.id"
-                        >
-                            {{ e.name }}
-                        </option>
-                    </MpSelect>
+                    <FilterSelect v-model="filterState.state.entityId" :options="filterState.entities.value.map((e) => ({ value: e.id, label: e.name }))" placeholder="All Entities" />
                 </MpFormControl>
+                <MpButton variant="secondary" left-icon="close" style="align-self: flex-end" :is-disabled="!filterState.hasActiveFilter.value" @click="filterState.reset">Clear filters</MpButton>
             </MpFlex>
         </MpFlex>
 
@@ -172,7 +147,7 @@ import {
     MpFlex,
     MpText,
     MpChart,
-    MpSelect,
+    MpButton,
     MpFormControl,
     MpFormLabel,
     MpSkeleton,
@@ -186,6 +161,7 @@ import {
     MpBadge,
     css,
 } from "@mekari/pixel3";
+import FilterSelect from "@/components/FilterSelect.vue";
 import SummaryBox from "@/components/SummaryBox.vue";
 import {
     useGriQualitativeInsight,
