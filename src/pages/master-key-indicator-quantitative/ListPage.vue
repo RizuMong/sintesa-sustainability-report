@@ -11,11 +11,8 @@
             paddingBottom="8px"
             backgroundColor="background.surface"
         >
-            <MpFlex justifyContent="space-between" alignItems="center">
-                <MpText as="h1" size="h1"
-                    >Master Key Indicator — Quantitative</MpText
-                >
-                <MpButton left-icon="add" @click="goToCreate">Create</MpButton>
+            <MpFlex justifyContent="flex-end">
+                <MpButton @click="goToCreate">Create</MpButton>
             </MpFlex>
         </MpFlex>
 
